@@ -1,0 +1,24 @@
+@startuml
+skinparam groupInheritance 2
+
+   class KPI {
+      name: str
+      type: str
+      criticality: str
+      frequency: str
+      value: int
+      unitText: str
+      timestamp: datetime
+   }
+
+   class KPITemp {
+      threshold: int
+   }
+
+   class KPITraffic {
+      threshold: int
+   }
+
+   KPI <|-- KPITemp
+   KPI <|-- KPITraffic
+@enduml
