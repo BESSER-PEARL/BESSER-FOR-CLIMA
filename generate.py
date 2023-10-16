@@ -1,4 +1,4 @@
-from generators.clima.clima_generator import ClimaGenerator
+from generator.clima_generator import ClimaGenerator
 from metamodel.structural.structural import DomainModel
 from notations.textx.textx_to_buml import textx_to_buml, build_buml_mm_from_grammar
 
