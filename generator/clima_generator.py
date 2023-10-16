@@ -13,7 +13,7 @@ class ClimaGenerator:
         # Start generation of basic python classes
         file_name = "classes.py"
         file_path = os.path.join(self.output_dir, file_name)
-        env = Environment(loader=FileSystemLoader('generators/clima/templates'))
+        env = Environment(loader=FileSystemLoader('generator/templates'))
         template = env.get_template('classes_template.py')
         with open(file_path, "w") as f:
             generated_code = template.render(classes=self.model.get_classes())
