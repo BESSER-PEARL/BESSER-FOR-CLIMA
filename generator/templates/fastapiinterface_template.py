@@ -8,10 +8,15 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from typing import Union
 import pydantic_classes as py_classes
+import os
 from pydantic_classes import {% for class in classes %}{% if not loop.last %}{{class.name}}, {{class.name}}DB,{% else %}{{class.name}}, {{class.name}}DB{% endif %}{% endfor %}
 app = FastAPI()
 
-engine = create_engine("postgresql://127.0.0.1/aaron?user=aaron&password=aaron")
+db_host = os.environ.get("DB_HOST")
+if db_host is None:
+    db_host = "127.0.0.1"
+
+engine = create_engine("postgresql://" + db_host + "/aaron?user=aaron&password=aaron")
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 py_classes.create_all(engine)

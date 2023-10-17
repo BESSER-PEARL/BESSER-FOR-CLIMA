@@ -24,7 +24,7 @@
     "panels": [
     {% for class in classes %}
       {
-        "datasource": "aaron",
+        "datasource": "dbname",
         "fieldConfig": {
           "defaults": {
             "color": {
@@ -149,12 +149,9 @@
     "templating": {
       "list": [{% for class in classes %}
         {
-          "current": {
-            "selected": false,
-            "text": "Temperature",
-            "value": "Temperature"
-          },
+          "current": {},
           "definition": "Select name from {{ class.name | lower}}",
+          "datasource": "dbname",
           "hide": 0,
           "includeAll": false,
           "multi": false,
