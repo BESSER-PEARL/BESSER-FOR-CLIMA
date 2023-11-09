@@ -22,7 +22,14 @@
     "links": [],
     "liveNow": false,
     "panels": [
-    {% for class in classes %}
+    {% set ns = namespace(first_element_added=false) %}
+    {% for class in classes -%}
+      {% if not class.is_abstract -%}
+        {% if not ns.first_element_added -%}
+          {% set ns.first_element_added = true -%}
+        {% else -%}
+        ,
+        {% endif -%}
       {
         "datasource": "dbname",
         "fieldConfig": {
@@ -101,14 +108,14 @@
           {
             "editorMode": "builder",
             "format": "table",
-            "rawSql": "SELECT value, \"timestamp\" FROM {{ class.name | lower}} LIMIT 50 ",
+            "rawSql": "SELECT \"kpiValue\", \"timestamp\" FROM {{ class.name | lower}} LIMIT 50 ",
             "refId": "A",
             "sql": {
               "columns": [
                 {
                   "parameters": [
                     {
-                      "name": "value",
+                      "name": "kpiValue",
                       "type": "functionParameter"
                     }
                   ],
@@ -133,21 +140,26 @@
                 }
               ],
               "limit": 50
-            },
-            "table": "kpitemp"
+            }
           }
         ],
         "title": "$name{{ loop.index }}",
         "type": "timeseries"
-      }{% if not loop.last %},{% else %}{% endif %}
+      }{% endif %}
     {% endfor %}
     ],
     "refresh": "",
     "schemaVersion": 38,
     "style": "dark",
     "tags": [],
+    {% set ns.first_element_added = false -%}
     "templating": {
-      "list": [{% for class in classes %}
+      "list": [{% for class in classes %}{% if not class.is_abstract -%}
+              {% if not ns.first_element_added -%}
+          {% set ns.first_element_added = true -%}
+        {% else -%}
+        ,
+        {% endif -%}
         {
           "current": {},
           "definition": "Select name from {{ class.name | lower}}",
@@ -163,7 +175,7 @@
           "skipUrlSync": false,
           "sort": 0,
           "type": "query"
-        }{% if not loop.last %},{% else %}{% endif %}
+        }{% endif %}
         {% endfor %}
       ]
     },

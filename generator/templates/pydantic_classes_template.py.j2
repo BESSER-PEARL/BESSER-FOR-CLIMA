@@ -1,0 +1,20 @@
+from pydantic import BaseModel
+from datetime import datetime
+from sqlalchemy import Column, Integer, String, TIMESTAMP
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declared_attr
+{% set ns = namespace(abstract_found=false) -%}
+{% for class in classes -%}
+    {% if class.is_abstract -%}
+        {% set ns.abstract_found = true -%}
+    {% endif -%}    
+{% endfor -%}
+{% if ns.abstract_found -%}
+from abc import ABC, abstractmethod
+{% endif -%}
+{# Two newlines are added here unconditionally #}
+{% for class in classes %}
+class {{ class.name }}{% if class.parents() %}({% for parent in class.parents() %}{{parent.name}}{{ ", " if not loop.last else "" }}{% endfor %}){% elif class.is_abstract %}(ABC, BaseModel){% else %}(BaseModel){% endif %}:
+    {% for attribute in class.attributes %}{{ attribute.name }}: {{ attribute.type.name }}
+    {% endfor %}
+{% endfor %}

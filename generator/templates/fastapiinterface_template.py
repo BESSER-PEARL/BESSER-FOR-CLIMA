@@ -2,14 +2,15 @@ from fastapi import FastAPI, HTTPException, Body
 import psycopg2
 from pydantic import BaseModel
 from typing import List, Optional
-
-from sqlalchemy import create_engine, Column, Integer, String, TIMESTAMP
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from typing import Union
-import pydantic_classes as py_classes
 import os
-from pydantic_classes import {% for class in classes %}{% if not loop.last %}{{class.name}}, {{class.name}}DB,{% else %}{{class.name}}, {{class.name}}DB{% endif %}{% endfor %}
+{% set ns = namespace(first_class_added=false) -%}
+from pydantic_classes import {% for class in classes %}{% if not class.is_abstract %}{% if not ns.first_class_added -%}{% set ns.first_class_added = true -%}{% else -%}, {% endif -%} {{class.name}}{% endif %}{% endfor %}
+{% set ns.first_class_added=false -%}
+from sql_alchemy import Base
+from sql_alchemy import {% for class in classes %}{% if not class.is_abstract %}{% if not ns.first_class_added -%}{% set ns.first_class_added = true -%}{% else -%}, {% endif -%} {{class.name}} as {{class.name}}DB{% endif %}{% endfor %}
 app = FastAPI()
 
 db_host = os.environ.get("DB_HOST")
@@ -19,11 +20,12 @@ if db_host is None:
 engine = create_engine("postgresql://" + db_host + "/aaron?user=aaron&password=aaron")
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-py_classes.create_all(engine)
+Base.metadata.create_all(bind=engine)
 
 # In-memory storage for KPI objects
 kpi_objects = []
 {% for class in classes %}
+    {% if not class.is_abstract %}
 @app.post("/kpi/{{ class.name }}", response_model={{ class.name }}, summary="Add a KPI object")
 async def create_kpi_{{ class.name }}(kpi: {{ class.name }}= Body(..., description="KPI object to add")):
     db_entry = {{ class.name }}DB(**kpi.model_dump())
@@ -32,7 +34,8 @@ async def create_kpi_{{ class.name }}(kpi: {{ class.name }}= Body(..., descripti
     db.commit()
     db.refresh(db_entry)
     db.close()   
-    return {"message": "KPI added to the database"}
+    return kpi
+    {% endif %}
 {% endfor %}
 
 # Optional: Swagger UI metadata

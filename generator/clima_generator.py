@@ -1,30 +1,20 @@
 import os
-
-from metamodel.structural.structural import DomainModel
-from generators.django.auxiliary import get_constraints_for_class
+from metamodel.structural import DomainModel
 from jinja2 import Environment, FileSystemLoader
+from generators.generator_interface import GeneratorInterface
 
-class ClimaGenerator:
-    def __init__(self, model: DomainModel, output_dir: str):
-        self.model = model
-        self.output_dir = output_dir
+class ClimaGenerator(GeneratorInterface):
+    def __init__(self, model: DomainModel, output_dir: str = None):
+        super().__init__(model, output_dir)
 
     def generate(self):
-        # Start generation of basic python classes
-        file_name = "classes.py"
-        file_path = os.path.join(self.output_dir, file_name)
         env = Environment(loader=FileSystemLoader('generator/templates'))
-        template = env.get_template('classes_template.py')
-        with open(file_path, "w") as f:
-            generated_code = template.render(classes=self.model.get_classes())
-            f.write(generated_code)
-        
         # generate pydantic classes for API calls
         file_name = "pydantic_classes.py"
-        template = env.get_template('pydantic_classes_template.py')
-        file_path = os.path.join(self.output_dir, file_name)        
+        template = env.get_template('pydantic_classes_template.py.j2')
+        file_path = os.path.join(self.output_dir, file_name)
         with open(file_path, "w") as f:
-            generated_code = template.render(classes=self.model.get_classes())
+            generated_code = template.render(classes=self.model.classes_sorted_by_inheritance())
             f.write(generated_code)
         
         # generate api interface
@@ -38,7 +28,7 @@ class ClimaGenerator:
         # generate grafana dashboard specification
         file_name = "dashboard.json"
         file_path = os.path.join(self.output_dir, file_name)     
-        template = env.get_template('dashboard_template.json')   
+        template = env.get_template('dashboard_template.json.j2')   
         with open(file_path, "w") as f:
             generated_code = template.render(classes=self.model.get_classes())
             f.write(generated_code)
