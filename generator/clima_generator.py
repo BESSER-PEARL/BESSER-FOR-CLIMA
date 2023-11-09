@@ -1,5 +1,5 @@
 import os
-from metamodel.structural import DomainModel
+from metamodel.structural import DomainModel, Class
 from jinja2 import Environment, FileSystemLoader
 from generators.generator_interface import GeneratorInterface
 
@@ -26,11 +26,13 @@ class ClimaGenerator(GeneratorInterface):
             f.write(generated_code)
         
         # generate grafana dashboard specification
-        file_name = "dashboard.json"
-        file_path = os.path.join(self.output_dir, file_name)     
+        file_name = "dashboards/"
         template = env.get_template('dashboard_template.json.j2')   
-        with open(file_path, "w") as f:
-            generated_code = template.render(classes=self.model.get_classes())
-            f.write(generated_code)
-            
-
+        for c in self.model.classes_sorted_by_inheritance():
+            for parent in c.all_parents():
+                if parent.name == "City":
+                    print("city" + c.name)
+                    file_path = os.path.join(self.output_dir, file_name + c.name + ".json")
+                    with open(file_path, "w") as f:
+                        generated_code = template.render(classes=self.model.get_classes())
+                        f.write(generated_code)  
