@@ -33,7 +33,7 @@ services:
     volumes:
       - ./datasources.yaml:/../../../etc/grafana/provisioning/datasources/datasources.yaml
       - ./dashboard.yaml:/../../../etc/grafana/provisioning/dashboards/dashboard.yaml
-      - ../generator/generated_output/dashboard.json:/../../../var/lib/grafana/dashboards/dashboard.json
+      - ../generator/generated_output/dashboards:/../../../var/lib/grafana/dashboards
     ports:
       - "3000:3000"
     depends_on:
