@@ -1,24 +1,81 @@
 @startuml
 skinparam groupInheritance 2
 
-   class KPI {
-      name: str
-      type: str
-      criticality: str
-      frequency: str
-      value: int
-      unitText: str
-      timestamp: datetime
-   }
+abstract class KPI {
+   id_kpi: str
+   name: str
+   category: str
+   description: str
+   provider: str
+   currentStanding: str
+   calculationFrequency: str
+   kpiValue: int
+   unitText: str
+   timestamp: datetime
+}
 
-   class KPITemp {
-      threshold: int
-   }
+class KPITemp {
+   threshold: int
+}
 
-   class KPITraffic {
-      threshold: int
-   }
+class KPITraffic {
+   target: int
+}
 
-   KPI <|-- KPITemp
-   KPI <|-- KPITraffic
+KPI <|-- KPITemp
+KPI <|-- KPITraffic
+
+abstract class City{
+    name: str
+}
+
+class Paris {
+}
+class Sofia {
+}
+
+Paris --|> City
+Sofia --|> City
+
+
+Paris --> KPITemp
+Sofia --> KPITraffic
+
+abstract class Visualization {
+}
+
+class Gauge {
+
+}
+
+class Table {
+
+}
+
+class BarChart {
+
+}
+
+class Stat {
+
+}
+
+class TimeSeries {
+
+}
+
+class Histogram {
+
+}
+Sofia --> KPITemp
+Gauge --|> Visualization 
+Table --|> Visualization
+BarChart --|> Visualization
+Stat --|> Visualization
+TimeSeries --|> Visualization
+Histogram --|> Visualization
+
+KPITemp --> Gauge
+KPITemp --> TimeSeries
+KPITraffic --> BarChart
 @enduml

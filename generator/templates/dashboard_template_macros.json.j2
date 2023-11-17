@@ -1,0 +1,596 @@
+{% macro timeseries(class_name) %}
+{
+    "datasource": "dbname",
+    "fieldConfig": {
+      "defaults": {
+        "color": {
+          "mode": "palette-classic"
+        },
+        "custom": {
+          "axisCenteredZero": false,
+          "axisColorMode": "text",
+          "axisLabel": "",
+          "axisPlacement": "auto",
+          "barAlignment": 0,
+          "drawStyle": "line",
+          "fillOpacity": 0,
+          "gradientMode": "none",
+          "hideFrom": {
+            "legend": false,
+            "tooltip": false,
+            "viz": false
+          },
+          "insertNulls": false,
+          "lineInterpolation": "linear",
+          "lineWidth": 1,
+          "pointSize": 5,
+          "scaleDistribution": {
+            "type": "linear"
+          },
+          "showPoints": "auto",
+          "spanNulls": false,
+          "stacking": {
+            "group": "A",
+            "mode": "none"
+          },
+          "thresholdsStyle": {
+            "mode": "off"
+          }
+        },
+        "mappings": [],
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [
+            {
+              "color": "green",
+              "value": null
+            },
+            {
+              "color": "red",
+              "value": 80
+            }
+          ]
+        }
+      },
+      "overrides": []
+    },
+    "gridPos": {
+      "h": 8,
+      "w": 12,
+      "x": 0,
+      "y": 0
+    },
+    "id": 1,
+    "options": {
+      "legend": {
+        "calcs": [],
+        "displayMode": "list",
+        "placement": "bottom",
+        "showLegend": true
+      },
+      "tooltip": {
+        "mode": "single",
+        "sort": "none"
+      }
+    },
+    "targets": [
+      {
+        "editorMode": "builder",
+        "format": "table",
+        "rawSql": "SELECT \"kpiValue\", \"timestamp\" FROM {{ class_name | lower}} LIMIT 50 ",
+        "refId": "A",
+        "sql": {
+          "columns": [
+            {
+              "parameters": [
+                {
+                  "name": "\"kpiValue\"",
+                  "type": "functionParameter"
+                }
+              ],
+              "type": "function"
+            },
+            {
+              "parameters": [
+                {
+                  "name": "\"timestamp\"",
+                  "type": "functionParameter"
+                }
+              ],
+              "type": "function"
+            }
+          ],
+          "groupBy": [
+            {
+              "property": {
+                "type": "string"
+              },
+              "type": "groupBy"
+            }
+          ],
+          "limit": 50
+        }, 
+        "table": "{{ class_name | lower}}"
+      }
+    ],
+    "title": "Timeseries",
+    "type": "timeseries"
+  }
+{% endmacro -%}   
+{% macro table(class_name) %}
+{
+  "datasource": "dbname",
+  "fieldConfig": {
+    "defaults": {
+      "custom": {
+        "align": "auto",
+        "cellOptions": {
+          "type": "auto"
+        },
+        "inspect": false
+      },
+      "mappings": [],
+      "thresholds": {
+        "mode": "absolute",
+        "steps": [
+          {
+            "color": "green",
+            "value": null
+          },
+          {
+            "color": "red",
+            "value": 80
+          }
+        ]
+      }
+    },
+    "overrides": []
+  },
+  "gridPos": {
+    "h": 8,
+    "w": 12,
+    "x": 0,
+    "y": 0
+  },
+  "id": 8,
+  "options": {
+    "cellHeight": "sm",
+    "footer": {
+      "countRows": false,
+      "fields": "",
+      "reducer": [
+        "sum"
+      ],
+      "show": false
+    },
+    "showHeader": true
+  },
+  "pluginVersion": "10.1.5",
+  "targets": [
+    {
+      "editorMode": "builder",
+      "format": "table",
+      "rawSql": "SELECT \"kpiValue\", \"timestamp\" FROM {{ class_name | lower}} LIMIT 50 ",
+      "refId": "A",
+      "sql": {
+        "columns": [
+          {
+            "parameters": [
+              {
+                "name": "\"kpiValue\"",
+                "type": "functionParameter"
+              }
+            ],
+            "type": "function"
+          },
+          {
+            "parameters": [
+              {
+                "name": "\"timestamp\"",
+                "type": "functionParameter"
+              }
+            ],
+            "type": "function"
+          }
+        ],
+        "groupBy": [
+          {
+            "property": {
+              "type": "string"
+            },
+            "type": "groupBy"
+          }
+        ],
+        "limit": 50
+      }, 
+      "table": "{{ class_name | lower}}"
+    }
+  ],
+  "title": "Table",
+  "type": "table"
+}
+{% endmacro -%}
+{% macro histogram(class_name) %}
+{
+  "datasource": "dbname",
+  "fieldConfig": {
+    "defaults": {
+      "color": {
+        "mode": "thresholds"
+      },
+      "custom": {
+        "fillOpacity": 80,
+        "gradientMode": "none",
+        "hideFrom": {
+          "legend": false,
+          "tooltip": false,
+          "viz": false
+        },
+        "lineWidth": 1
+      },
+      "mappings": [],
+      "thresholds": {
+        "mode": "absolute",
+        "steps": [
+          {
+            "color": "green",
+            "value": null
+          },
+          {
+            "color": "red",
+            "value": 80
+          }
+        ]
+      }
+    },
+    "overrides": []
+  },
+  "gridPos": {
+    "h": 8,
+    "w": 12,
+    "x": 0,
+    "y": 16
+  },
+  "id": 6,
+  "options": {
+    "bucketOffset": 0,
+    "legend": {
+      "calcs": [],
+      "displayMode": "list",
+      "placement": "bottom",
+      "showLegend": true
+    }
+  },
+  "pluginVersion": "10.1.5",
+  "targets": [
+    {
+      "editorMode": "builder",
+      "format": "table",
+      "rawSql": "SELECT \"kpiValue\", \"timestamp\" FROM {{ class_name | lower}} LIMIT 50 ",
+      "refId": "A",
+      "sql": {
+        "columns": [
+          {
+            "parameters": [
+              {
+                "name": "\"kpiValue\"",
+                "type": "functionParameter"
+              }
+            ],
+            "type": "function"
+          },
+          {
+            "parameters": [
+              {
+                "name": "\"timestamp\"",
+                "type": "functionParameter"
+              }
+            ],
+            "type": "function"
+          }
+        ],
+        "groupBy": [
+          {
+            "property": {
+              "type": "string"
+            },
+            "type": "groupBy"
+          }
+        ],
+        "limit": 50
+      }, 
+      "table": "{{ class_name | lower}}"
+    }
+  ],
+  "title": "Histogram",
+  "type": "histogram"
+}
+{% endmacro -%}   
+{% macro gauge(class_name) %}
+{
+  "datasource": "dbname",
+  "fieldConfig": {
+    "defaults": {
+      "color": {
+        "mode": "thresholds"
+      },
+      "mappings": [],
+      "thresholds": {
+        "mode": "absolute",
+        "steps": [
+          {
+            "color": "green",
+            "value": null
+          },
+          {
+            "color": "red",
+            "value": 80
+          }
+        ]
+      }
+    },
+    "overrides": []
+  },
+  "gridPos": {
+    "h": 8,
+    "w": 12,
+    "x": 0,
+    "y": 24
+  },
+  "id": 5,
+  "options": {
+    "orientation": "auto",
+    "reduceOptions": {
+      "calcs": [
+        "lastNotNull"
+      ],
+      "fields": "",
+      "values": false
+    },
+    "showThresholdLabels": false,
+    "showThresholdMarkers": true
+  },
+  "pluginVersion": "10.1.5",
+  "targets": [
+    {
+      "editorMode": "builder",
+      "format": "table",
+      "rawSql": "SELECT \"kpiValue\" FROM {{ class_name | lower}} LIMIT 50 ",
+      "refId": "A",
+      "sql": {
+        "columns": [
+          {
+            "parameters": [
+              {
+                "name": "\"kpiValue\"",
+                "type": "functionParameter"
+              }
+            ],
+            "type": "function"
+          }
+        ],
+        "groupBy": [
+          {
+            "property": {
+              "type": "string"
+            },
+            "type": "groupBy"
+          }
+        ],
+        "limit": 50
+      }, 
+      "table": "{{ class_name | lower}}"
+    }
+  ],
+  "title": "Gauge",
+  "type": "gauge"
+}
+{% endmacro -%}   
+{% macro stat(class_name) %}
+{
+  "datasource": "dbname",
+  "fieldConfig": {
+    "defaults": {
+      "color": {
+        "mode": "thresholds"
+      },
+      "mappings": [],
+      "thresholds": {
+        "mode": "absolute",
+        "steps": [
+          {
+            "color": "green",
+            "value": null
+          },
+          {
+            "color": "red",
+            "value": 80
+          }
+        ]
+      }
+    },
+    "overrides": []
+  },
+  "gridPos": {
+    "h": 8,
+    "w": 12,
+    "x": 0,
+    "y": 32
+  },
+  "id": 4,
+  "options": {
+    "colorMode": "value",
+    "graphMode": "area",
+    "justifyMode": "auto",
+    "orientation": "auto",
+    "reduceOptions": {
+      "calcs": [
+        "lastNotNull"
+      ],
+      "fields": "",
+      "values": false
+    },
+    "textMode": "auto"
+  },
+  "pluginVersion": "10.1.5",
+  "targets": [
+    {
+      "editorMode": "builder",
+      "format": "table",
+      "rawSql": "SELECT \"kpiValue\", \"timestamp\" FROM {{ class_name | lower}} LIMIT 50 ",
+      "refId": "A",
+      "sql": {
+        "columns": [
+          {
+            "parameters": [
+              {
+                "name": "\"kpiValue\"",
+                "type": "functionParameter"
+              }
+            ],
+            "type": "function"
+          },
+          {
+            "parameters": [
+              {
+                "name": "\"timestamp\"",
+                "type": "functionParameter"
+              }
+            ],
+            "type": "function"
+          }
+        ],
+        "groupBy": [
+          {
+            "property": {
+              "type": "string"
+            },
+            "type": "groupBy"
+          }
+        ],
+        "limit": 50
+      }, 
+      "table": "{{ class_name | lower}}"
+    }
+  ],
+  "title": "Stat",
+  "type": "stat"
+}
+{% endmacro -%}   
+{% macro bar_chart(class_name) %}
+{
+  "datasource": "dbname",
+  "fieldConfig": {
+    "defaults": {
+      "color": {
+        "mode": "palette-classic"
+      },
+      "custom": {
+        "axisCenteredZero": false,
+        "axisColorMode": "text",
+        "axisLabel": "",
+        "axisPlacement": "auto",
+        "fillOpacity": 80,
+        "gradientMode": "none",
+        "hideFrom": {
+          "legend": false,
+          "tooltip": false,
+          "viz": false
+        },
+        "lineWidth": 1,
+        "scaleDistribution": {
+          "type": "linear"
+        },
+        "thresholdsStyle": {
+          "mode": "off"
+        }
+      },
+      "mappings": [],
+      "thresholds": {
+        "mode": "absolute",
+        "steps": [
+          {
+            "color": "green",
+            "value": null
+          },
+          {
+            "color": "red",
+            "value": 80
+          }
+        ]
+      }
+    },
+    "overrides": []
+  },
+  "gridPos": {
+    "h": 8,
+    "w": 12,
+    "x": 0,
+    "y": 40
+  },
+  "id": 3,
+  "options": {
+    "barRadius": 0,
+    "barWidth": 0.97,
+    "fullHighlight": false,
+    "groupWidth": 0.7,
+    "legend": {
+      "calcs": [],
+      "displayMode": "list",
+      "placement": "bottom",
+      "showLegend": true
+    },
+    "orientation": "auto",
+    "showValue": "auto",
+    "stacking": "none",
+    "tooltip": {
+      "mode": "single",
+      "sort": "none"
+    },
+    "xTickLabelRotation": 0,
+    "xTickLabelSpacing": 0
+  },
+  "targets": [
+    {
+      "editorMode": "builder",
+      "format": "table",
+      "rawSql": "SELECT \"kpiValue\", \"timestamp\" FROM {{ class_name | lower}} LIMIT 50 ",
+      "refId": "A",
+      "sql": {
+        "columns": [
+          {
+            "parameters": [
+              {
+                "name": "\"kpiValue\"",
+                "type": "functionParameter"
+              }
+            ],
+            "type": "function"
+          },
+          {
+            "parameters": [
+              {
+                "name": "\"timestamp\"",
+                "type": "functionParameter"
+              }
+            ],
+            "type": "function"
+          }
+        ],
+        "groupBy": [
+          {
+            "property": {
+              "type": "string"
+            },
+            "type": "groupBy"
+          }
+        ],
+        "limit": 50
+      }, 
+      "table": "{{ class_name | lower}}"
+    }
+  ],
+  "title": "Bar Chart",
+  "type": "barchart"
+}
+{% endmacro -%}  

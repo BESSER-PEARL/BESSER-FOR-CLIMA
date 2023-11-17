@@ -16,5 +16,8 @@ from abc import ABC, abstractmethod
 {% for class in classes %}
 class {{ class.name }}{% if class.parents() %}({% for parent in class.parents() %}{{parent.name}}{{ ", " if not loop.last else "" }}{% endfor %}){% elif class.is_abstract %}(ABC, BaseModel){% else %}(BaseModel){% endif %}:
     {% for attribute in class.attributes %}{{ attribute.name }}: {{ attribute.type.name }}
-    {% endfor %}
+    {% endfor -%}
+    {% if not class.attributes -%}
+    pass 
+    {% endif -%}
 {% endfor %}

@@ -1,3 +1,4 @@
+{% import "dashboard_template_macros.json.j2" as grafana_visualizations %}
 {
     "annotations": {
       "list": [
@@ -22,131 +23,44 @@
     "links": [],
     "liveNow": false,
     "panels": [
-    {% set ns = namespace(first_element_added=false) %}
+    {% set ns = namespace(first_element_added=false, first_visualization_added=false) -%}
     {% for class in classes -%}
+      {% set ns.first_visualization_added=false -%}
       {% if not class.is_abstract -%}
         {% if not ns.first_element_added -%}
           {% set ns.first_element_added = true -%}
         {% else -%}
         ,
         {% endif -%}
-      {
-        "datasource": "dbname",
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "palette-classic"
-            },
-            "custom": {
-              "axisCenteredZero": false,
-              "axisColorMode": "text",
-              "axisLabel": "",
-              "axisPlacement": "auto",
-              "barAlignment": 0,
-              "drawStyle": "line",
-              "fillOpacity": 0,
-              "gradientMode": "none",
-              "hideFrom": {
-                "legend": false,
-                "tooltip": false,
-                "viz": false
-              },
-              "insertNulls": false,
-              "lineInterpolation": "linear",
-              "lineWidth": 1,
-              "pointSize": 5,
-              "scaleDistribution": {
-                "type": "linear"
-              },
-              "showPoints": "auto",
-              "spanNulls": false,
-              "stacking": {
-                "group": "A",
-                "mode": "none"
-              },
-              "thresholdsStyle": {
-                "mode": "off"
-              }
-            },
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green",
-                  "value": null
-                },
-                {
-                  "color": "red",
-                  "value": 80
-                }
-              ]
-            }
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 8,
-          "w": 12,
-          "x": 0,
-          "y": 0
-        },
-        "id": 1,
-        "options": {
-          "legend": {
-            "calcs": [],
-            "displayMode": "list",
-            "placement": "bottom",
-            "showLegend": true
-          },
-          "tooltip": {
-            "mode": "single",
-            "sort": "none"
-          }
-        },
-        "targets": [
-          {
-            "editorMode": "builder",
-            "format": "table",
-            "rawSql": "SELECT \"kpiValue\", \"timestamp\" FROM {{ class.name | lower}} LIMIT 50 ",
-            "refId": "A",
-            "sql": {
-              "columns": [
-                {
-                  "parameters": [
-                    {
-                      "name": "kpiValue",
-                      "type": "functionParameter"
-                    }
-                  ],
-                  "type": "function"
-                },
-                {
-                  "parameters": [
-                    {
-                      "name": "\"timestamp\"",
-                      "type": "functionParameter"
-                    }
-                  ],
-                  "type": "function"
-                }
-              ],
-              "groupBy": [
-                {
-                  "property": {
-                    "type": "string"
-                  },
-                  "type": "groupBy"
-                }
-              ],
-              "limit": 50
-            }
-          }
-        ],
-        "title": "$name{{ loop.index }}",
-        "type": "timeseries"
-      }{% endif %}
-    {% endfor %}
+        {% for visualization in class.association_ends() -%}
+          {% if visualization.is_navigable -%}
+            {% if not ns.first_visualization_added -%}
+              {% set ns.first_visualization_added = true -%}
+            {% else -%}
+              ,
+            {% endif -%}
+            {% if visualization.type.name == "TimeSeries" -%}
+              {{ grafana_visualizations.timeseries(class_name=class.name) -}}
+            {% endif -%}
+            {% if visualization.type.name == "Table" -%}
+              {{ grafana_visualizations.table(class_name=class.name) -}}
+            {% endif -%}
+            {% if visualization.type.name == "Histogram" -%}
+              {{ grafana_visualizations.histogram(class_name=class.name) -}}
+            {% endif -%}
+            {% if visualization.type.name == "Gauge" -%}
+              {{ grafana_visualizations.gauge(class_name=class.name) -}}
+            {% endif -%}
+            {% if visualization.type.name == "Stat" -%}
+              {{ grafana_visualizations.stat(class_name=class.name) -}}
+            {% endif -%}
+            {% if visualization.type.name == "BarChart" -%}
+              {{ grafana_visualizations.bar_chart(class_name=class.name) -}}
+            {% endif %}
+          {% endif -%}
+        {% endfor -%}
+      {% endif -%}
+    {% endfor -%}
     ],
     "refresh": "",
     "schemaVersion": 38,
@@ -185,7 +99,7 @@
     },
     "timepicker": {},
     "timezone": "",
-    "title": "KPI",
+    "title": "KPI - {{ city -}}",
     "version": 2,
     "weekStart": ""
   }
