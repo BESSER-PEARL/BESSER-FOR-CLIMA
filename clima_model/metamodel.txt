@@ -1,0 +1,79 @@
+@startuml
+class City{
+    name: str
+}
+
+abstract class KPI {
+   id_kpi: str
+   name: str
+   category: str
+   description: str
+   provider: str
+   calculationFrequency: str
+   unitText: str
+}
+
+class KPIValue {
+   kpiValue: int
+   timestamp: datetime
+   currentStanding: str
+}
+
+class KPITemp {
+   threshold: int
+}
+
+class KPITraffic {
+   target: int
+}
+
+
+class KPIMoney {
+   target: int
+}
+
+abstract class Visualization {
+   name: str
+}
+
+class Gauge {
+   thresholdTop: str
+   valueName: str
+}
+
+class Table {
+}
+
+class BarChart {
+valueName: str
+timestampName: str
+}
+
+class Stat {
+valueName: str
+timestampName: str
+}
+
+class TimeSeries {
+valueName: str
+timestampName: str
+}
+
+class Histogram {
+valueName: str
+}
+
+KPI --> "*" KPIValue: values
+City --> "*" KPI: kpis
+KPI <|-- KPITemp
+KPI <|-- KPITraffic
+KPI <|-- KPIMoney
+KPI --> "1..*" Visualization: has
+
+Visualization <|-- Gauge
+Visualization <|-- Table
+Visualization <|-- BarChart
+Visualization <|-- Stat
+Visualization <|-- TimeSeries
+Visualization <|-- Histogram
+@enduml

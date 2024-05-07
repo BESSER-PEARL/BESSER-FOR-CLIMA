@@ -1,7 +1,7 @@
 import os
-from metamodel.structural import DomainModel, Class, Property
+from besser.BUML.metamodel.structural import DomainModel, Class, Property
 from jinja2 import Environment, FileSystemLoader
-from generators.generator_interface import GeneratorInterface
+from besser.generators.generator_interface import GeneratorInterface
 
 class ClimaGenerator(GeneratorInterface):
     def __init__(self, model: DomainModel, output_dir: str = None):
@@ -31,7 +31,7 @@ class ClimaGenerator(GeneratorInterface):
             f.write(generated_code)
         
         # generate grafana dashboard specification
-        file_name = "dashboards/"
+"""        file_name = "dashboards/"
         template = env.get_template('dashboard_template.json.j2') 
         os.system('del /q generator\generated_output\dashboards\*')
         for c in self.model.classes_sorted_by_inheritance():
@@ -47,4 +47,4 @@ class ClimaGenerator(GeneratorInterface):
                         kpis.append(a.type)
                     with open(file_path, "w") as f:
                         generated_code = template.render(classes=kpis, city=c.name)
-                        f.write(generated_code)
+                        f.write(generated_code)"""

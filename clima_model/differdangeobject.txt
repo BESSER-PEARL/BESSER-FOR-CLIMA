@@ -1,0 +1,111 @@
+@startuml
+
+object "differdange: City" as Differdange {
+name = "Differdange"
+}
+
+
+object "kpiTemp_Differdange: KPITemp" as KPITemperature_Differdange {
+    id_kpi = "temp001"
+    name = "Average Temperature"
+    category = "Environment"
+    description = "Measures the average temperature of the city"
+    provider = "WeatherService"
+    calculationFrequency = "Daily"
+    unitText = "Celsius"
+    threshold = 25
+}
+
+
+
+object "kpiValue_Temperature1: KPIValue" as KPIValue_Temperature {
+    kpiValue = ""
+    currentStanding = ""
+    timestamp = ""
+}
+
+
+object "timeseries_kpi_temp: TimeSeries" as timeseries_kpi_temp {
+    name = "bob"
+    valueName = "kpiValue"
+    timestampName = "timestamp"
+}
+
+
+Differdange --> KPITemperature_Differdange
+
+KPITemperature_Differdange --> KPIValue_Temperature
+KPITemperature_Differdange --> timeseries_kpi_temp
+object "sofia: City" as Sofia {
+    name = "Sofia"
+}
+
+
+
+object "kpiTrafficCongestion_Sofia: KPITraffic" as KPITrafficCongestion_Sofia {
+    id_kpi = "traffic001"
+    name = "Traffic Congestion Level"
+    category = "Transport"
+    description = "Measures the level of traffic congestion"
+    provider = "TransportDepartment"
+    calculationFrequency = "Hourly"
+    unitText = "Number of Cars"
+    target = 30
+}
+
+object "kpiValue_Traffic: KPIValue" as KPIValue_Traffic {
+    kpiValue = ""
+    currentStanding = ""
+    timestamp = ""
+}
+
+
+object "gauge_traffic: Gauge" as Gauge {
+name = "gaugie"
+thresholdTop = "target"
+valueName = "kpiValue"
+}
+
+object "gauge_traffic_diff: Gauge" as Differdange_Gauge {
+name = "gaugie"
+thresholdTop = "threshold"
+valueName = "kpiValue"
+}
+
+KPITemperature_Differdange --> Differdange_Gauge
+
+Sofia --> KPITrafficCongestion_Sofia
+
+KPITrafficCongestion_Sofia --> KPIValue_Traffic
+
+KPITrafficCongestion_Sofia --> Gauge
+
+object "table_diff: Table" as Differdange_Table {
+name = "tablie"
+}
+
+KPITemperature_Differdange --> Differdange_Table
+
+object "barchart_diff: BarChart" as Differdange_BarChart {
+name = "barrie"
+    valueName = "kpiValue"
+    timestampName = "timestamp"
+}
+
+KPITemperature_Differdange --> Differdange_BarChart
+
+object "stat_diff: Stat" as Differdange_Stat {
+name = "statie"
+    valueName = "kpiValue"
+    timestampName = "timestamp"
+}
+
+KPITemperature_Differdange --> Differdange_Stat
+
+object "histogram_diff: Histogram" as Differdange_Histogram {
+name = "historie"
+    valueName = "kpiValue"
+}
+
+KPITemperature_Differdange --> Differdange_Histogram
+@enduml

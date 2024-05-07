@@ -1,0 +1,46 @@
+@startuml
+skinparam groupInheritance 2
+
+
+' Define the Visualization class
+abstract class Visualization {
+   +String type
+}
+
+' Specific visualizations extend the Visualization class
+class Graph extends Visualization {
+   +Boolean isStacked
+   +String yAxis
+}
+
+class Gauge extends Visualization {
+   +Int min
+   +Int max
+}
+
+class Table extends Visualization {
+   +List<String> columns
+}
+
+class BarChart extends Visualization {
+   +Boolean showLegend
+}
+
+class PieChart extends Visualization {
+   +Boolean showLabels
+}
+
+class Stat extends Visualization {
+   +String textMode
+}
+
+class TimeSeries extends Visualization {
+   +String lineInterpolation
+}
+
+class Histogram extends Visualization {
+   +Int bucketSize
+}
+
+
+@enduml

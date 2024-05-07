@@ -1,4 +1,5 @@
 {% import "dashboard_template_macros.json.j2" as grafana_visualizations %}
+{% set visualizations = ['Gauge', 'Table', 'BarChart', 'Stat', 'TimeSeries', 'Histogram'] %}
 {
     "annotations": {
       "list": [
@@ -24,42 +25,41 @@
     "liveNow": false,
     "panels": [
     {% set ns = namespace(first_element_added=false, first_visualization_added=false) -%}
-    {% for class in classes -%}
-      {% set ns.first_visualization_added=false -%}
-      {% if not class.is_abstract -%}
-        {% if not ns.first_element_added -%}
-          {% set ns.first_element_added = true -%}
-        {% else -%}
-        ,
-        {% endif -%}
-        {% for visualization in class.association_ends() -%}
-          {% if visualization.is_navigable -%}
-            {% if not ns.first_visualization_added -%}
-              {% set ns.first_visualization_added = true -%}
-            {% else -%}
-              ,
-            {% endif -%}
-            {% if visualization.type.name == "TimeSeries" -%}
-              {{ grafana_visualizations.timeseries(class_name=class.name) -}}
-            {% endif -%}
-            {% if visualization.type.name == "Table" -%}
-              {{ grafana_visualizations.table(class_name=class.name) -}}
-            {% endif -%}
-            {% if visualization.type.name == "Histogram" -%}
-              {{ grafana_visualizations.histogram(class_name=class.name) -}}
-            {% endif -%}
-            {% if visualization.type.name == "Gauge" -%}
-              {{ grafana_visualizations.gauge(class_name=class.name) -}}
-            {% endif -%}
-            {% if visualization.type.name == "Stat" -%}
-              {{ grafana_visualizations.stat(class_name=class.name) -}}
-            {% endif -%}
-            {% if visualization.type.name == "BarChart" -%}
-              {{ grafana_visualizations.bar_chart(class_name=class.name) -}}
-            {% endif %}
+    {% for kpi in kpis %}
+      {% for visualization in kpi.deps -%}
+        {% if visualization.name in visualizations %}
+          {% set ns.first_visualization_added=false -%}
+          {% if not ns.first_element_added -%}
+            {% set ns.first_element_added = true -%}
+          {% else -%}
+          ,
           {% endif -%}
-        {% endfor -%}
-      {% endif -%}
+
+          {% if not ns.first_visualization_added -%}
+            {% set ns.first_visualization_added = true -%}
+          {% else -%}
+            ,
+          {% endif -%}
+          {% if visualization.name == "TimeSeries" -%}
+            {{ grafana_visualizations.timeseries(visualization=visualization, kpi=kpi) -}}
+          {% endif -%}
+          {% if visualization.name == "Table" -%}
+            {{ grafana_visualizations.table(visualization=visualization, kpi=kpi) -}}
+          {% endif -%}
+          {% if visualization.name == "Histogram" -%}
+            {{ grafana_visualizations.histogram(visualization=visualization, kpi=kpi) -}}
+          {% endif -%}
+          {% if visualization.name == "Gauge" -%}
+            {{ grafana_visualizations.gauge(visualization=visualization, kpi=kpi) -}}
+          {% endif -%}
+          {% if visualization.name == "Stat" -%}
+            {{ grafana_visualizations.stat(visualization=visualization, kpi=kpi) -}}
+          {% endif -%}
+          {% if visualization.name == "BarChart" -%}
+            {{ grafana_visualizations.bar_chart(visualization=visualization, kpi=kpi) -}}
+          {% endif %}
+        {% endif -%}
+      {% endfor -%}
     {% endfor -%}
     ],
     "refresh": "",
@@ -77,7 +77,7 @@
         {
           "current": {},
           "definition": "Select name from {{ class.name | lower}}",
-          "datasource": "dbname",
+          "datasource": "aaron",
           "hide": 0,
           "includeAll": false,
           "multi": false,
@@ -99,7 +99,7 @@
     },
     "timepicker": {},
     "timezone": "",
-    "title": "KPI - {{ city -}}",
+    "title": "KPI - {{ city.upper() -}}",
     "version": 2,
     "weekStart": ""
   }

@@ -22,8 +22,6 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base.metadata.create_all(bind=engine)
 
-# In-memory storage for KPI objects
-kpi_objects = []
 {% for class in classes %}
     {% if not class.is_abstract %}
 @app.post("/kpi/{{ class.name }}", response_model={{ class.name }}, summary="Add a KPI object")

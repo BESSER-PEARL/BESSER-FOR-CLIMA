@@ -24,21 +24,21 @@ class KPITraffic {
 
 KPI <|-- KPITemp
 KPI <|-- KPITraffic
-
+KPI <|-- KPIMoneyInvestedInRenewableEnergy
 abstract class City{
     name: str
 }
 
-class Paris {
+class Differdange {
 }
 class Sofia {
 }
+City <|-- Differdange
+City <|-- Sofia
 
-Paris --|> City
-Sofia --|> City
+Differdange --> KPITemp
 
-
-Paris --> KPITemp
+Differdange --> KPIMoneyInvestedInRenewableEnergy
 Sofia --> KPITraffic
 
 abstract class Visualization {
@@ -78,4 +78,6 @@ Histogram --|> Visualization
 KPITemp --> Gauge
 KPITemp --> TimeSeries
 KPITraffic --> BarChart
+KPITraffic --> Histogram
+KPIMoneyInvestedInRenewableEnergy --> Stat
 @enduml

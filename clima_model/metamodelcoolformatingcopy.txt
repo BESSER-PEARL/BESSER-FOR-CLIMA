@@ -1,0 +1,14 @@
+@startuml
+class City{
+    name: str
+}
+
+class KPI {
+   id_kpi: str
+}
+
+City --> "*" KPI: kpis
+
+
+
+@enduml

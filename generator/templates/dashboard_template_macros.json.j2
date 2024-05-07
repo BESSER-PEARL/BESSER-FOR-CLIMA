@@ -1,6 +1,6 @@
-{% macro timeseries(class_name) %}
+{% macro timeseries(visualization, kpi) %}
 {
-    "datasource": "dbname",
+    "datasource": "aaron",
     "fieldConfig": {
       "defaults": {
         "color": {
@@ -77,49 +77,18 @@
       {
         "editorMode": "builder",
         "format": "table",
-        "rawSql": "SELECT \"kpiValue\", \"timestamp\" FROM {{ class_name | lower}} LIMIT 50 ",
-        "refId": "A",
-        "sql": {
-          "columns": [
-            {
-              "parameters": [
-                {
-                  "name": "\"kpiValue\"",
-                  "type": "functionParameter"
-                }
-              ],
-              "type": "function"
-            },
-            {
-              "parameters": [
-                {
-                  "name": "\"timestamp\"",
-                  "type": "functionParameter"
-                }
-              ],
-              "type": "function"
-            }
-          ],
-          "groupBy": [
-            {
-              "property": {
-                "type": "string"
-              },
-              "type": "groupBy"
-            }
-          ],
-          "limit": 50
-        }, 
-        "table": "{{ class_name | lower}}"
+        "rawSql": "SELECT \"{{visualization.attribute_dict["valueName"]}}\", \"{{visualization.attribute_dict["timestampName"]}}\" FROM kpivalue JOIN kpi on kpivalue.kpi_id = kpi.id JOIN {{kpi.name | lower }} ON kpi.id = {{kpi.name | lower }}.id where id_kpi = '{{kpi.attribute_dict["id_kpi"]}}';",
+        "refId": "A", 
+        "table": "kpivalue"
       }
     ],
-    "title": "Timeseries",
+    "title": "{{visualization.attribute_dict["name"]}}",
     "type": "timeseries"
   }
 {% endmacro -%}   
-{% macro table(class_name) %}
+{% macro table(visualization, kpi) %}
 {
-  "datasource": "dbname",
+  "datasource": "aaron",
   "fieldConfig": {
     "defaults": {
       "custom": {
@@ -170,49 +139,17 @@
     {
       "editorMode": "builder",
       "format": "table",
-      "rawSql": "SELECT \"kpiValue\", \"timestamp\" FROM {{ class_name | lower}} LIMIT 50 ",
-      "refId": "A",
-      "sql": {
-        "columns": [
-          {
-            "parameters": [
-              {
-                "name": "\"kpiValue\"",
-                "type": "functionParameter"
-              }
-            ],
-            "type": "function"
-          },
-          {
-            "parameters": [
-              {
-                "name": "\"timestamp\"",
-                "type": "functionParameter"
-              }
-            ],
-            "type": "function"
-          }
-        ],
-        "groupBy": [
-          {
-            "property": {
-              "type": "string"
-            },
-            "type": "groupBy"
-          }
-        ],
-        "limit": 50
-      }, 
-      "table": "{{ class_name | lower}}"
+      "rawSql": "SELECT \"kpiValue\", \"currentStanding\" ,\"timestamp\" FROM kpivalue JOIN kpi on kpivalue.kpi_id = kpi.id JOIN {{kpi.name | lower }} ON kpi.id = {{kpi.name | lower }}.id where id_kpi = '{{kpi.attribute_dict["id_kpi"]}}';",
+      "refId": "A"
     }
   ],
-  "title": "Table",
+  "title": "{{visualization.attribute_dict["name"]}}",
   "type": "table"
 }
 {% endmacro -%}
-{% macro histogram(class_name) %}
+{% macro histogram(visualization, kpi) %}
 {
-  "datasource": "dbname",
+  "datasource": "aaron",
   "fieldConfig": {
     "defaults": {
       "color": {
@@ -266,55 +203,24 @@
     {
       "editorMode": "builder",
       "format": "table",
-      "rawSql": "SELECT \"kpiValue\", \"timestamp\" FROM {{ class_name | lower}} LIMIT 50 ",
-      "refId": "A",
-      "sql": {
-        "columns": [
-          {
-            "parameters": [
-              {
-                "name": "\"kpiValue\"",
-                "type": "functionParameter"
-              }
-            ],
-            "type": "function"
-          },
-          {
-            "parameters": [
-              {
-                "name": "\"timestamp\"",
-                "type": "functionParameter"
-              }
-            ],
-            "type": "function"
-          }
-        ],
-        "groupBy": [
-          {
-            "property": {
-              "type": "string"
-            },
-            "type": "groupBy"
-          }
-        ],
-        "limit": 50
-      }, 
-      "table": "{{ class_name | lower}}"
+      "rawSql": "SELECT \"{{visualization.attribute_dict["valueName"]}}\" FROM kpivalue JOIN kpi on kpivalue.kpi_id = kpi.id JOIN {{kpi.name | lower }} ON kpi.id = {{kpi.name | lower }}.id where id_kpi = '{{kpi.attribute_dict["id_kpi"]}}';",
+      "refId": "A"
     }
   ],
-  "title": "Histogram",
+  "title": "{{visualization.attribute_dict["name"]}}",
   "type": "histogram"
 }
 {% endmacro -%}   
-{% macro gauge(class_name) %}
+{% macro gauge(visualization, kpi) %}
 {
-  "datasource": "dbname",
+  "datasource": "aaron",
   "fieldConfig": {
     "defaults": {
       "color": {
         "mode": "thresholds"
       },
       "mappings": [],
+      {% if visualization.attribute_dict["thresholdTop"] != "" %}
       "thresholds": {
         "mode": "absolute",
         "steps": [
@@ -324,10 +230,11 @@
           },
           {
             "color": "red",
-            "value": 80
+            "value": {{kpi.attribute_dict[visualization.attribute_dict["thresholdTop"]]}}
           }
         ]
       }
+      {% endif %}
     },
     "overrides": []
   },
@@ -355,40 +262,17 @@
     {
       "editorMode": "builder",
       "format": "table",
-      "rawSql": "SELECT \"kpiValue\" FROM {{ class_name | lower}} LIMIT 50 ",
-      "refId": "A",
-      "sql": {
-        "columns": [
-          {
-            "parameters": [
-              {
-                "name": "\"kpiValue\"",
-                "type": "functionParameter"
-              }
-            ],
-            "type": "function"
-          }
-        ],
-        "groupBy": [
-          {
-            "property": {
-              "type": "string"
-            },
-            "type": "groupBy"
-          }
-        ],
-        "limit": 50
-      }, 
-      "table": "{{ class_name | lower}}"
+      "rawSql": "SELECT \"{{visualization.attribute_dict["valueName"]}}\" FROM kpivalue JOIN kpi on kpivalue.kpi_id = kpi.id JOIN {{kpi.name | lower }} ON kpi.id = {{kpi.name | lower }}.id where id_kpi = '{{kpi.attribute_dict["id_kpi"]}}';",
+      "refId": "A"
     }
   ],
-  "title": "Gauge",
+  "title": "{{visualization.attribute_dict["name"]}}",
   "type": "gauge"
 }
 {% endmacro -%}   
-{% macro stat(class_name) %}
+{% macro stat(visualization, kpi) %}
 {
-  "datasource": "dbname",
+  "datasource": "aaron",
   "fieldConfig": {
     "defaults": {
       "color": {
@@ -437,49 +321,22 @@
     {
       "editorMode": "builder",
       "format": "table",
-      "rawSql": "SELECT \"kpiValue\", \"timestamp\" FROM {{ class_name | lower}} LIMIT 50 ",
-      "refId": "A",
-      "sql": {
-        "columns": [
-          {
-            "parameters": [
-              {
-                "name": "\"kpiValue\"",
-                "type": "functionParameter"
-              }
-            ],
-            "type": "function"
-          },
-          {
-            "parameters": [
-              {
-                "name": "\"timestamp\"",
-                "type": "functionParameter"
-              }
-            ],
-            "type": "function"
-          }
-        ],
-        "groupBy": [
-          {
-            "property": {
-              "type": "string"
-            },
-            "type": "groupBy"
-          }
-        ],
-        "limit": 50
-      }, 
-      "table": "{{ class_name | lower}}"
+      {% if visualization.attribute_dict["timestampName"] == ""%}
+      "rawSql": "SELECT \"{{visualization.attribute_dict["valueName"]}}\" FROM kpivalue JOIN kpi on kpivalue.kpi_id = kpi.id JOIN {{kpi.name | lower }} ON kpi.id = {{kpi.name | lower }}.id where id_kpi = '{{kpi.attribute_dict["id_kpi"]}}';",
+
+      {% else %}
+      "rawSql": "SELECT \"{{visualization.attribute_dict["valueName"]}}\", \"{{visualization.attribute_dict["timestampName"]}}\" FROM kpivalue JOIN kpi on kpivalue.kpi_id = kpi.id JOIN {{kpi.name | lower }} ON kpi.id = {{kpi.name | lower }}.id where id_kpi = '{{kpi.attribute_dict["id_kpi"]}}';",
+      {% endif %}
+      "refId": "A"
     }
   ],
-  "title": "Stat",
+  "title": "{{visualization.attribute_dict["name"]}}",
   "type": "stat"
 }
 {% endmacro -%}   
-{% macro bar_chart(class_name) %}
+{% macro bar_chart(visualization, kpi) %}
 {
-  "datasource": "dbname",
+  "datasource": "aaron",
   "fieldConfig": {
     "defaults": {
       "color": {
@@ -554,43 +411,11 @@
     {
       "editorMode": "builder",
       "format": "table",
-      "rawSql": "SELECT \"kpiValue\", \"timestamp\" FROM {{ class_name | lower}} LIMIT 50 ",
-      "refId": "A",
-      "sql": {
-        "columns": [
-          {
-            "parameters": [
-              {
-                "name": "\"kpiValue\"",
-                "type": "functionParameter"
-              }
-            ],
-            "type": "function"
-          },
-          {
-            "parameters": [
-              {
-                "name": "\"timestamp\"",
-                "type": "functionParameter"
-              }
-            ],
-            "type": "function"
-          }
-        ],
-        "groupBy": [
-          {
-            "property": {
-              "type": "string"
-            },
-            "type": "groupBy"
-          }
-        ],
-        "limit": 50
-      }, 
-      "table": "{{ class_name | lower}}"
+      "rawSql": "SELECT \"{{visualization.attribute_dict["valueName"]}}\", \"{{visualization.attribute_dict["timestampName"]}}\" FROM kpivalue JOIN kpi on kpivalue.kpi_id = kpi.id JOIN {{kpi.name | lower }} ON kpi.id = {{kpi.name | lower }}.id where id_kpi = '{{kpi.attribute_dict["id_kpi"]}}';",
+      "refId": "A"
     }
   ],
-  "title": "Bar Chart",
+  "title": "{{visualization.attribute_dict["name"]}}",
   "type": "barchart"
 }
 {% endmacro -%}  
