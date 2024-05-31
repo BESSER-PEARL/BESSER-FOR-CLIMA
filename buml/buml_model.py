@@ -3,9 +3,9 @@ from besser.BUML.metamodel.structural import NamedElement, DomainModel, Type, Cl
         GeneralizationSet, AssociationClass 
 
 # Primitive Data Types 
-datetime_type = PrimitiveDataType("datetime")
 int_type = PrimitiveDataType("int")
 str_type = PrimitiveDataType("str")
+datetime_type = PrimitiveDataType("datetime")
 
 # City class definition 
 City_name: Property = Property(name="name", property_type=str_type)
@@ -35,9 +35,29 @@ KPITemp: Class = Class(name="KPITemp", attributes={KPITemp_threshold})
 KPITraffic_target: Property = Property(name="target", property_type=int_type)
 KPITraffic: Class = Class(name="KPITraffic", attributes={KPITraffic_target})
 
+# KPICollectedWaste class definition 
+KPICollectedWaste_target: Property = Property(name="target", property_type=int_type)
+KPICollectedWaste: Class = Class(name="KPICollectedWaste", attributes={KPICollectedWaste_target})
+
+# KPISecondHandCustomers class definition 
+KPISecondHandCustomers_target: Property = Property(name="target", property_type=int_type)
+KPISecondHandCustomers: Class = Class(name="KPISecondHandCustomers", attributes={KPISecondHandCustomers_target})
+
 # KPIMoney class definition 
 KPIMoney_target: Property = Property(name="target", property_type=int_type)
 KPIMoney: Class = Class(name="KPIMoney", attributes={KPIMoney_target})
+
+# KPITotalRenewableEnergy class definition 
+KPITotalRenewableEnergy_target: Property = Property(name="target", property_type=int_type)
+KPITotalRenewableEnergy: Class = Class(name="KPITotalRenewableEnergy", attributes={KPITotalRenewableEnergy_target})
+
+# KPINumberHouseholdRenewableEnergy class definition 
+KPINumberHouseholdRenewableEnergy_target: Property = Property(name="target", property_type=int_type)
+KPINumberHouseholdRenewableEnergy: Class = Class(name="KPINumberHouseholdRenewableEnergy", attributes={KPINumberHouseholdRenewableEnergy_target})
+
+# KPIPeakSolarEnergy class definition 
+KPIPeakSolarEnergy_target: Property = Property(name="target", property_type=int_type)
+KPIPeakSolarEnergy: Class = Class(name="KPIPeakSolarEnergy", attributes={KPIPeakSolarEnergy_target})
 
 # Visualization class definition 
 Visualization_xposition: Property = Property(name="xposition", property_type=int_type)
@@ -97,6 +117,11 @@ shows: BinaryAssociation = BinaryAssociation(name="shows", ends={
         Property(name="shows", property_type=TableColumn, multiplicity=Multiplicity(0, "*"), is_navigable=True)})
 
 # Generalizations
+gen_KPI_KPICollectedWaste: Generalization = Generalization(general=KPI, specific=KPICollectedWaste)
+gen_KPI_KPISecondHandCustomers: Generalization = Generalization(general=KPI, specific=KPISecondHandCustomers)
+gen_KPI_KPITotalRenewableEnergy: Generalization = Generalization(general=KPI, specific=KPITotalRenewableEnergy)
+gen_KPI_KPINumberHouseholdRenewableEnergy: Generalization = Generalization(general=KPI, specific=KPINumberHouseholdRenewableEnergy)
+gen_KPI_KPIPeakSolarEnergy: Generalization = Generalization(general=KPI, specific=KPIPeakSolarEnergy)
 gen_KPI_KPITemp: Generalization = Generalization(general=KPI, specific=KPITemp)
 gen_KPI_KPITraffic: Generalization = Generalization(general=KPI, specific=KPITraffic)
 gen_KPI_KPIMoney: Generalization = Generalization(general=KPI, specific=KPIMoney)
@@ -108,4 +133,4 @@ gen_Visualization_Map: Generalization = Generalization(general=Visualization, sp
 
 
 # Domain Model
-domain: DomainModel = DomainModel(name="Domain Model", types={City, KPI, KPIValue, KPITemp, KPITraffic, KPIMoney, Visualization, Table, PieChart, StatChart, LineChart, TableColumn, Map, Dashboard}, associations={values, kpis, visualizedBy, has, consistsOf, shows}, generalizations={gen_KPI_KPITemp, gen_KPI_KPITraffic, gen_KPI_KPIMoney, gen_Visualization_Table, gen_Visualization_PieChart, gen_Visualization_StatChart, gen_Visualization_LineChart, gen_Visualization_Map})
+domain: DomainModel = DomainModel(name="Domain Model", types={City, KPI, KPIValue, KPITemp, KPITraffic, KPICollectedWaste, KPISecondHandCustomers, KPIMoney, KPITotalRenewableEnergy, KPINumberHouseholdRenewableEnergy, KPIPeakSolarEnergy, Visualization, Table, PieChart, StatChart, LineChart, TableColumn, Map, Dashboard}, associations={values, kpis, visualizedBy, has, consistsOf, shows}, generalizations={gen_KPI_KPICollectedWaste, gen_KPI_KPISecondHandCustomers, gen_KPI_KPITotalRenewableEnergy, gen_KPI_KPINumberHouseholdRenewableEnergy, gen_KPI_KPIPeakSolarEnergy, gen_KPI_KPITemp, gen_KPI_KPITraffic, gen_KPI_KPIMoney, gen_Visualization_Table, gen_Visualization_PieChart, gen_Visualization_StatChart, gen_Visualization_LineChart, gen_Visualization_Map})

@@ -188,7 +188,7 @@ async def add_or_update_{{class.name}}_{{object.className.name}}(id: int, chart:
     else:
         # If the chart does not exist, create a new one
         db_entry = {{class.name}}DB(**chart.dict())
-        db_entry.consistsOf = dashboard_differdange
+        db_entry.consistsOf = dashboard_{{object.className.name}}
         db_entry.kpi_id = id
         try:
             session.add(db_entry)
@@ -265,12 +265,11 @@ async def get_visualizations_{{object.className.name}}():
         query = session.query(visualization_alias, {{class.name}}_alias).\
             join({{class.name}}_alias, visualization_alias.id == {{class.name}}_alias.id).\
             join(dashboard_alias, dashboard_alias.id == visualization_alias.dashboard_id).\
-            filter(func.lower(dashboard_alias.code) == func.lower("differdange"))
+            filter(func.lower(dashboard_alias.code) == func.lower("{{object.className.name}}"))
 
         # Execute the query to get the results
         results = query.all()
         # Convert SQLAlchemy objects to dictionaries
-        
         for result in results:
             result_dict = {}
             for table in result: 
@@ -315,6 +314,17 @@ async def get_kpi_{{object.className.name}}(id: int):
 {%- endfor %}
 
 
+@app.delete("/")
+async def delete_all():
+    # Create a session
+    from sqlalchemy import MetaData
+    # Step 2: Reflect the existing tables from the database into SQLAlchemy metadata
+    metadata = MetaData()
+    metadata.reflect(bind=engine)
+
+    # Step 3: Drop all tables from the metadata
+    metadata.drop_all(bind=engine)
+    return {"msg":"deleted all"}
 
 
 # Optional: Swagger UI metadata

@@ -27,8 +27,27 @@ class KPITraffic {
    target: int
 }
 
+class KPICollectedWaste extends KPI {
+   target: int
+}
+
+class KPISecondHandCustomers extends KPI {
+   target: int
+}
 
 class KPIMoney {
+   target: int
+}
+
+class KPITotalRenewableEnergy extends KPI {
+   target: int
+}
+
+class KPINumberHouseholdRenewableEnergy extends KPI {
+   target: int
+}
+
+class KPIPeakSolarEnergy extends KPI {
    target: int
 }
 

@@ -78,6 +78,112 @@ Sofia --> KPITrafficCongestion_Sofia
 
 KPITrafficCongestion_Sofia --> KPIValue_Traffic
 
+object "cascais: City" as Cascais {
+    name = "Cascais"
+}
 
+object "kpiCollectedWaste_Cascais: KPICollectedWaste" as KPICollectedWaste_Cascais {
+    id_kpi = "waste001"
+    name = "Collected Textile Waste in Ton"
+    category = "Waste"
+    description = "Total textile waste collected in Cascais"
+    provider = "WasteDepartment"
+    calculationFrequency = "Weekly"
+    unitText = "Tons"
+    target = 10
+}
+
+object "kpiValue_Waste: KPIValue" as KPIValue_Waste {
+    kpiValue = ""
+    currentStanding = ""
+    timestamp = ""
+}
+
+object "kpiCSecondHandCustomers_Cascais: KPISecondHandCustomers" as KPISecondHandCustomers_Cascais {
+    id_kpi = "waste002"
+    name = "Customers in second hand shops"
+    category = "Waste"
+    description = "Daily number of customers in second hand shops"
+    provider = "Shops"
+    calculationFrequency = "Daily"
+    unitText = "Number of people"
+    target = 1000
+}
+
+object "kpiValue_Waste2: KPIValue" as KPIValue_Waste2 {
+    kpiValue = ""
+    currentStanding = ""
+    timestamp = ""
+}
+
+object "kpiTotalRenewableEnergy_Differdange: KPITotalRenewableEnergy" as KPITotalRenewableEnergy_Differdange {
+    id_kpi = "energy001"
+    name = "Percentage of renewable energy in Differdange"
+    category = "Energy"
+    description = "Percentage of renewable energy in Differdange based on total amount of energy"
+    provider = "Solution Provider"
+    calculationFrequency = "Monthly"
+    unitText = "Percentage"
+    target = 20
+}
+
+
+object "kpiNumberHouseholdRenewableEnergy_Differdange: KPINumberHouseholdRenewableEnergy" as KPINumberHouseholdRenewableEnergy_Differdange {
+    id_kpi = "energy002"
+    name = "Household with renewable energy"
+    category = "Energy"
+    description = "Number of households producing any kind of renewable energy"
+    provider = "Citizens"
+    calculationFrequency = "Monthly"
+    unitText = "Number"
+    target = 500
+}
+
+
+object "kpiPeakSolarEnergy_Differdange: KPIPeakSolarEnergy" as KPIPeakSolarEnergy_Differdange {
+    id_kpi = "energy003"
+    name = "Peak solar energy"
+    category = "Energy"
+    description = "Peak solar energy in Differdange"
+    provider = "Differdange"
+    calculationFrequency = "Monthly"
+    unitText = "KW peak"
+    target = 1000
+}
+
+Differdange --> KPITotalRenewableEnergy_Differdange
+Differdange --> KPINumberHouseholdRenewableEnergy_Differdange
+Differdange --> KPIPeakSolarEnergy_Differdange
+
+
+object "kpiValue_Energy1: KPIValue" as KPIValue_Energy1 {
+    kpiValue = ""
+    currentStanding = ""
+    timestamp = ""
+}
+
+object "kpiValue_Energy2: KPIValue" as KPIValue_Energy2 {
+    kpiValue = ""
+    currentStanding = ""
+    timestamp = ""
+}
+object "kpiValue_Energy3: KPIValue" as KPIValue_Energy3 {
+    kpiValue = ""
+    currentStanding = ""
+    timestamp = ""
+}
+
+KPITotalRenewableEnergy_Differdange --> KPIValue_Energy1
+KPINumberHouseholdRenewableEnergy_Differdange --> KPIValue_Energy2
+KPIPeakSolarEnergy_Differdange --> KPIValue_Energy3
+
+
+Cascais --> KPICollectedWaste_Cascais
+
+KPICollectedWaste_Cascais --> KPIValue_Waste
+
+Cascais --> KPISecondHandCustomers_Cascais
+
+KPISecondHandCustomers_Cascais --> KPIValue_Waste2
 
 @enduml
