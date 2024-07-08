@@ -14,7 +14,7 @@ from collections import deque, defaultdict
 
 
 # import and build clima DSL from given plantuml model and transform it into BUML
-domain: DomainModel = plantuml_to_buml('clima_model/metamodelvis.txt')
+domain: DomainModel = plantuml_to_buml("clima_model/metamodelvis.txt")
 
 generator = ClimaGenerator(output_dir="generator/generated_output", model=domain)
 generator.generate()
@@ -24,9 +24,6 @@ py = Python_Generator(output_dir="generator/generated_output", model=domain)
 py.generate()
 db = SQLGenerator(output_dir="generator/generated_output", model=domain)
 db.generate()
-
-
-
 
 
 def topological_sort(relations):
@@ -63,7 +60,8 @@ def topological_sort(relations):
 
     return sorted_order[::]  # reverse to get highest hierarchy first
 
-def plantuml_to_object(model_path:str):
+
+def plantuml_to_object(model_path: str):
     """
     Converts a PlantUML model to a model conforms to B-UML.
 
@@ -73,11 +71,13 @@ def plantuml_to_object(model_path:str):
     Returns:
         DomainModel: The resulting model conforms to B-UML.
     """
-    
-    grammar_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'plantumlobject.tx')
+
+    grammar_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "plantumlobject.tx"
+    )
     plantUML_mm = metamodel_from_file(grammar_path)
     textx_model = plantUML_mm.model_from_file(model_path)
-    
+
     res = topological_sort(textx_model.relationships)
     objects = []
     dependencies = {}
@@ -102,7 +102,7 @@ def plantuml_to_object(model_path:str):
     for object in objects:
         object.dep_from = dependency_of[object.alias]
         attribute_dict = {}
-        for attribute in object.attributes: 
+        for attribute in object.attributes:
             attribute_dict[attribute.name] = attribute.value
         object.attribute_dict = attribute_dict
     return objects
@@ -110,10 +110,10 @@ def plantuml_to_object(model_path:str):
 
 objects = plantuml_to_object("clima_model/plantumlobject.txt")
 
-env = Environment(loader=FileSystemLoader('generator/templates'))
+env = Environment(loader=FileSystemLoader("generator/templates"))
 # generate pydantic classes for API calls
 file_name = "objects.py"
-template = env.get_template('objects.py.j2')
+template = env.get_template("objects.py.j2")
 file_path = os.path.join("generator/generated_output", file_name)
 with open(file_path, "w") as f:
     generated_code = template.render(objects=objects)
@@ -122,14 +122,16 @@ with open(file_path, "w") as f:
 
 # generate api interfaces for API calls
 file_name = "api_interface_objects.py"
-template = env.get_template('fastapiinterface_template_objects.py')
+template = env.get_template("fastapiinterface_template_objects.py")
 file_path = os.path.join("generator/generated_output", file_name)
 with open(file_path, "w") as f:
-    generated_code = template.render(objects=objects[::-1], classes=domain.classes_sorted_by_inheritance())
+    generated_code = template.render(
+        objects=objects[::-1], classes=domain.classes_sorted_by_inheritance()
+    )
     f.write(generated_code)
 
 # generate grafana dashboard specification
-file_name = "dashboards/"
+""" file_name = "dashboards/"
 template = env.get_template('dashboard_template.json.j2') 
 os.system('del /q generator\generated_output\dashboards\*')
 for object in objects:
@@ -137,7 +139,7 @@ for object in objects:
         file_path = os.path.join("generator/generated_output", file_name + object.className.name + ".json")
         with open(file_path, "w") as f:
             generated_code = template.render(kpis=object.deps, city=object.className.name)
-            f.write(generated_code)
+            f.write(generated_code) """
 
 
 example_datetime = datetime(2023, 1, 4, 15, 30, 45)

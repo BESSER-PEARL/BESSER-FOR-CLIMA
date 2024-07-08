@@ -1,5 +1,12 @@
 @startuml
 
+object "torino: City" as Torino {
+name = "Torino"
+}
+
+
+
+
 object "differdange: City" as Differdange {
 name = "Differdange"
 }
@@ -186,4 +193,191 @@ Cascais --> KPISecondHandCustomers_Cascais
 
 KPISecondHandCustomers_Cascais --> KPIValue_Waste2
 
+object "kpiInformedCitizens: KPIParticipants" as KPIInformedCitizens_Torino {
+    id_kpi = "participants_001"
+    name = "Citizens informed through Re4Circular"
+    category = "Waste"
+    description = "Citizens informed through Re4Circular"
+    provider = "Re4Circular"
+    calculationFrequency = "Monthly"
+    unitText = "Number of people"
+    target = 1000
+}
+
+object "kpiInvolvedCitizens: KPIParticipants" as KPIInvolvedCitizens_Torino {
+    id_kpi = "participants_002"
+    name = "Citizens active on Re4Circular"
+    category = "Waste"
+    description = "Citizens active on Re4Circular"
+    provider = "Re4Circular"
+    calculationFrequency = "Monthly"
+    unitText = "Number of people"
+    target = 500
+}
+
+
+object "kpiInformedBusinesses: KPIParticipants" as KPIInformedBusinesses_Torino {
+    id_kpi = "participants_003"
+    name = "Businesses informed through Re4Circular"
+    category = "Waste"
+    description = "Businesses informed through Re4Circular"
+    provider = "Re4Circular"
+    calculationFrequency = "Monthly"
+    unitText = "Number of businesses"
+    target = 50
+}
+
+object "kpiInvolvedBusinesses: KPIParticipants" as KPIInvolvedBusinesses_Torino {
+    id_kpi = "participants_004"
+    name = "Businesses active on Re4Circular"
+    category = "Waste"
+    description = "Businesses active on Re4Circular"
+    provider = "Re4Circular"
+    calculationFrequency = "Monthly"
+    unitText = "Number of businesses"
+    target = 20
+}
+
+object "kpiReuseBusinesses: KPIParticipants" as KPIReuseBusinesses_Torino {
+    id_kpi = "participants_005"
+    name = "Businesses re-using textiles through Re4Circular"
+    category = "Waste"
+    description = "Businesses re-using textiles through Re4Circular"
+    provider = "Re4Circular"
+    calculationFrequency = "Monthly"
+    unitText = "Number of businesses"
+    target = 10
+}
+
+object "kpiWasteAvoided: KPIWasteAvoided" as KPIWasteAvoided_Torino {
+    id_kpi = "waste_001"
+    name = "Waste avoided through Re4Circular"
+    category = "Waste"
+    description = "Waste avoided through Re4Circular (collecting material before it becomes waste)"
+    provider = "Re4Circular"
+    calculationFrequency = "Monthly"
+    unitText = "Tons"
+    target = 10
+}
+
+object "kpiCo2Avoided: KPICo2Avoided" as KPICo2Avoided_Torino {
+    id_kpi = "co2_001"
+    name = "Co2 avoided through collection of waste through Re4Circular"
+    category = "Waste"
+    description = "Co2 avoided through collection of waste through Re4Circular"
+    provider = "DKSR"
+    calculationFrequency = "Monthly"
+    unitText = "Tons"
+    target = 1
+}
+
+object "kpiWasteSorted: KPIWasteSorted" as KPIWasteSorted_Torino {
+    id_kpi = "waste_006"
+    name = "Amount of correctly sorted waste in bins using ReLearn sensors"
+    category = "Waste"
+    description = "Amount of correctly sorted waste in bins using ReLearn sensors"
+    provider = "ReLearn"
+    calculationFrequency = "Monthly"
+    unitText = "Tons"
+}
+
+
+object "kpiCollectedWaste: KPICollectedWaste" as KPICollectedWaste_Torino {
+    id_kpi = "waste_007"
+    name = "Amount of collected waste"
+    category = "Waste"
+    description = "Amount of collected waste"
+    provider = "ReLearn"
+    calculationFrequency = "Monthly"
+    unitText = "Tons"
+    target = 5
+}
+
+Torino --> KPIInformedCitizens_Torino
+
+object "kpiValue_Waste_001: KPIValue" as KPIWaste_001 {
+    kpiValue = ""
+    currentStanding = ""
+    timestamp = ""
+}
+
+KPIInformedCitizens_Torino --> KPIWaste_001
+
+
+
+Torino --> KPIInvolvedCitizens_Torino
+
+
+object "kpiValue_Waste_002: KPIValue" as KPIWaste_002 {
+    kpiValue = ""
+    currentStanding = ""
+    timestamp = ""
+}
+
+KPIInvolvedCitizens_Torino --> KPIWaste_002
+
+Torino --> KPIInformedBusinesses_Torino
+
+object "kpiValue_Waste_003: KPIValue" as KPIWaste_003{
+    kpiValue = ""
+    currentStanding = ""
+    timestamp = ""
+}
+
+KPIInformedBusinesses_Torino --> KPIWaste_003
+
+Torino --> KPIInvolvedBusinesses_Torino
+
+object "kpiValue_Waste_004: KPIValue" as KPIWaste_004 {
+    kpiValue = ""
+    currentStanding = ""
+    timestamp = ""
+}
+
+KPIInvolvedBusinesses_Torino --> KPIWaste_004
+Torino --> KPIReuseBusinesses_Torino
+
+object "kpiValue_Waste_005: KPIValue" as KPIWaste_005 {
+    kpiValue = ""
+    currentStanding = ""
+    timestamp = ""
+}
+
+KPIReuseBusinesses_Torino --> KPIWaste_005
+Torino --> KPIWasteAvoided_Torino
+
+object "kpiValue_Waste_006: KPIValue" as KPIWaste_006 {
+    kpiValue = ""
+    currentStanding = ""
+    timestamp = ""
+}
+
+KPIWasteAvoided_Torino --> KPIWaste_006
+Torino --> KPICo2Avoided_Torino
+
+object "kpiValue_Waste_007: KPIValue" as KPIWaste_007 {
+    kpiValue = ""
+    currentStanding = ""
+    timestamp = ""
+}
+
+KPICo2Avoided_Torino --> KPIWaste_007
+Torino --> KPIWasteSorted_Torino
+
+object "kpiValue_Waste_008: KPIValue" as KPIWaste_008 {
+    kpiValue = ""
+    currentStanding = ""
+    timestamp = ""
+}
+
+KPIWasteSorted_Torino --> KPIWaste_008
+Torino --> KPICollectedWaste_Torino
+
+object "kpiValue_Waste_009: KPIValue" as KPIWaste_009 {
+    kpiValue = ""
+    currentStanding = ""
+    timestamp = ""
+}
+
+KPICollectedWaste_Torino --> KPIWaste_009
 @enduml

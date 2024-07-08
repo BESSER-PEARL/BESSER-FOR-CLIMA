@@ -17,6 +17,13 @@ from sql_alchemy import Base
 from sql_alchemy import {% for object in classes %}{% if not ns.first_object_added -%}{% set ns.first_object_added = true -%}{% else -%}, {% endif -%} {{object.name}} as {{object.name}}DB{% endfor %}
 from sql_alchemy import KPI as KPIDB
 from sqlalchemy.orm import aliased
+
+from fastapi import File, UploadFile, HTTPException
+from geoalchemy2.shape import from_shape
+from shapely.geometry import shape
+import json
+
+
 app = FastAPI()
 
 db_host = os.environ.get("DB_HOST")
@@ -140,6 +147,37 @@ except:
 
 {%- endfor -%}
 
+
+
+@app.post("/admin", response_model=Admin, summary="Add an admin")
+async def add_admin(user: Admin= Body(..., description="Admin to add")):
+    db_entry = AdminDB(**user.dict())
+    try:
+        session.add(db_entry)
+        session.commit()
+        session.refresh(db_entry)   
+    except IntegrityError: 
+        session.rollback()
+        print("Error integrity")
+    except:
+        session.rollback()
+        print("Error")
+    return user
+
+# Define the Pydantic models
+class UserCredentials(BaseModel):
+    email: str
+    password: str
+
+@app.post("/check_user", response_model=bool, summary="Check if user in database")
+def check_user(credentials: UserCredentials):
+    user = session.query(UserDB).filter(UserDB.email == credentials.email, UserDB.password == credentials.password).first()
+    if user:
+        return user
+    else:
+        return {}
+
+
 {% for object in objects %}
     {%- if object.name == "KPIValue" -%}
         {%- for parent in object.dep_from -%}
@@ -231,8 +269,7 @@ async def delete_visualizations_{{object.className.name}}(ids: List[int]):
 {%- endfor %}
 
 {% for object in objects %}
-    {% if object.name == "City" %}
-    
+    {% if object.name == "City" %} 
 @app.get("/{{object.className.name}}/kpis", response_model=list[object], summary="get a KPI object")
 async def get_kpis_{{object.className.name}}():
     try:
@@ -244,23 +281,119 @@ async def get_kpis_{{object.className.name}}():
     except Exception as e:
         return [e]
     
+@app.post("/{{object.className.name}}/geojson/")
+async def upload_geojson_{{object.className.name}}(title: str = Query(..., description="Title of the GeoJSON data"), file: UploadFile = File(...)):
+    try:
+        contents = await file.read()
+        geojson_data = json.loads(contents)
+        
+        # Create a new GeoJson entry
+        new_data = GeoJsonDB(
+            title=title,
+            data=geojson_data,
+            hasMapData={{object.className.name}}
+        )
+        session.add(new_data)
+        session.commit()
+        
+        return {"status": "success", "message": "GeoJSON file processed and data stored in the database."}
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+
+@app.get("/{{object.className.name}}/geojson/")
+async def get_geojson_for_{{object.className.name}}():
+    results = []
+    try:
+        # Query the database for geospatial data for the given city
+        geojson_data = session.query(GeoJsonDB).filter(GeoJsonDB.city_id == {{object.className.name}}.id).all()
+
+        # Check if data exists for the city
+        if not geojson_data:
+            raise HTTPException(status_code=404, detail=f"No geospatial data found for city: torino")
+        for result in geojson_data: 
+            results.append(result)
+        return results
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+    
+@app.post("/{{object.className.name}}/wms/")
+async def upload_wms_{{object.className.name}}(title: str = Query(..., description="Title of the WMS data"), url: str = Query(..., description="URL of the WMS data"), name: str = Query(..., description="Name of the wms artifact")):
+    try:
+        
+        # Create a new GeoJson entry
+        new_data = WMSDB(
+            title=title,
+            url=url,
+            name=name,
+            hasMapData={{object.className.name}}
+        )
+        session.add(new_data)
+        session.commit()
+        
+        return {"status": "success", "message": "GeoJSON file processed and data stored in the database."}
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+@app.get("/{{object.className.name}}/wms/")
+async def get_wms_for_{{object.className.name}}():
+    results = []
+    try:
+        # Query the database for geospatial data for the given city
+        wms_data = session.query(WMSDB).filter(WMSDB.city_id == {{object.className.name}}.id).all()
+
+        # Check if data exists for the city
+        if not wms_data:
+            raise HTTPException(status_code=404, detail=f"No geospatial data found for city: torino")
+        for result in wms_data: 
+            results.append(result)
+        return results
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+    
+@app.get("/{{object.className.name}}/mapdata/")    
+async def get_mapdata_for_{{object.className.name}}():
+    results = []
+    try:
+        # Query the database for geospatial data for the given city
+        wms_data = session.query(WMSDB).filter(WMSDB.city_id == {{object.className.name}}.id).all()
+
+        # Check if data exists for the city
+        if not wms_data:
+            print("sucks")
+        for result in wms_data: 
+            results.append(result)
+        geojson_data = session.query(GeoJsonDB).filter(GeoJsonDB.city_id == {{object.className.name}}.id).all()
+
+        # Check if data exists for the city
+        if not geojson_data:
+            print("sucks")
+        for result in geojson_data: 
+            results.append(result)
+        return results            
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")    
+    
     
 dashboard_alias = aliased(DashboardDB)
 visualization_alias = aliased(VisualizationDB)
-        {% for class in classes %}
-            {% for parent in class.parents() %}
+        {%- for class in classes -%}
+            {%- for parent in class.parents() -%}
                 {% if parent.name == "Visualization" %}            
 {{class.name}}_alias = aliased({{class.name}}DB)
-                {% endif %}
-            {% endfor %}
+                {%- endif -%}
+            {%- endfor -%}
         {%- endfor %}
         
 @app.get("/{{object.className.name}}/visualizations", response_model=list[object], summary="get a KPI object")
 async def get_visualizations_{{object.className.name}}():
     try:
         results_list = []
-        {% for class in classes %}
-            {% for parent in class.parents() %}
+        {% for class in classes -%}
+            {% for parent in class.parents() -%}
                 {% if parent.name == "Visualization" %}            
         query = session.query(visualization_alias, {{class.name}}_alias).\
             join({{class.name}}_alias, visualization_alias.id == {{class.name}}_alias.id).\
@@ -277,20 +410,18 @@ async def get_visualizations_{{object.className.name}}():
                     if not key.startswith('_'):
                         result_dict[key] = getattr(table, key)
             results_list.append(result_dict)
-                {% endif %}
-            {% endfor %}
+                {% endif -%}
+            {% endfor -%}
         {%- endfor %}
         return results_list
     except Exception as e:
+        session.rollback()
         return [{"error": str(e)}]
-    
-    {% endif %}
-{%- endfor %}
+    {% endif -%}
+{%- endfor -%}
 
-
-{% for object in objects %}
-    {% if object.name == "City" %}
-
+{%- for object in objects -%}
+    {%- if object.name == "City" %}
 @app.get("/{{object.className.name}}/kpi/", response_model=list[object], summary="get a KPI object")
 async def get_kpi_{{object.className.name}}(id: int):
     try:
@@ -309,7 +440,6 @@ async def get_kpi_{{object.className.name}}(id: int):
         return results_list
     except Exception as e:
         return [{'err': e}]
-
     {% endif %}
 {%- endfor %}
 
