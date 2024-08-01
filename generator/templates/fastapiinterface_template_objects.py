@@ -23,6 +23,22 @@ from geoalchemy2.shape import from_shape
 from shapely.geometry import shape
 import json
 
+from auth.auth_handler import sign_jwt
+from auth.auth_model import PostSchema, UserSchema, UserLoginSchema
+
+from fastapi import  Depends
+from auth.auth_bearer import JWTBearer
+
+import logging
+
+from passlib.context import CryptContext
+
+# Password hashing context
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+logger = logging.getLogger('uvicorn.error')
+logger.setLevel(logging.DEBUG)
+
 
 app = FastAPI()
 
@@ -46,11 +62,88 @@ engine = create_engine("postgresql://" + db_host + "/" + db_name +
                        "?user=" + db_user + "&password=" + db_password)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
 Base.metadata.create_all(bind=engine)
 
 
-
 session = SessionLocal()
+
+admin = (
+    session.query(UserDB)
+    .filter_by(email="admin@gmail.com")
+    .first()
+)
+if admin is None:
+    admin = AdminDB(
+        email="admin@gmail.com",
+        password=pwd_context.hash("adminpw"),
+        firstName="admin",
+        lastName="admin",
+    )
+try:
+    session.add(admin)
+    session.commit()
+except IntegrityError:
+    session.rollback()
+    print("error integrity")
+except Exception as e:
+    session.rollback()
+    print(e)
+
+
+@app.post("/user/signup", dependencies=[Depends(JWTBearer())], tags=["user"])
+async def create_user(user: User = Body(...)):
+    user_db = session.query(UserDB).filter_by(email=user.email).first()
+    if user_db is not None:
+        return {"error": "User with email address '" + user.email + "' already registered!"}
+    hashed_password = pwd_context.hash(user.password)
+    statement = AdminDB(
+        email=user.email,
+        password=hashed_password,
+        firstName=user.firstName,
+        lastName=user.lastName
+    )
+    try:
+        session.add(statement)
+        session.commit()
+        return sign_jwt(user.email)
+    except IntegrityError:
+        session.rollback()
+        print("error integrity")
+        return {"error": "Integrity error"}
+    except Exception as e:
+        print(e)
+        print("added user")
+        session.rollback()
+        return {"error": "Exception " + e}
+
+
+
+def check_user_api(data: UserLoginSchema):
+    try:
+        user = session.query(UserDB).filter_by(email=data.email).first()
+        if user is None:
+            return None
+        if pwd_context.verify(data.password, user.password):
+            return user
+        return None
+    except Exception as e:
+        session.rollback()
+        return {"error": "Exception " + e}
+
+
+@app.post("/user/login", response_model=dict(), tags=["user"])
+async def user_login(user: UserLoginSchema = Body(...)):
+    session.rollback()
+    user_db = check_user_api(user)
+    if user_db:
+        token_response = sign_jwt(user.email)
+        token_response["firstName"] = user_db.firstName
+        return token_response
+    return {"error": "Wrong login details!"}
+    
+    
+
 {% for object in objects -%}
 {%- if object.name != "KPIValue" -%}
 
@@ -123,6 +216,7 @@ except IntegrityError:
     session.rollback()
     print("error integrity")
 except:
+    session.rollback()
     print("error already added? {{loop.index}}")
 
 
@@ -140,6 +234,7 @@ except IntegrityError:
     session.rollback()
     print("error integrity")
 except:
+    session.rollback()
     print("error already added? {{loop.index}}")
 
 
@@ -148,34 +243,12 @@ except:
 {%- endfor -%}
 
 
-
-@app.post("/admin", response_model=Admin, summary="Add an admin")
-async def add_admin(user: Admin= Body(..., description="Admin to add")):
-    db_entry = AdminDB(**user.dict())
-    try:
-        session.add(db_entry)
-        session.commit()
-        session.refresh(db_entry)   
-    except IntegrityError: 
-        session.rollback()
-        print("Error integrity")
-    except:
-        session.rollback()
-        print("Error")
-    return user
-
 # Define the Pydantic models
 class UserCredentials(BaseModel):
     email: str
     password: str
-
-@app.post("/check_user", response_model=bool, summary="Check if user in database")
-def check_user(credentials: UserCredentials):
-    user = session.query(UserDB).filter(UserDB.email == credentials.email, UserDB.password == credentials.password).first()
-    if user:
-        return user
-    else:
-        return {}
+    
+    
 
 
 {% for object in objects %}
@@ -184,7 +257,7 @@ def check_user(credentials: UserCredentials):
             {%- for grandparent in parent.dep_from -%}
                 {%- if grandparent.name == "City" %}
                 
-@app.post("/{{grandparent.className.name}}/kpi/{{parent.className.name}}", response_model=KPIValue, summary="Add a KPI object")
+@app.post("/{{grandparent.className.name}}/kpi/{{parent.className.name}}", dependencies=[Depends(JWTBearer())], response_model=KPIValue, summary="Add a KPI object")
 async def add_kpi_value_{{-parent.className.name-}}(kpi: KPIValue= Body(..., description="KPI object to add")):
     db_entry = KPIValueDB(**kpi.dict())
     db_entry.values = {{parent.className.name}}
@@ -211,7 +284,7 @@ async def add_kpi_value_{{-parent.className.name-}}(kpi: KPIValue= Body(..., des
         {% for class in classes %}
             {% for parent in class.parents() %}
                 {% if parent.name == "Visualization" %}            
-@app.post("/{{object.className.name}}/visualization/{{class.name}}/{id}", response_model=int, summary="Add a Chart object")
+@app.post("/{{object.className.name}}/visualization/{{class.name}}/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object")
 async def add_or_update_{{class.name}}_{{object.className.name}}(id: int, chart: {{class.name}}= Body(..., description="Chart object to add")):
     db_entry = {{class.name}}DB(**chart.dict())
     existing_chart = session.query({{class.name}}DB).filter({{class.name}}DB.i == db_entry.i).first()
@@ -244,7 +317,7 @@ async def add_or_update_{{class.name}}_{{object.className.name}}(id: int, chart:
         {%- endfor %}
         
 @app.delete("/{{object.className.name}}/visualizations")
-async def delete_visualizations_{{object.className.name}}(ids: List[int]):
+async def delete_visualizations_{{object.className.name}}(ids: List[int], dependencies=[Depends(JWTBearer())]):
     # Create a session
     try:
         # Delete rows using ORM
@@ -282,7 +355,7 @@ async def get_kpis_{{object.className.name}}():
         return [e]
     
 @app.post("/{{object.className.name}}/geojson/")
-async def upload_geojson_{{object.className.name}}(title: str = Query(..., description="Title of the GeoJSON data"), file: UploadFile = File(...)):
+async def upload_geojson_{{object.className.name}}(title: str = Query(..., description="Title of the GeoJSON data"), dependencies=[Depends(JWTBearer())], file: UploadFile = File(...)):
     try:
         contents = await file.read()
         geojson_data = json.loads(contents)
@@ -319,7 +392,7 @@ async def get_geojson_for_{{object.className.name}}():
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
     
 @app.post("/{{object.className.name}}/wms/")
-async def upload_wms_{{object.className.name}}(title: str = Query(..., description="Title of the WMS data"), url: str = Query(..., description="URL of the WMS data"), name: str = Query(..., description="Name of the wms artifact")):
+async def upload_wms_{{object.className.name}}(title: str = Query(..., description="Title of the WMS data"), url: str = Query(..., description="URL of the WMS data"), dependencies=[Depends(JWTBearer())], name: str = Query(..., description="Name of the wms artifact")):
     try:
         
         # Create a new GeoJson entry
@@ -445,7 +518,7 @@ async def get_kpi_{{object.className.name}}(id: int):
 
 
 @app.delete("/")
-async def delete_all():
+async def delete_all(dependencies=[Depends(JWTBearer())]):
     # Create a session
     from sqlalchemy import MetaData
     # Step 2: Reflect the existing tables from the database into SQLAlchemy metadata

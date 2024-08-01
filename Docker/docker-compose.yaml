@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   postgres:
-    image: postgres:latest
+    image: postgres:16.3
     container_name: postgres_container
     environment:
       POSTGRES_DB: mydb
@@ -27,27 +27,26 @@ services:
       - postgres
 
 
-  grafana:
-    image: grafana/grafana:latest
-    container_name: grafana_container
-    volumes:
-      - ./datasources.yaml:/../../../etc/grafana/provisioning/datasources/datasources.yaml
-      - ./dashboard.yaml:/../../../etc/grafana/provisioning/dashboards/dashboard.yaml
-      - ../generator/generated_output/dashboards:/../../../var/lib/grafana/dashboards
-    ports:
-      - "3000:3000"
-    depends_on:
-      - postgres
-      - fastapi
-    environment:
-      GF_DATABASE_TYPE: postgres
-      GF_DATABASE_HOST: postgres
-      GF_DATABASE_PORT: 5432
-      GF_DATABASE_NAME: mydb
-      GF_DATABASE_USER: myuser
-      GF_DATABASE_PASSWORD: mypassword
-    restart: always
-
+#  grafana:
+#    image: grafana/grafana:latest
+#    container_name: grafana_container
+#    volumes:
+#      - ./datasources.yaml:/../../../etc/grafana/provisioning/datasources/datasources.yaml
+#      - ./dashboard.yaml:/../../../etc/grafana/provisioning/dashboards/dashboard.yaml
+#      - ../generator/generated_output/dashboards:/../../../var/lib/grafana/dashboards
+#    ports:
+#      - "3000:3000"
+#    depends_on:
+#      - postgres
+#      - fastapi
+#    environment:
+#      GF_DATABASE_TYPE: postgres
+#      GF_DATABASE_HOST: postgres
+#      GF_DATABASE_PORT: 5432
+#      GF_DATABASE_NAME: aaron
+#      GF_DATABASE_USER: aaron
+#      GF_DATABASE_PASSWORD: aaron
+#    restart: always
 
 
 volumes:
