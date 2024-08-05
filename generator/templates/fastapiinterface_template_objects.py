@@ -23,8 +23,8 @@ from geoalchemy2.shape import from_shape
 from shapely.geometry import shape
 import json
 
-from auth.auth_handler import sign_jwt
-from auth.auth_model import PostSchema, UserSchema, UserLoginSchema
+from auth.auth_handler import sign_jwt, refresh_jwt
+from auth.auth_model import UserSchema, UserLoginSchema, TokenSchema
 
 from fastapi import  Depends
 from auth.auth_bearer import JWTBearer
@@ -117,7 +117,14 @@ async def create_user(user: User = Body(...)):
         session.rollback()
         return {"error": "Exception " + e}
 
-
+@app.post("/user/refresh", dependencies=[Depends(JWTBearer())], tags=["user"])
+async def refresh_token(token: TokenSchema = Body(...)):
+    try:
+        return refresh_jwt(token.access_token)
+    except Exception as e:
+        print(e)
+        print("added user")
+        return {"error": "Exception " + e}
 
 def check_user_api(data: UserLoginSchema):
     try:
@@ -242,11 +249,9 @@ except:
 
 {%- endfor -%}
 
-
-# Define the Pydantic models
-class UserCredentials(BaseModel):
-    email: str
-    password: str
+{% for class in classes %}           
+{{class.name | lower}}_alias = aliased({{class.name}}DB)
+{% endfor %}  
     
     
 
@@ -346,10 +351,28 @@ async def delete_visualizations_{{object.className.name}}(ids: List[int], depend
 @app.get("/{{object.className.name}}/kpis", response_model=list[object], summary="get a KPI object")
 async def get_kpis_{{object.className.name}}():
     try:
-        results = session.query(KPIDB.name, KPIDB.id).join(CityDB, KPIDB.city_id == CityDB.id).filter(func.lower(CityDB.name) == func.lower("{{object.className.name}}")).all()
         results_list = []
+        {% for class in classes -%}
+            {% for parent in class.parents() -%}
+                {% if parent.name == "KPI" %}            
+        query = session.query(kpi_alias, {{class.name | lower }}_alias).\
+            join({{class.name | lower }}_alias, kpi_alias.id == {{class.name | lower}}_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("{{object.className.name}}"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
         for result in results:
-            results_list.append({'name': result[0], 'id': result[1]})
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                {% endif -%}
+            {% endfor -%}
+        {%- endfor %}
         return results_list
     except Exception as e:
         return [e]
@@ -448,18 +471,7 @@ async def get_mapdata_for_{{object.className.name}}():
         return results            
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")    
-    
-    
-dashboard_alias = aliased(DashboardDB)
-visualization_alias = aliased(VisualizationDB)
-        {%- for class in classes -%}
-            {%- for parent in class.parents() -%}
-                {% if parent.name == "Visualization" %}            
-{{class.name}}_alias = aliased({{class.name}}DB)
-                {%- endif -%}
-            {%- endfor -%}
-        {%- endfor %}
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")     
         
 @app.get("/{{object.className.name}}/visualizations", response_model=list[object], summary="get a KPI object")
 async def get_visualizations_{{object.className.name}}():
@@ -468,8 +480,8 @@ async def get_visualizations_{{object.className.name}}():
         {% for class in classes -%}
             {% for parent in class.parents() -%}
                 {% if parent.name == "Visualization" %}            
-        query = session.query(visualization_alias, {{class.name}}_alias).\
-            join({{class.name}}_alias, visualization_alias.id == {{class.name}}_alias.id).\
+        query = session.query(visualization_alias, {{class.name | lower }}_alias).\
+            join({{class.name | lower}}_alias, visualization_alias.id == {{class.name | lower}}_alias.id).\
             join(dashboard_alias, dashboard_alias.id == visualization_alias.dashboard_id).\
             filter(func.lower(dashboard_alias.code) == func.lower("{{object.className.name}}"))
 
