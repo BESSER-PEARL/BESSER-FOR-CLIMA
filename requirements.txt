@@ -7,4 +7,5 @@ geoalchemy2
 shapely
 PyJWT==2.8.0
 python-decouple
+python-multipart
 passlib

@@ -152,7 +152,9 @@ async def user_login(user: UserLoginSchema = Body(...)):
     
 
 {% for object in objects -%}
-{%- if object.name != "KPIValue" -%}
+
+
+
 
 {{ object.className.name }} = session.query({{ object.name }}DB).filter_by(  
     {%- for attribute in object.attributes -%}
@@ -227,9 +229,7 @@ except:
     print("error already added? {{loop.index}}")
 
 
-{% endif %}
-
-{%- if object.name == "City" -%}
+{% if object.name == "City" -%}
 dashboard_{{object.className.name}} = session.query(DashboardDB).filter_by(code="{{object.className.name}}").first()
 if dashboard_{{object.className.name}} is None:
     dashboard_{{object.className.name}} = DashboardDB(code="{{object.className.name}}", has={{object.className.name}})
@@ -257,31 +257,31 @@ except:
 
 
 {% for object in objects %}
-    {%- if object.name == "KPIValue" -%}
-        {%- for parent in object.dep_from -%}
-            {%- for grandparent in parent.dep_from -%}
-                {%- if grandparent.name == "City" %}
-                
-@app.post("/{{grandparent.className.name}}/kpi/{{parent.className.name}}", dependencies=[Depends(JWTBearer())], response_model=KPIValue, summary="Add a KPI object")
-async def add_kpi_value_{{-parent.className.name-}}(kpi: KPIValue= Body(..., description="KPI object to add")):
-    db_entry = KPIValueDB(**kpi.dict())
-    db_entry.values = {{parent.className.name}}
-    try:
-        session.add(db_entry)
-        session.commit()
-        session.refresh(db_entry)   
-    except IntegrityError: 
-        session.rollback()
-        print("Error integrity")
-    except:
-        session.rollback()
-        print("Error")
-    return kpi 
+    {%- for parent in object.dep_from -%}
+        {%- if parent.name == "City" %}             
+@app.post("/{{parent.className.name}}/kpi/{{object.className.name}}", dependencies=[Depends(JWTBearer())], response_model=List[KPIValue], summary="Add a KPI object", tags = ["KPI"])
+async def add_kpi_value_{{-object.className.name-}}(kpis: List[KPIValue]= Body(..., description="KPI object to add")):
+    db_entries = []
+    for kpi in kpis:    
+        db_entry = KPIValueDB(**kpi.dict())
+        db_entry.values = {{object.className.name}}
+        try:
+            session.add(db_entry)
+            session.commit()
+            session.refresh(db_entry)   
+            db_entries.append(db_entry)
+        except IntegrityError: 
+            session.rollback()
+            print("Error integrity")
+            raise HTTPException(status_code=400, detail="Integrity error occurred.")
+        except:
+            session.rollback()
+            print("Error")
+            raise HTTPException(status_code=400, detail="An unexpected error occurred.")
 
-                {%- endif -%}
-            {%- endfor -%}
-        {%- endfor -%}  
-    {%- endif -%}
+    return db_entries
+        {%- endif -%}
+    {%- endfor -%}  
 {%- endfor %}
 
 {% for object in objects %}
@@ -289,7 +289,7 @@ async def add_kpi_value_{{-parent.className.name-}}(kpi: KPIValue= Body(..., des
         {% for class in classes %}
             {% for parent in class.parents() %}
                 {% if parent.name == "Visualization" %}            
-@app.post("/{{object.className.name}}/visualization/{{class.name}}/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object")
+@app.post("/{{object.className.name}}/visualization/{{class.name}}/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
 async def add_or_update_{{class.name}}_{{object.className.name}}(id: int, chart: {{class.name}}= Body(..., description="Chart object to add")):
     db_entry = {{class.name}}DB(**chart.dict())
     existing_chart = session.query({{class.name}}DB).filter({{class.name}}DB.i == db_entry.i).first()
@@ -322,7 +322,7 @@ async def add_or_update_{{class.name}}_{{object.className.name}}(id: int, chart:
         {%- endfor %}
         
 @app.delete("/{{object.className.name}}/visualizations")
-async def delete_visualizations_{{object.className.name}}(ids: List[int], dependencies=[Depends(JWTBearer())]):
+async def delete_visualizations_{{object.className.name}}(ids: List[int], dependencies=[Depends(JWTBearer())], tags = ["Visualisation"]):
     # Create a session
     try:
         # Delete rows using ORM
@@ -473,7 +473,7 @@ async def get_mapdata_for_{{object.className.name}}():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")     
         
-@app.get("/{{object.className.name}}/visualizations", response_model=list[object], summary="get a KPI object")
+@app.get("/{{object.className.name}}/visualizations", response_model=list[object], summary="get a KPI object", tags = ["Visualisation"])
 async def get_visualizations_{{object.className.name}}():
     try:
         results_list = []
@@ -507,7 +507,7 @@ async def get_visualizations_{{object.className.name}}():
 
 {%- for object in objects -%}
     {%- if object.name == "City" %}
-@app.get("/{{object.className.name}}/kpi/", response_model=list[object], summary="get a KPI object")
+@app.get("/{{object.className.name}}/kpi/", response_model=list[object], summary="get a KPI object", tags = ["KPI"])
 async def get_kpi_{{object.className.name}}(id: int):
     try:
         results = session.query(KPIValueDB).join(KPIDB, KPIValueDB.kpi_id == KPIDB.id).join(
@@ -529,7 +529,7 @@ async def get_kpi_{{object.className.name}}(id: int):
 {%- endfor %}
 
 
-@app.delete("/")
+@app.delete("/", dependencies=[Depends(JWTBearer())],  summary="Delete everything from the database, please never use this")
 async def delete_all(dependencies=[Depends(JWTBearer())]):
     # Create a session
     from sqlalchemy import MetaData

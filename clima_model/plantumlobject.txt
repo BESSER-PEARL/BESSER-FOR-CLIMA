@@ -35,25 +35,12 @@ object "kpiMoney_Differdange: KPIMoney" as KPIMoney_Differdange {
 }
 
 
-object "kpiValue_Temperature1: KPIValue" as KPIValue_Temperature {
-    kpiValue = ""
-    currentStanding = ""
-    timestamp = ""
-}
-
-object "kpiValue_Money1: KPIValue" as KPIValue_Money {
-    kpiValue = ""
-    currentStanding = ""
-    timestamp = ""
-}
 
 
 Differdange --> KPITemperature_Differdange
 Differdange --> KPIMoney_Differdange
 
-KPITemperature_Differdange --> KPIValue_Temperature
 
-KPIMoney_Differdange --> KPIValue_Money
 
 
 object "sofia: City" as Sofia {
@@ -72,18 +59,13 @@ object "kpiTrafficCongestion_Sofia: KPITraffic" as KPITrafficCongestion_Sofia {
     target = 30
 }
 
-object "kpiValue_Traffic: KPIValue" as KPIValue_Traffic {
-    kpiValue = ""
-    currentStanding = ""
-    timestamp = ""
-}
+
 
 
 
 
 Sofia --> KPITrafficCongestion_Sofia
 
-KPITrafficCongestion_Sofia --> KPIValue_Traffic
 
 object "cascais: City" as Cascais {
     name = "Cascais"
@@ -100,11 +82,6 @@ object "kpiCollectedWaste_Cascais: KPICollectedWaste" as KPICollectedWaste_Casca
     target = 10
 }
 
-object "kpiValue_Waste: KPIValue" as KPIValue_Waste {
-    kpiValue = ""
-    currentStanding = ""
-    timestamp = ""
-}
 
 object "kpiCSecondHandCustomers_Cascais: KPISecondHandCustomers" as KPISecondHandCustomers_Cascais {
     id_kpi = "waste002"
@@ -117,11 +94,7 @@ object "kpiCSecondHandCustomers_Cascais: KPISecondHandCustomers" as KPISecondHan
     target = 1000
 }
 
-object "kpiValue_Waste2: KPIValue" as KPIValue_Waste2 {
-    kpiValue = ""
-    currentStanding = ""
-    timestamp = ""
-}
+
 
 object "kpiTotalRenewableEnergy_Differdange: KPITotalRenewableEnergy" as KPITotalRenewableEnergy_Differdange {
     id_kpi = "energy001"
@@ -163,35 +136,11 @@ Differdange --> KPINumberHouseholdRenewableEnergy_Differdange
 Differdange --> KPIPeakSolarEnergy_Differdange
 
 
-object "kpiValue_Energy1: KPIValue" as KPIValue_Energy1 {
-    kpiValue = ""
-    currentStanding = ""
-    timestamp = ""
-}
-
-object "kpiValue_Energy2: KPIValue" as KPIValue_Energy2 {
-    kpiValue = ""
-    currentStanding = ""
-    timestamp = ""
-}
-object "kpiValue_Energy3: KPIValue" as KPIValue_Energy3 {
-    kpiValue = ""
-    currentStanding = ""
-    timestamp = ""
-}
-
-KPITotalRenewableEnergy_Differdange --> KPIValue_Energy1
-KPINumberHouseholdRenewableEnergy_Differdange --> KPIValue_Energy2
-KPIPeakSolarEnergy_Differdange --> KPIValue_Energy3
-
 
 Cascais --> KPICollectedWaste_Cascais
 
-KPICollectedWaste_Cascais --> KPIValue_Waste
 
 Cascais --> KPISecondHandCustomers_Cascais
-
-KPISecondHandCustomers_Cascais --> KPIValue_Waste2
 
 object "kpiInformedCitizens: KPIParticipants" as KPIInformedCitizens_Torino {
     id_kpi = "participants_001"
@@ -278,106 +227,110 @@ object "kpiWasteSorted: KPIWasteSorted" as KPIWasteSorted_Torino {
     description = "Amount of correctly sorted waste in bins using ReLearn sensors"
     provider = "ReLearn"
     calculationFrequency = "Monthly"
-    unitText = "Tons"
+    unitText = "Kg"
+    target = 1000
+
 }
 
 
 object "kpiCollectedWaste: KPICollectedWaste" as KPICollectedWaste_Torino {
     id_kpi = "waste_007"
-    name = "Amount of collected waste"
+    name = "Amount of collected textile waste"
     category = "Waste"
-    description = "Amount of collected waste"
+    description = "Amount of collected textile waste"
     provider = "ReLearn"
     calculationFrequency = "Monthly"
-    unitText = "Tons"
-    target = 5
+    unitText = "Kg"
+    target = 6000
 }
+
+
+
+
+object "kpiTextileWastePerPerson: KPITextileWastePerPerson" as KPITextileWastePerPerson_Torino {
+    id_kpi = "waste_010"
+    name = "Amount of yearly textile waste per person"
+    category = "Waste"
+    description = "Amount of yearly textile waste per person"
+    provider = "City"
+    calculationFrequency = "Yearly"
+    unitText = "Kg"
+}
+
+object "kpiHouseholdInvolvedThreeBagCollection: KPIParticipants" as KPIHouseholds_Torino {
+    id_kpi = "participants_006"
+    name = "Households participating in the three bags collection"
+    category = "Waste"
+    description = "Households participating in the three bags collection"
+    provider = "Torino"
+    calculationFrequency = "Monthly"
+    unitText = "Households"
+    target = 100
+}
+
+object "kpiCollectedClothes: KPICollectedWaste" as KPICollectedClothes_Torino {
+    id_kpi = "waste_011"
+    name = "Amount of collected textile clothes"
+    category = "Waste"
+    description = "Amount of collected textile clothes"
+    provider = "City of Torino"
+    calculationFrequency = "Monthly"
+    unitText = "Kg"
+    target = 6000
+}
+
+
+object "kpiCollectedTextileWaste: KPICollectedWaste" as KPICollectedTextileWaste_Torino {
+    id_kpi = "waste_012"
+    name = "Amount of other types of textiles collected"
+    category = "Waste"
+    description = "Amount of other types of textiles collected"
+    provider = "City of Torino"
+    calculationFrequency = "Monthly"
+    unitText = "Kg"
+    target = 5000
+}
+
+Torino --> KPICollectedClothes_Torino
+Torino --> KPICollectedTextileWaste_Torino
 
 Torino --> KPIInformedCitizens_Torino
 
-object "kpiValue_Waste_001: KPIValue" as KPIWaste_001 {
-    kpiValue = ""
-    currentStanding = ""
-    timestamp = ""
-}
-
-KPIInformedCitizens_Torino --> KPIWaste_001
 
 
 
 Torino --> KPIInvolvedCitizens_Torino
 
 
-object "kpiValue_Waste_002: KPIValue" as KPIWaste_002 {
-    kpiValue = ""
-    currentStanding = ""
-    timestamp = ""
-}
-
-KPIInvolvedCitizens_Torino --> KPIWaste_002
-
 Torino --> KPIInformedBusinesses_Torino
 
-object "kpiValue_Waste_003: KPIValue" as KPIWaste_003{
-    kpiValue = ""
-    currentStanding = ""
-    timestamp = ""
-}
-
-KPIInformedBusinesses_Torino --> KPIWaste_003
 
 Torino --> KPIInvolvedBusinesses_Torino
 
-object "kpiValue_Waste_004: KPIValue" as KPIWaste_004 {
-    kpiValue = ""
-    currentStanding = ""
-    timestamp = ""
-}
 
-KPIInvolvedBusinesses_Torino --> KPIWaste_004
 Torino --> KPIReuseBusinesses_Torino
 
-object "kpiValue_Waste_005: KPIValue" as KPIWaste_005 {
-    kpiValue = ""
-    currentStanding = ""
-    timestamp = ""
-}
 
-KPIReuseBusinesses_Torino --> KPIWaste_005
 Torino --> KPIWasteAvoided_Torino
 
-object "kpiValue_Waste_006: KPIValue" as KPIWaste_006 {
-    kpiValue = ""
-    currentStanding = ""
-    timestamp = ""
-}
-
-KPIWasteAvoided_Torino --> KPIWaste_006
 Torino --> KPICo2Avoided_Torino
 
-object "kpiValue_Waste_007: KPIValue" as KPIWaste_007 {
-    kpiValue = ""
-    currentStanding = ""
-    timestamp = ""
-}
 
-KPICo2Avoided_Torino --> KPIWaste_007
 Torino --> KPIWasteSorted_Torino
 
-object "kpiValue_Waste_008: KPIValue" as KPIWaste_008 {
-    kpiValue = ""
-    currentStanding = ""
-    timestamp = ""
-}
 
-KPIWasteSorted_Torino --> KPIWaste_008
 Torino --> KPICollectedWaste_Torino
 
-object "kpiValue_Waste_009: KPIValue" as KPIWaste_009 {
-    kpiValue = ""
-    currentStanding = ""
-    timestamp = ""
-}
 
-KPICollectedWaste_Torino --> KPIWaste_009
+
+
+Torino --> KPITextileWastePerPerson_Torino
+
+
+
+Torino --> KPIHouseholds_Torino
+
+
+
+
 @enduml

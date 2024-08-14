@@ -168,9 +168,11 @@ target: int
 }
 
 class KPIWasteSorted extends KPI {
-
+target: int
 }
 
+class KPITextileWastePerPerson extends KPI {
+}
 
 
 @enduml
