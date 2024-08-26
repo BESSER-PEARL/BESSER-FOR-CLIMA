@@ -14,7 +14,7 @@ from collections import deque, defaultdict
 
 
 # import and build clima DSL from given plantuml model and transform it into BUML
-domain: DomainModel = plantuml_to_buml("clima_model/metamodelvis.txt")
+domain: DomainModel = plantuml_to_buml("clima_model/metamodel.txt")
 
 generator = ClimaGenerator(output_dir="generator/generated_output", model=domain)
 generator.generate()
@@ -24,7 +24,6 @@ py = Python_Generator(output_dir="generator/generated_output", model=domain)
 py.generate()
 db = SQLGenerator(output_dir="generator/generated_output", model=domain)
 db.generate()
-
 
 def topological_sort(relations):
     # Creating a graph

@@ -27,40 +27,86 @@ class KPITraffic {
    target: int
 }
 
+class KPICollectedWaste extends KPI {
+   target: int
+}
+
+class KPISecondHandCustomers extends KPI {
+   target: int
+}
 
 class KPIMoney {
    target: int
 }
 
-abstract class Visualization {
-   name: str
+class KPITotalRenewableEnergy extends KPI {
+   target: int
 }
 
-class Gauge {
-   thresholdTop: str
-   valueName: str
+class KPINumberHouseholdRenewableEnergy extends KPI {
+   target: int
+}
+
+class KPIPeakSolarEnergy extends KPI {
+   target: int
+}
+
+abstract class Visualisation {
+   xposition: int
+   yposition: int
+   width: int
+   height: int
+   chartType: str
+   title: str
+   i: str
+   section: str
 }
 
 class Table {
 }
 
-class BarChart {
-valueName: str
-timestampName: str
+class PieChart {
 }
 
-class Stat {
-valueName: str
-timestampName: str
+class StatChart {
+   unit: str
+   target: int
 }
 
-class TimeSeries {
-valueName: str
-timestampName: str
+class LineChart {
+   xtitle: str
+   ytitle: str
+   color: str
+   target: int
 }
 
-class Histogram {
-valueName: str
+class TableColumn {
+name: str
+}
+
+class Map {
+}
+
+abstract class User {
+    password: str
+    email: str
+    firstName: str
+    lastName: str
+}
+
+class Admin {
+}
+
+class CityUser {
+}
+
+class CityAngel {
+}
+
+class SolutionProvider {
+}
+
+class Citizen {
 }
 
 KPI --> "*" KPIValue: values
@@ -68,12 +114,70 @@ City --> "*" KPI: kpis
 KPI <|-- KPITemp
 KPI <|-- KPITraffic
 KPI <|-- KPIMoney
-KPI --> "1..*" Visualization: has
 
-Visualization <|-- Gauge
-Visualization <|-- Table
-Visualization <|-- BarChart
-Visualization <|-- Stat
-Visualization <|-- TimeSeries
-Visualization <|-- Histogram
+Visualisation "*" <--  KPI: visualizedBy
+
+Visualisation <|-- Table
+Visualisation <|-- PieChart
+Visualisation <|-- StatChart
+Visualisation <|-- LineChart
+Visualisation <|-- Map
+
+class Dashboard {
+code: str
+}
+
+
+
+City --> "*" Dashboard: has
+Dashboard --> "*" Visualisation: consistsOf
+Table --> "*" TableColumn: shows
+
+City --> "*" User: operatedBy
+User <|-- Admin
+User <|-- CityUser
+User <|-- CityAngel
+User <|-- SolutionProvider
+User <|-- Citizen
+
+abstract class MapData {
+title: str
+}
+
+class GeoJson {
+   data: str
+}
+
+class WMS {
+   url: str
+   name: str
+}
+
+City --> "*" MapData: hasMapData
+
+GeoJson --|> MapData
+WMS --|> MapData
+
+Map "*"<-- MapData: isDisplayedOnMap
+
+class KPIParticipants extends KPI {
+target: int
+}
+
+class KPIWasteAvoided extends KPI {
+target: int
+}
+
+class KPICo2Avoided extends KPI {
+target: int
+}
+
+class KPIWasteSorted extends KPI {
+target: int
+}
+
+class KPITextileWastePerPerson extends KPI {
+}
+
+
 @enduml

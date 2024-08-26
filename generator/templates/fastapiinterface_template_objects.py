@@ -288,7 +288,7 @@ async def add_kpi_value_{{-object.className.name-}}(kpis: List[KPIValue]= Body(.
     {% if object.name == "City" %}
         {% for class in classes %}
             {% for parent in class.parents() %}
-                {% if parent.name == "Visualization" %}            
+                {% if parent.name == "Visualisation" %}            
 @app.post("/{{object.className.name}}/visualization/{{class.name}}/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
 async def add_or_update_{{class.name}}_{{object.className.name}}(id: int, chart: {{class.name}}= Body(..., description="Chart object to add")):
     db_entry = {{class.name}}DB(**chart.dict())
@@ -326,7 +326,7 @@ async def delete_visualizations_{{object.className.name}}(ids: List[int], depend
     # Create a session
     try:
         # Delete rows using ORM
-        rows_to_delete = session.query(VisualizationDB).filter(~VisualizationDB.id.in_(ids)).all()
+        rows_to_delete = session.query(VisualisationDB).filter(~VisualisationDB.id.in_(ids)).all()
         for row in rows_to_delete:
             
             if (row.consistsOf.code == "{{object.className.name}}"):
@@ -378,15 +378,12 @@ async def get_kpis_{{object.className.name}}():
         return [e]
     
 @app.post("/{{object.className.name}}/geojson/")
-async def upload_geojson_{{object.className.name}}(title: str = Query(..., description="Title of the GeoJSON data"), dependencies=[Depends(JWTBearer())], file: UploadFile = File(...)):
+async def upload_geojson_{{object.className.name}}(title: str = Query(..., description="Title of the GeoJSON data"), dependencies=[Depends(JWTBearer())], geojson_data: dict = Body(..., description="GeoJSON data")):
     try:
-        contents = await file.read()
-        geojson_data = json.loads(contents)
-        
         # Create a new GeoJson entry
         new_data = GeoJsonDB(
             title=title,
-            data=geojson_data,
+            data=json.dumps(geojson_data),
             hasMapData={{object.className.name}}
         )
         session.add(new_data)
@@ -479,10 +476,10 @@ async def get_visualizations_{{object.className.name}}():
         results_list = []
         {% for class in classes -%}
             {% for parent in class.parents() -%}
-                {% if parent.name == "Visualization" %}            
-        query = session.query(visualization_alias, {{class.name | lower }}_alias).\
-            join({{class.name | lower}}_alias, visualization_alias.id == {{class.name | lower}}_alias.id).\
-            join(dashboard_alias, dashboard_alias.id == visualization_alias.dashboard_id).\
+                {% if parent.name == "Visualisation" %}            
+        query = session.query(visualisation_alias, {{class.name | lower }}_alias).\
+            join({{class.name | lower}}_alias, visualisation_alias.id == {{class.name | lower}}_alias.id).\
+            join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
             filter(func.lower(dashboard_alias.code) == func.lower("{{object.className.name}}"))
 
         # Execute the query to get the results

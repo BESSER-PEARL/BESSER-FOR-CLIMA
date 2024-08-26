@@ -2,15 +2,15 @@ version: '3.8'
 
 services:
   postgres:
-    image: postgres:16.3
+    image: postgres:latest
     container_name: postgres_container
     environment:
-      POSTGRES_DB: aaron
-      POSTGRES_USER: aaron
-      POSTGRES_PASSWORD: aaron
+      POSTGRES_DB: mydb
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
       PGDATA: /var/lib/postgresql/data
     volumes:
-      - C:/Users/conrardy/data:/var/lib/postgresql/data
+      - path/to/your/data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
 
@@ -20,16 +20,13 @@ services:
     container_name: fastapi_container
     environment: 
       DB_HOST: postgres
-      DB_USER: aaron
-      DB_PASSWORD: aaron
-      DB_NAME: aaron
     ports:
       - "8000:8000"
     restart: always
     depends_on:
       - postgres
 
-
+      
   pgadmin:
     image: dpage/pgadmin4
     environment:
@@ -38,7 +35,5 @@ services:
     ports:
       - "82:80"
     restart: unless-stopped
-
 volumes:
   postgres_data:
-  grafana_data:

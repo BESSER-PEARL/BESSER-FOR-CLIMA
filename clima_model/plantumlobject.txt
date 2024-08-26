@@ -291,12 +291,35 @@ object "kpiCollectedTextileWaste: KPICollectedWaste" as KPICollectedTextileWaste
     target = 5000
 }
 
+object "kpiDiscardedWaste: KPICollectedWaste" as KPIDiscardedTextileWaste_Torino {
+    id_kpi = "waste_013"
+    name = "Amount of textile waste discarded from the differentiated share"
+    category = "Waste"
+    description = "Amount of textile waste discarded from the differentiated share"
+    provider = "City of Torino"
+    calculationFrequency = "Monthly"
+    unitText = "Kg"
+    target = 50
+}
+
+object "kpiCollectedTextileWasteEcoIsole: KPICollectedWaste" as KPICollectedTextileWasteEcoIsole_Torino {
+    id_kpi = "waste_014"
+    name = "Amount of textile left in the indifferentiated waste (Eco-Isole)"
+    category = "Waste"
+    description = "Amount of textile left in the indifferentiated waste (Eco-Isole)"
+    provider = "City of Torino"
+    calculationFrequency = "Monthly"
+    unitText = "Kg"
+    target = 3000
+}
+
+
 Torino --> KPICollectedClothes_Torino
 Torino --> KPICollectedTextileWaste_Torino
-
+Torino --> KPICollectedTextileWasteEcoIsole_Torino
 Torino --> KPIInformedCitizens_Torino
 
-
+Torino --> KPIDiscardedTextileWaste_Torino
 
 
 Torino --> KPIInvolvedCitizens_Torino
