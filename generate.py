@@ -10,54 +10,12 @@ from besser.generators.sql import SQLGenerator
 from textx import metamodel_from_file
 import os
 from jinja2 import Environment, FileSystemLoader
-from collections import deque, defaultdict
+
+import json
+
+from utils.utils import topological_sort
 
 
-# import and build clima DSL from given plantuml model and transform it into BUML
-domain: DomainModel = plantuml_to_buml("clima_model/metamodel.txt")
-
-generator = ClimaGenerator(output_dir="generator/generated_output", model=domain)
-generator.generate()
-sqlalc = SQLAlchemyGenerator(output_dir="generator/generated_output", model=domain)
-sqlalc.generate()
-py = Python_Generator(output_dir="generator/generated_output", model=domain)
-py.generate()
-db = SQLGenerator(output_dir="generator/generated_output", model=domain)
-db.generate()
-
-def topological_sort(relations):
-    # Creating a graph
-    graph = defaultdict(list)
-    in_degree = defaultdict(int)
-
-    # Filling the graph and in-degree dictionary
-    for relation in relations:
-        graph[relation.target].append(relation.source)
-        in_degree[relation.source] += 1
-        if relation.target not in in_degree:
-            in_degree[relation.target] = 0
-
-    # Initialize the queue with nodes having in-degree 0
-    queue = deque([node for node in in_degree if in_degree[node] == 0])
-
-    sorted_order = []
-
-    # Process until the queue is empty
-    while queue:
-        node = queue.popleft()
-        sorted_order.append(node)
-
-        # Decrease the in-degree of dependent nodes
-        for dependent in graph[node]:
-            in_degree[dependent] -= 1
-            if in_degree[dependent] == 0:
-                queue.append(dependent)
-
-    # Check for cycle in the graph
-    if len(sorted_order) != len(in_degree):
-        return "Cycle detected in graph, sorting not possible"
-
-    return sorted_order[::]  # reverse to get highest hierarchy first
 
 
 def plantuml_to_object(model_path: str):
@@ -106,11 +64,39 @@ def plantuml_to_object(model_path: str):
         object.attribute_dict = attribute_dict
     return objects
 
+# start creation of metamodel and generate classes
+
+domain: DomainModel = plantuml_to_buml("clima_model/metamodel.txt")
+
+generator = ClimaGenerator(output_dir="generator/generated_output", model=domain)
+generator.generate()
+sqlalc = SQLAlchemyGenerator(output_dir="generator/generated_output", model=domain)
+sqlalc.generate()
+
+# instantiate objects given classes and object model
 
 objects = plantuml_to_object("clima_model/plantumlobject.txt")
+jsonObjects = dict()
+for obj in objects:
+    if (obj.name == "City"):
+        city = dict()
+        for kpi in obj.deps:
+            kpi_json = dict()
+            print(kpi)
+            for attribute in kpi.attribute_dict:
+                print(attribute)
+                kpi_json[attribute] = kpi.attribute_dict[attribute]
+            city[kpi.name] =  kpi_json
+        jsonObjects[obj.className.name] = city
+        
+# Specify the file name
+file_name = "data.json"
+
+# Open the file in write mode and use json.dump to write the object
+with open(file_name, 'w') as json_file:
+    json.dump(jsonObjects, json_file, indent=4)
 
 env = Environment(loader=FileSystemLoader("generator/templates"))
-# generate pydantic classes for API calls
 file_name = "objects.py"
 template = env.get_template("objects.py.j2")
 file_path = os.path.join("generator/generated_output", file_name)
@@ -128,18 +114,3 @@ with open(file_path, "w") as f:
         objects=objects[::-1], classes=domain.classes_sorted_by_inheritance()
     )
     f.write(generated_code)
-
-# generate grafana dashboard specification
-""" file_name = "dashboards/"
-template = env.get_template('dashboard_template.json.j2') 
-os.system('del /q generator\generated_output\dashboards\*')
-for object in objects:
-    if object.name == "City":
-        file_path = os.path.join("generator/generated_output", file_name + object.className.name + ".json")
-        with open(file_path, "w") as f:
-            generated_code = template.render(kpis=object.deps, city=object.className.name)
-            f.write(generated_code) """
-
-
-example_datetime = datetime(2023, 1, 4, 15, 30, 45)
-print(example_datetime)

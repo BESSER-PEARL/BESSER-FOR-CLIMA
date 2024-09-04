@@ -17,34 +17,4 @@ class ClimaGenerator(GeneratorInterface):
             generated_code = template.render(classes=self.model.classes_sorted_by_inheritance())
             f.write(generated_code)
         
-        # generate api interface
-        file_name = "api_interface.py"
-        file_path = os.path.join(self.output_dir, file_name)     
-        template = env.get_template('fastapiinterface_template.py')   
-        with open(file_path, "w") as f:
-            classes = []
-            for c in self.model.classes_sorted_by_inheritance():
-                name = c.name
-                if "kpi" in name.lower():
-                    classes.append(c)
-            generated_code = template.render(classes=classes)
-            f.write(generated_code)
-        
-        # generate grafana dashboard specification
-"""        file_name = "dashboards/"
-        template = env.get_template('dashboard_template.json.j2') 
-        os.system('del /q generator\generated_output\dashboards\*')
-        for c in self.model.classes_sorted_by_inheritance():
-            for parent in c.all_parents():
-                if parent.name == "City":
-                    print("city " + c.name)
-                    file_path = os.path.join(self.output_dir, file_name + c.name + ".json")
-                    kpis = []
-                    for a in c.association_ends():
-                        b: Class = a.type
-                        for kpi_association in b.association_ends():
-                            kpi_association: Property
-                        kpis.append(a.type)
-                    with open(file_path, "w") as f:
-                        generated_code = template.render(classes=kpis, city=c.name)
-                        f.write(generated_code)"""
+

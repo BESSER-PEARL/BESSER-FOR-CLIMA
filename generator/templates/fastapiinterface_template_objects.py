@@ -253,8 +253,6 @@ except:
 {{class.name | lower}}_alias = aliased({{class.name}}DB)
 {% endfor %}  
     
-    
-
 
 {% for object in objects %}
     {%- for parent in object.dep_from -%}
@@ -263,13 +261,23 @@ except:
 async def add_kpi_value_{{-object.className.name-}}(kpis: List[KPIValue]= Body(..., description="KPI object to add")):
     db_entries = []
     for kpi in kpis:    
-        db_entry = KPIValueDB(**kpi.dict())
-        db_entry.values = {{object.className.name}}
         try:
-            session.add(db_entry)
-            session.commit()
-            session.refresh(db_entry)   
-            db_entries.append(db_entry)
+            # Check if an entry with the same timestamp and kpi_id already exists
+            existing_entry = session.query(KPIValueDB).filter_by(timestamp=kpi.timestamp, kpi_id={{object.className.name}}.id).first()
+            if existing_entry:
+                existing_entry.kpiValue = kpi.kpiValue
+                existing_entry.currentStanding = kpi.currentStanding
+                existing_entry.values = {{object.className.name}}
+                session.commit()
+                session.refresh(existing_entry)
+                db_entries.append(existing_entry)
+            else: 
+                db_entry = KPIValueDB(**kpi.dict())
+                db_entry.values = {{object.className.name}}           
+                session.add(db_entry)
+                session.commit()
+                session.refresh(db_entry)   
+                db_entries.append(db_entry)
         except IntegrityError: 
             session.rollback()
             print("Error integrity")
@@ -508,7 +516,7 @@ async def get_visualizations_{{object.className.name}}():
 async def get_kpi_{{object.className.name}}(id: int):
     try:
         results = session.query(KPIValueDB).join(KPIDB, KPIValueDB.kpi_id == KPIDB.id).join(
-            CityDB, KPIDB.city_id == CityDB.id).filter(func.lower(CityDB.name) == func.lower("{{object.className.name}}"), KPIDB.id == id).all()
+            CityDB, KPIDB.city_id == CityDB.id).filter(func.lower(CityDB.name) == func.lower("{{object.className.name}}"), KPIDB.id == id).order_by(KPIValueDB.timestamp).all()
         results_list = []
         for result in results:
             res = dict()
