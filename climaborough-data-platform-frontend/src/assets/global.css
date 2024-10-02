@@ -1,0 +1,150 @@
+/* src/assets/global.css */
+
+/* Metropolis Black */
+@font-face {
+    font-family: 'Metropolis';
+    src: url('fonts//Metropolis-Black.otf') format('opentype');
+    font-weight: 900;
+    font-style: normal;
+}
+
+/* Metropolis Black Italic */
+@font-face {
+    font-family: 'Metropolis';
+    src: url('fonts//Metropolis-BlackItalic.otf') format('opentype');
+    font-weight: 900;
+    font-style: italic;
+}
+
+/* Metropolis Bold */
+@font-face {
+    font-family: 'Metropolis';
+    src: url('fonts//Metropolis-Bold.otf') format('opentype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+/* Metropolis Bold Italic */
+@font-face {
+    font-family: 'Metropolis';
+    src: url('fonts//Metropolis-BoldItalic.otf') format('opentype');
+    font-weight: bold;
+    font-style: italic;
+}
+
+/* Metropolis Extra Bold */
+@font-face {
+    font-family: 'Metropolis';
+    src: url('fonts//Metropolis-ExtraBold.otf') format('opentype');
+    font-weight: 800;
+    font-style: normal;
+}
+
+/* Metropolis Extra Bold Italic */
+@font-face {
+    font-family: 'Metropolis';
+    src: url('fonts//Metropolis-ExtraBoldItalic.otf') format('opentype');
+    font-weight: 800;
+    font-style: italic;
+}
+
+/* Metropolis Medium */
+@font-face {
+    font-family: 'Metropolis';
+    src: url('fonts//Metropolis-Medium.otf') format('opentype');
+    font-weight: 500;
+    font-style: normal;
+}
+
+/* Metropolis Medium Italic */
+@font-face {
+    font-family: 'Metropolis';
+    src: url('fonts//Metropolis-MediumItalic.otf') format('opentype');
+    font-weight: 500;
+    font-style: italic;
+}
+
+/* Metropolis Semi Bold */
+@font-face {
+    font-family: 'Metropolis';
+    src: url('fonts//Metropolis-SemiBold.otf') format('opentype');
+    font-weight: 600;
+    font-style: normal;
+}
+
+/* Metropolis Semi Bold Italic */
+@font-face {
+    font-family: 'Metropolis';
+    src: url('fonts//Metropolis-SemiBoldItalic.otf') format('opentype');
+    font-weight: 600;
+    font-style: italic;
+}
+
+/* Metropolis Extra Light */
+@font-face {
+    font-family: 'Metropolis';
+    src: url('fonts//Metropolis-ExtraLight.otf') format('opentype');
+    font-weight: 200;
+    font-style: normal;
+}
+
+/* Metropolis Extra Light Italic */
+@font-face {
+    font-family: 'Metropolis';
+    src: url('fonts//Metropolis-ExtraLightItalic.otf') format('opentype');
+    font-weight: 200;
+    font-style: italic;
+}
+
+/* Metropolis Light */
+@font-face {
+    font-family: 'Metropolis';
+    src: url('fonts//Metropolis-Light.otf') format('opentype');
+    font-weight: 300;
+    font-style: normal;
+}
+
+/* Metropolis Light Italic */
+@font-face {
+    font-family: 'Metropolis';
+    src: url('fonts//Metropolis-LightItalic.otf') format('opentype');
+    font-weight: 300;
+    font-style: italic;
+}
+
+/* Metropolis Regular */
+@font-face {
+    font-family: 'Metropolis';
+    src: url('fonts//Metropolis-Regular.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* Metropolis Regular Italic */
+@font-face {
+    font-family: 'Metropolis';
+    src: url('fonts//Metropolis-RegularItalic.otf') format('opentype');
+    font-weight: normal;
+    font-style: italic;
+}
+
+/* Metropolis Thin */
+@font-face {
+    font-family: 'Metropolis';
+    src: url('fonts//Metropolis-Thin.otf') format('opentype');
+    font-weight: 100;
+    font-style: normal;
+}
+
+/* Metropolis Thin Italic */
+@font-face {
+    font-family: 'Metropolis';
+    src: url('fonts//Metropolis-ThinItalic.otf') format('opentype');
+    font-weight: 100;
+    font-style: italic;
+}
+
+/* Apply the font globally */
+body {
+    font-family: 'Metropolis', sans-serif;
+}

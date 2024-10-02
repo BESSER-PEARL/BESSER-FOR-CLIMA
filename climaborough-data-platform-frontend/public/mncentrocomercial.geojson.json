@@ -1,0 +1,766 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "properties": {
+                "Geometry name": "Localização",
+                "Id": "7969664",
+                "Nome": "Centro Comercial Ryadh",
+                "Rua": "Avenida Gaspar Corte Real",
+                "Local": "Bairro do Rosário",
+                "Freguesia": "U.F. Cascais e Estoril",
+                "Parque de estacionamento": "Não",
+                "Cinema": "Não",
+                "Data de actualização": "20/05/2008 15:37:53"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -9.4362203970,
+                    38.7013457196
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Geometry name": "Localização",
+                "Id": "7969672",
+                "Nome": "Centro Comercial Auchan (Antigo)",
+                "Rua": "Avenida Marginal",
+                "Local": "Cascais",
+                "Freguesia": "U.F. Cascais e Estoril",
+                "Parque de estacionamento": "Sim",
+                "Cinema": "Não",
+                "Data de actualização": "27/05/2022 10:43:55"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -9.4163988151,
+                    38.7019565715
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Geometry name": "Localização",
+                "Id": "7969676",
+                "Nome": "Centro Comercial Visconde da Luz",
+                "Rua": "Rua Afonso Sanches",
+                "Número de polícia": "37-41",
+                "Código Postal": "2750-282 Cascais",
+                "Local": "Cascais",
+                "Freguesia": "U.F. Cascais e Estoril",
+                "Parque de estacionamento": "Não",
+                "Cinema": "Não",
+                "Data de actualização": "12/11/2019 11:37:21"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -9.4215740584,
+                    38.6977312255
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Geometry name": "Localização",
+                "Id": "7969680",
+                "Nome": "Centro Comercial Birre",
+                "Rua": "Rua Margaridas",
+                "Local": "Birre",
+                "Freguesia": "U.F. Cascais e Estoril",
+                "Parque de estacionamento": "Sim",
+                "Cinema": "Não",
+                "Data de actualização": "20/05/2008 15:39:20"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -9.4456701644,
+                    38.7150709885
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Geometry name": "Localização",
+                "Id": "7969684",
+                "Nome": "Centro Comercial CascaisVilla",
+                "Rua": "Avenida D. Pedro I",
+                "Local": "Cascais",
+                "Freguesia": "U.F. Cascais e Estoril",
+                "Parque de estacionamento": "Sim",
+                "Cinema": "Sim",
+                "Data de actualização": "20/05/2008 15:39:36"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -9.4188728487,
+                    38.7014281741
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Geometry name": "Localização",
+                "Id": "7969688",
+                "Nome": "Centro Comercial Cisne",
+                "Rua": "Avenida Marginal",
+                "Número de polícia": "9348",
+                "Local": "Cascais",
+                "Freguesia": "U.F. Cascais e Estoril",
+                "Parque de estacionamento": "Não",
+                "Cinema": "Não",
+                "Data de actualização": "10/12/2010 15:33:14"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -9.4197881902,
+                    38.7010762527
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Geometry name": "Localização",
+                "Id": "7969692",
+                "Nome": "Centro Comercial Orion",
+                "Rua": "Rua Francisco D'Avilez",
+                "Número de polícia": "6A",
+                "Código Postal": "2755-349",
+                "Local": "Cascais",
+                "Freguesia": "U.F. Cascais e Estoril",
+                "Parque de estacionamento": "Não",
+                "Cinema": "Não",
+                "Data de actualização": "26/10/2021 15:22:08"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -9.4227556046,
+                    38.6996132962
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Geometry name": "Localização",
+                "Id": "7969696",
+                "Nome": "Centro Comercial Assunção",
+                "Rua": "Rua António Silva",
+                "Número de polícia": "127",
+                "Local": "Cascais",
+                "Freguesia": "U.F. Cascais e Estoril",
+                "Parque de estacionamento": "Não",
+                "Cinema": "Não",
+                "Data de actualização": "05/06/2014 13:26:19"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -9.4326826303,
+                    38.7039628484
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Geometry name": "Localização",
+                "Id": "7969704",
+                "Nome": "Centro Comercial Estoril Parque",
+                "Rua": "Rua de Lisboa",
+                "Número de polícia": "5",
+                "Local": "Estoril",
+                "Freguesia": "U.F. Cascais e Estoril",
+                "Parque de estacionamento": "Não",
+                "Cinema": "Não",
+                "Data de actualização": "10/01/2012 11:53:51"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -9.3983086242,
+                    38.7085102645
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Geometry name": "Localização",
+                "Id": "7969708",
+                "Nome": "Centro Comercial Grande Galiza",
+                "Rua": "Rua Sacadura Cabral",
+                "Número de polícia": "216 A",
+                "Código Postal": "2765",
+                "Local": "São João do Estoril",
+                "Freguesia": "U.F. Cascais e Estoril",
+                "Parque de estacionamento": "Não",
+                "Cinema": "Não",
+                "Data de actualização": "16/01/2023 15:08:23"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -9.3855790723,
+                    38.7058614975
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Geometry name": "Localização",
+                "Id": "7969712",
+                "Nome": "Centro Comercial Areias",
+                "Rua": "Rua Fernão Lopes",
+                "Número de polícia": "Lote 5",
+                "Código Postal": "2765-091",
+                "Local": "Alapraia",
+                "Freguesia": "U.F. Cascais e Estoril",
+                "Telefone": "912575702",
+                "Horário de funcionamento": "08h00 às 22h00",
+                "Parque de estacionamento": "Não",
+                "Cinema": "Não",
+                "Data de actualização": "07/05/2012 10:30:50"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -9.3780688687,
+                    38.7048697982
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Geometry name": "Localização",
+                "Id": "7969716",
+                "Nome": "Centro Comercial Estoril Garden",
+                "Rua": "Avenida Aida",
+                "Local": "Estoril",
+                "Freguesia": "U.F. Cascais e Estoril",
+                "Parque de estacionamento": "Não",
+                "Cinema": "Não",
+                "Data de actualização": "18/01/2012 11:34:05"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -9.3986824136,
+                    38.7064806707
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Geometry name": "Localização",
+                "Id": "7969720",
+                "Nome": "Centro Comercial São Pedro do Estoril",
+                "Rua": "Rua Nunes dos Santos 21",
+                "Local": "São Pedro do Estoril",
+                "Freguesia": "U.F. Cascais e Estoril",
+                "Parque de estacionamento": "Não",
+                "Cinema": "Não",
+                "Data de actualização": "20/05/2008 15:43:50"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -9.3734633190,
+                    38.6954458826
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Geometry name": "Localização",
+                "Id": "7969724",
+                "Nome": "Centro Comercial Carcavelos",
+                "Rua": "Rua Doutor Manuel de Arriaga",
+                "Local": "Carcavelos",
+                "Freguesia": "U.F. Carcavelos e Parede",
+                "Parque de estacionamento": "Não",
+                "Cinema": "Sim",
+                "Data de actualização": "24/08/2017 11:18:27"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -9.3369081127,
+                    38.6882636035
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Geometry name": "Localização",
+                "Id": "7969728",
+                "Nome": "Centro Comercial Plim",
+                "Rua": "Rua Doutor Manuel de Arriaga",
+                "Local": "Carcavelos",
+                "Freguesia": "U.F. Carcavelos e Parede",
+                "Parque de estacionamento": "Não",
+                "Cinema": "Não",
+                "Data de actualização": "20/05/2008 15:44:23"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -9.3365537897,
+                    38.6882365341
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Geometry name": "Localização",
+                "Id": "7969732",
+                "Nome": "Centro Comercial Riviera Center",
+                "Rua": "Rua Bartolomeu Dias",
+                "Número de polícia": "S/N",
+                "Código Postal": "2775-551",
+                "Local": "Junqueiro",
+                "Freguesia": "U.F. Carcavelos e Parede",
+                "Parque de estacionamento": "Sim",
+                "Cinema": "Não",
+                "Data de actualização": "29/01/2021 13:48:06"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -9.3435735473,
+                    38.6850895466
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Geometry name": "Localização",
+                "Id": "7969736",
+                "Nome": "Centro Comercial Tirano",
+                "Rua": "Praça Fernando Lopes Graça",
+                "Local": "Tires",
+                "Freguesia": "São Domingos de Rana",
+                "Parque de estacionamento": "Não",
+                "Cinema": "Não",
+                "Data de actualização": "02/11/2019 17:11:21"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -9.3492150544,
+                    38.7145474638
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Geometry name": "Localização",
+                "Id": "7969740",
+                "Nome": "Centro Comercial Tires",
+                "Rua": "Bairro Monte Conde Real",
+                "Local": "Tires",
+                "Freguesia": "São Domingos de Rana",
+                "Parque de estacionamento": "Não",
+                "Cinema": "Não",
+                "Data de actualização": "20/05/2008 15:45:23"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -9.3508080454,
+                    38.7222382567
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Geometry name": "Localização",
+                "Id": "7969744",
+                "Nome": "Centro Comercial Alcaide",
+                "Rua": "Rua Costa Pinto",
+                "Número de polícia": "38",
+                "Local": "Pai do Vento",
+                "Freguesia": "Alcabideche",
+                "Parque de estacionamento": "Não",
+                "Cinema": "Não",
+                "Data de actualização": "20/05/2008 15:45:55"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -9.4143963082,
+                    38.7130433423
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Geometry name": "Localização",
+                "Id": "7969748",
+                "Nome": "Centro Comercial Charneca",
+                "Rua": "Rua das Lapas",
+                "Local": "Charneca",
+                "Freguesia": "U.F. Cascais e Estoril",
+                "Parque de estacionamento": "Não",
+                "Cinema": "Não",
+                "Data de actualização": "20/05/2008 15:46:23"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -9.4498498280,
+                    38.7332389726
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Geometry name": "Localização",
+                "Id": "7969752",
+                "Nome": "Centro Comercial Cascaishopping",
+                "Rua": "E.N. 9",
+                "Código Postal": "2645-543",
+                "Local": "Alcoitão",
+                "Freguesia": "Alcabideche",
+                "Parque de estacionamento": "Sim",
+                "Cinema": "Sim",
+                "Data de actualização": "14/11/2016 10:37:18"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -9.3991826379,
+                    38.7374837914
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Geometry name": "Localização",
+                "Id": "7969756",
+                "Nome": "Centro Comercial Parede",
+                "Rua": "Rua Latino Coelho",
+                "Número de polícia": "36",
+                "Código Postal": "2775-225",
+                "Local": "Parede",
+                "Freguesia": "U.F. Carcavelos e Parede",
+                "Parque de estacionamento": "Sim",
+                "Cinema": "Não",
+                "Data de actualização": "16/07/2020 07:44:49"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -9.3550115006,
+                    38.6905947485
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Geometry name": "Localização",
+                "Id": "7969760",
+                "Nome": "Centro Comercial Astoria",
+                "Rua": "Rua Sampaio Bruno",
+                "Local": "Parede",
+                "Freguesia": "U.F. Carcavelos e Parede",
+                "Parque de estacionamento": "Não",
+                "Cinema": "Não",
+                "Data de actualização": "20/05/2008 15:47:22"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -9.3525756321,
+                    38.6865302296
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Geometry name": "Localização",
+                "Id": "7969764",
+                "Nome": "Centro Comercial Mirasol",
+                "Rua": "Urbanização do Buzano",
+                "Local": "Rana",
+                "Freguesia": "São Domingos de Rana",
+                "Parque de estacionamento": "Não",
+                "Cinema": "Não",
+                "Data de actualização": "20/05/2008 15:47:32"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -9.3501524991,
+                    38.6951125432
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Geometry name": "Localização",
+                "Id": "7969768",
+                "Nome": "Centro Comercial Galeria Azul",
+                "Rua": "Urbanização Checlos",
+                "Local": "Rebelva",
+                "Freguesia": "U.F. Carcavelos e Parede",
+                "Parque de estacionamento": "Não",
+                "Cinema": "Não",
+                "Data de actualização": "20/05/2008 15:48:08"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -9.3405144434,
+                    38.7012915985
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Geometry name": "Localização",
+                "Id": "23046184",
+                "Nome": "Centro Comercial ELeclerc",
+                "Rua": "Avenida Aristides Sousa Mendes",
+                "Código Postal": "2785",
+                "Local": "São Domingos de Rana",
+                "Freguesia": "São Domingos de Rana",
+                "Parque de estacionamento": "Sim",
+                "Cinema": "Sim",
+                "Data de actualização": "21/04/2010 14:16:30"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -9.3301300028,
+                    38.7101395998
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Geometry name": "Localização",
+                "Id": "28197718",
+                "Nome": "Galerias Parede Plaza",
+                "Rua": "Avenida da República",
+                "Número de polícia": "1289",
+                "Código Postal": "2775-003",
+                "Local": "Parede",
+                "Freguesia": "U.F. Carcavelos e Parede",
+                "Cinema": "Não",
+                "Data de actualização": "25/11/2011 15:19:15"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -9.3548782718,
+                    38.6901340777
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Geometry name": "Localização",
+                "Id": "30041505",
+                "Nome": "Galerias Valmor",
+                "Rua": "Rua Fernão Magalhães",
+                "Número de polícia": "Lote C-2",
+                "Código Postal": "2785-366",
+                "Local": "Matarraque",
+                "Freguesia": "São Domingos de Rana",
+                "Horário de funcionamento": "8h00 às 2200",
+                "Parque de estacionamento": "Não",
+                "Cinema": "Não",
+                "Data de actualização": "27/12/2011 09:52:19"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -9.3556697402,
+                    38.7073791185
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Geometry name": "Localização",
+                "Id": "30042628",
+                "Nome": "Centro Comercial Mirasol",
+                "Rua": "Praceta Natália Correia",
+                "Número de polícia": "181",
+                "Código Postal": "2775",
+                "Local": "Rana",
+                "Freguesia": "São Domingos de Rana",
+                "Data de actualização": "03/01/2012 11:31:15"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -9.3489718525,
+                    38.6946320738
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Geometry name": "Localização",
+                "Id": "30270969",
+                "Nome": "Casa da Guia House Center",
+                "Rua": "Avenida Nossa Senhora do Cabo",
+                "Número de polícia": "101",
+                "Código Postal": "2750-374 ",
+                "Local": "Guia",
+                "Freguesia": "U.F. Cascais e Estoril",
+                "Telefone": "214843215",
+                "Parque de estacionamento": "Sim",
+                "Data de actualização": "16/07/2020 07:32:19"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -9.4432015147,
+                    38.6954705454
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Geometry name": "Localização",
+                "Id": "34993753",
+                "Nome": "Marina de Cascais",
+                "Número de polícia": "Loja 45 A",
+                "Código Postal": "2750-800",
+                "Local": "Cascais",
+                "Freguesia": "U.F. Cascais e Estoril",
+                "Telefone": "934506141",
+                "Data de actualização": "16/07/2020 07:45:21"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -9.4190581505,
+                    38.6919785590
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Geometry name": "Localização",
+                "Id": "44736748",
+                "Nome": "C.Comercial Aquário",
+                "Rua": "Trinta e um de Janeiro",
+                "Número de polícia": "5",
+                "Código Postal": "2775",
+                "Local": "Parede",
+                "Freguesia": "U.F. Carcavelos e Parede",
+                "Data de actualização": "23/07/2020 08:11:53"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -9.3540248186,
+                    38.6904980427
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Geometry name": "Localização",
+                "Id": "46446857",
+                "Nome": "Edifício Silva Santos",
+                "Rua": "Rua do Grupo de Instrução Popular",
+                "Número de polícia": "19",
+                "Código Postal": "2645-205",
+                "Local": "Amoreira",
+                "Freguesia": "Alcabideche",
+                "Data de actualização": "11/03/2021 13:03:17"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -9.4089757763,
+                    38.7170953875
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Geometry name": "Localização",
+                "Id": "50592378",
+                "Nome": "C.C.Auchan (Novo)",
+                "Rua": "Avenida Marginal",
+                "Número de polícia": "S/N",
+                "Código Postal": "2754-522",
+                "Local": "Cascais",
+                "Freguesia": "U.F. Cascais e Estoril",
+                "Data de actualização": "27/05/2022 10:47:06"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -9.4164027135,
+                    38.7018409057
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Geometry name": "Localização",
+                "Id": "52173826",
+                "Nome": "C. C. S. João do Estoril",
+                "Rua": "Rua Sacadura Cabral",
+                "Número de polícia": "216-A",
+                "Código Postal": "2765-349",
+                "Local": "São João do Estoril",
+                "Freguesia": "U.F. Cascais e Estoril",
+                "Data de actualização": "16/01/2023 15:01:55"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -9.3856098603,
+                    38.7064348251
+                ]
+            }
+        }
+    ]
+}

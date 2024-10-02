@@ -1,0 +1,16 @@
+# Use the node image from official Docker Hub
+FROM node:18.18.2-alpine3.18 as build-stage
+# set the working directory
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY ./ .
+RUN npm run build
+
+FROM nginx as production-stage
+RUN mkdir /app
+COPY --from=build-stage /app/dist /app
+COPY nginx/default.conf /etc/nginx/nginx.conf
+COPY docker-entrypoint.sh /app
+# Set the entrypoint
+ENTRYPOINT ["app/docker-entrypoint.sh"]

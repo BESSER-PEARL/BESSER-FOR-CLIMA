@@ -1,0 +1,7 @@
+# Sphinx documentation
+docs/_build/
+
+*.pyc
+*.pyo
+env
+generator/generated_output
