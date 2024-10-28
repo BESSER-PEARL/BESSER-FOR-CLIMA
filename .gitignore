@@ -5,3 +5,4 @@ docs/_build/
 *.pyo
 env
 generator/generated_output
+node_modules

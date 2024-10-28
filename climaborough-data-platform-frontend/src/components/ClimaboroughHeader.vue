@@ -12,29 +12,39 @@ const loginBool = ref(false)
 
 const name = ref("")
 const password = ref("")
+const city = ref("");
+const userType = ref("");
 
 const loggedIn = ref(false)
 
 const checkIfLogged = () => {
   var userName = localStorage.getItem("login")
   var loginToken = localStorage.getItem("loginToken")
+  var userCityName = localStorage.getItem("userCityName");
+  var userAccountType = localStorage.getItem("userType");
+
   if (userName && loginToken) {
     var decoded = jwtDecode(loginToken)
     if (decoded.expires * 1000 > Date.now()) {
-
-      name.value = userName
-      loggedIn.value = true
+      name.value = userName;
+      city.value = userCityName || "";
+      userType.value = userAccountType || "";
+      loggedIn.value = true;
     } else {
-      console.log("login token expired, login again")
-      localStorage.removeItem("login")
-      localStorage.removeItem("loginToken")
-      loggedIn.value = false
+      console.log("login token expired, login again");
+      localStorage.removeItem("login");
+      localStorage.removeItem("loginToken");
+      localStorage.removeItem("userCityName");
+      localStorage.removeItem("userType");
+      loggedIn.value = false;
     }
   } else {
-    localStorage.removeItem("login")
-    localStorage.removeItem("loginToken")
-    loggedIn.value = false
-    console.log("not logged in")
+    localStorage.removeItem("login");
+    localStorage.removeItem("loginToken");
+    localStorage.removeItem("userCityName");
+    localStorage.removeItem("userType");
+    loggedIn.value = false;
+    console.log("not logged in");
   }
 }
 
@@ -99,9 +109,8 @@ const toggleLogin = () => {
 }
 
 const login = async () => {
-
   try {
-  console.log("attempting log in")
+    console.log("attempting log in");
     const response = await fetch('http://localhost:8000/user/login', {
       method: 'POST',
       headers: {
@@ -109,49 +118,63 @@ const login = async () => {
       },
       body: JSON.stringify({
         email: name.value,
-        password: password.value
-      })
-    })
-    console.log("this is respone")
-    console.log(response)
+        password: password.value,
+      }),
+    });
+    
     if (response.ok) {
-      console.log("got log in response")
-      const data = await response.json()
-      console.log("this is the data")
-      console.log(data)
+      console.log("got login response");
+      const data = await response.json();
       if (data) {
         if ('access_token' in data) {
-          window.alert("Successful login")
-          localStorage.setItem("login", data["firstName"])
-          localStorage.setItem("loginToken", data["access_token"])
-          loginBool.value = false
-          loggedIn.value = true
+          window.alert("Successful login");
+
+          // Stocker les informations de l'utilisateur dans le localStorage
+          localStorage.setItem("login", data["firstName"]);
+          localStorage.setItem("loginToken", data["access_token"]);
+          localStorage.setItem("userCityName", data["city_name"] || ""); // Stocker le nom de la ville (si disponible)
+          localStorage.setItem("userType", data["type_spec"]); // Stocker le type d'utilisateur (par exemple, admin, cityuser)
+          
+          // Mettre à jour les variables réactives
+          name.value = data["firstName"];
+          city.value = data["city_name"] || ""; // Mise à jour de la ville si elle est disponible
+          userType.value = data["type_spec"];
+          loggedIn.value = true;
+          //window.alert(userType.value);
+          //window.alert(city.value);
+          loginBool.value = false;
           window.location.reload();
         } else {
-          window.alert("Wrong Credentials")
+          window.alert("Wrong Credentials");
         }
-
       } else {
-        window.alert("Wrong Credentials")
-
+        window.alert("Wrong Credentials");
       }
     } else {
-
+      console.error("Failed to log in. Response not OK.");
+      window.alert("Wrong Credentials");
     }
   } catch (err) {
-
-    console.error(err)
+    console.error(err);
+    window.alert("An error occurred while trying to log in.");
   }
+};
 
-
-}
 
 const logOff = () => {
-  localStorage.removeItem("login")
-  name.value = ""
-  loggedIn.value = false
+  localStorage.removeItem("login");
+  localStorage.removeItem("loginToken");
+  localStorage.removeItem("userCityName"); 
+  localStorage.removeItem("userType"); 
+
+  name.value = "";
+  city.value = "";
+  userType.value = "";
+  loggedIn.value = false;
+
   window.location.reload();
-}
+};
+
 const selectedLanguage = ref('EN') // Default language
 const languages = ref(
   [{

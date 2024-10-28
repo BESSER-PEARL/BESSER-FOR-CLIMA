@@ -139,14 +139,26 @@ def check_user_api(data: UserLoginSchema):
         return {"error": "Exception " + e}
 
 
-@app.post("/user/login", response_model=dict(), tags=["user"])
+@app.post("/user/login", response_model=dict, tags=["user"])
 async def user_login(user: UserLoginSchema = Body(...)):
     session.rollback()
     user_db = check_user_api(user)
     if user_db:
         token_response = sign_jwt(user.email)
         token_response["firstName"] = user_db.firstName
+        token_response["type_spec"] = user_db.type_spec
+
+        if user_db.type_spec == "cityuser":
+            if user_db.city_id:
+                city_record = session.query(CityDB).filter_by(id=user_db.city_id).first()
+                if city_record:
+                    city_name = city_record.name
+                    token_response["city"] = user_db.city_id
+                    token_response["city_name"] = city_name
+                    print(f"User city name: {city_name}")
+
         return token_response
+    
     return {"error": "Wrong login details!"}
     
     

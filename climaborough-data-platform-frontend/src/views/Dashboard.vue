@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, onMounted, onBeforeUnmount } from 'vue';
+import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue';
 import { GridLayout, GridItem } from 'grid-layout-plus'
 import { useRoute } from 'vue-router';
 
@@ -24,6 +24,11 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
 const loggedIn = ref(false)
+const userType = localStorage.getItem("userType");
+const userCity = localStorage.getItem("userCityName");
+console.log(userType)
+console.log(userCity)
+
 
 const checkIfLogged = () => {
     var userName = localStorage.getItem("login")
@@ -33,9 +38,38 @@ const checkIfLogged = () => {
 }
 checkIfLogged()
 
+// Définir les autorisations d'accès selon le type d'utilisateur
+const canCreateDashboard = computed(() => {
+  return userType === 'admin' || (userType === 'cityuser' && useRoute().params.city === userCity);	
+});
+
+const canUpdateOrDeleteDashboard = (dashboard) => {
+  if (userType === 'admin') {
+    return true;
+  } else if (userType === 'cityuser' && dashboard.creator === localStorage.getItem("login")) {
+    return true;
+  }
+  return false;
+};
+
+const canReadDashboard = (dashboardCity) => {
+  if (userType === 'admin' || userType === 'solutionprovider' || userType === 'partnerorsupplier' || userType === 'citizen') {
+    return true;
+  } else if (userType === 'cityuser' || userType === 'cityangel') {
+    return true; // dashboardCity.toLowerCase() === userCity.toLowerCase(); maybe after
+  }
+  return false;
+};
+
+// const canViewSensitiveData = computed(() => {
+//   return userType === 'admin' || userType === 'cityuser';
+// });
+
 const popupTriggers = ref({ buttonTrigger: false })
 
+
 const city = ref(useRoute().params.city)
+
 
 const layout = ref([
 
@@ -52,9 +86,6 @@ const projects = {
     'Grenoble-Alpes': "franceball.png",
     Torino: "italyball.png"
 }
-
-
-
 
 
 const exportToPDF = async () => {
@@ -645,19 +676,16 @@ const tempName = ref("")
 </script>
 
 <template>
-    <div v-if=loggedIn class="body">
-
-        <h2 style="align-items: center; "> Overview: {{ city }} <img :src='"../../" + flag' /></h2>
-        <ElementForm v-if="popupTriggers.buttonTrigger" @cancel="toggleForm" @addElement="addElement"
-            label="Enter the box's content:">
+    <div v-if="loggedIn" class="body">
+        <h2 style="align-items: center;"> Overview: {{ city }} <img :src='"../../" + flag' /></h2>
+        <ElementForm v-if="popupTriggers.buttonTrigger" @cancel="toggleForm" @addElement="addElement" label="Enter the box's content:">
         </ElementForm>
-
 
         <div v-if="editMode == true" class="empty">
             <div class="header">
                 <v-col cols="auto" class="buttons" style="flex-wrap: wrap;">
                     <div class="button">
-                        <v-btn size="x-large" @click="edit" color="red"  class="button">Turn off edit mode</v-btn>
+                        <v-btn size="x-large" @click="edit" color="red" class="button">Turn off edit mode</v-btn>
                     </div>
                     <div class="button">
                         <v-btn size="x-large" @click="storeVisualisations" class="button"
@@ -683,41 +711,34 @@ const tempName = ref("")
                             </v-btn>
                         </template>
                         <v-list>
-                            <v-list-item v-for="(item, index) in sections" :key="index" :value="index"
-                                @click="setSection(item)" style="display: flex; align-items: center">
+                            <v-list-item v-for="(item, index) in sections" :key="index" :value="index" @click="setSection(item)"
+                                style="display: flex; align-items: center">
                                 <v-list-item-content v-if="!item.edit">
                                     <span>{{ item.name }}</span>
-                                    <Icon class="edit" icon="material-symbols-light:edit-square-outline" width="30"
-                                        height="30" style="color: #0177a9;" @click="editSection(item, $event)" />
-                                    <Icon class="edit" icon="material-symbols-light:delete-outline" width="30"
-                                        height="30" style="color: red" @click="deleteSection(item, $event)" />
+                                    <Icon class="edit" icon="material-symbols-light:edit-square-outline" width="30" height="30"
+                                        style="color: #0177a9;" @click="editSection(item, $event)" />
+                                    <Icon class="edit" icon="material-symbols-light:delete-outline" width="30" height="30"
+                                        style="color: red" @click="deleteSection(item, $event)" />
                                 </v-list-item-content>
                                 <v-list-item-content v-else style="display: flex;">
-                                    <v-text-field @click="cancelClick($event)" @keydown.space="cancelClick($event)"
-                                        v-model="tempName" style="width: 200px">
-
+                                    <v-text-field @click="cancelClick($event)" @keydown.space="cancelClick($event)" v-model="tempName"
+                                        style="width: 200px">
                                     </v-text-field>
-                                    <Icon icon="material-symbols:check" width="30" height="30"
-                                        @click="renameSection(item, $event)"
+                                    <Icon icon="material-symbols:check" width="30" height="30" @click="renameSection(item, $event)"
                                         style="color: #aec326; margin-top: 10px;" />
-                                    <Icon class="edit" icon="material-symbols-light:delete-outline" width="30"
-                                        height="30" style="color: red" @click="deleteSection(item, $event)" />
+                                    <Icon class="edit" icon="material-symbols-light:delete-outline" width="30" height="30"
+                                        style="color: red" @click="deleteSection(item, $event)" />
                                 </v-list-item-content>
-
-
                             </v-list-item>
                             <v-spacer></v-spacer>
-
                             <v-btn variant="text" @click="menu = false">
                                 Cancel
                             </v-btn>
                             <v-btn color="primary" variant="text" @click="addSection($event)">
                                 Add section
                             </v-btn>
-
                         </v-list>
                     </v-menu>
-
                 </v-col>
             </div>
             <div class="container">
@@ -728,18 +749,17 @@ const tempName = ref("")
                         <a>Charts</a>
                         <div class="widget-icon" draggable="true" unselectable="on" @drag="drag('LineChart')"
                             @dragend="dragEnd('LineChart')">
-                            <img src="/LineChart.png" class="icon" style="width: 80px"
-                                @click="toggleKPIForm('LineChart')">
+                            <img src="/LineChart.png" class="icon" style="width: 80px" @click="toggleKPIForm('LineChart')">
                         </div>
+                        <a>Pie Charts</a>
                         <div class="widget-icon" draggable="true" unselectable="on" @drag="drag('PieChart')"
                             @dragend="dragEnd('PieChart')">
-                            <img src="/PieChart.png" class="icon" style="width: 80px"
-                                @click="toggleKPIForm('PieChart')">
+                            <img src="/PieChart.png" class="icon" style="width: 80px" @click="toggleKPIForm('PieChart')">
                         </div>
+                        <a>Stats Charts</a>
                         <div class="widget-icon" draggable="true" unselectable="on" @drag="drag('StatChart')"
                             @dragend="dragEnd('StatChart')">
-                            <img src="/StatChart.png" class="icon" style="width: 80px"
-                                @click="toggleKPIForm('StatChart')">
+                            <img src="/StatChart.png" class="icon" style="width: 80px" @click="toggleKPIForm('StatChart')">
                         </div>
                         <a>Tables</a>
                         <div class="widget-icon" draggable="true" unselectable="on" @drag="drag('Table')"
@@ -749,30 +769,25 @@ const tempName = ref("")
                         <a>Maps</a>
                         <div class="widget-icon" draggable="true" unselectable="on" @drag="drag('Map')"
                             @dragend="dragEnd('Map')">
-                            <img src="/Map.png" class="icon" style="width: 80px"
-                                @click="createVisualisation('1', 'Map', 'Map', {})">
+                            <img src="/Map.png" class="icon" style="width: 80px" @click="createVisualisation('1', 'Map', 'Map', {})">
                         </div>
                     </div>
                 </div>
                 <div ref="gridSpaceRef" class="grid-space">
                     <GridLayout v-model:layout="selectedSection.layout" ref="gridLayout" :col-num="12" :row-height="30"
-                        is-draggable is-bounded use-css-transforms restore-on-drag :vertical-compact="false"
-                        style="min-height: 800px;">
-                        <GridItem class="test" v-for="item in selectedSection.layout" :key="item.i" :x="item.x"
-                            :y="item.y" :w="item.w" :h="item.h" :i="item.i" :id="item.id">
-                            <div class="delete" style="display: flex; justify-content: flex-end">
-                                <Icon class="edit" icon="material-symbols-light:edit-square-outline" width="30"
-                                    height="30" style="color: #0177a9" @click="editVisualisation(item)" />
+                        is-draggable is-bounded use-css-transforms restore-on-drag :vertical-compact="false" style="min-height: 800px;">
+                        <GridItem class="test" v-for="item in selectedSection.layout" :key="item.i" v-if="canReadDashboard(city.value)"
+                            :x="item.x" :y="item.y" :w="item.w" :h="item.h" :i="item.i" :id="item.id">
+                            <div class="delete" v-if="canUpdateOrDeleteDashboard(item)" style="display: flex; justify-content: flex-end">
+                                <Icon class="edit" icon="material-symbols-light:edit-square-outline" width="30" height="30"
+                                    style="color: #0177a9" @click="editVisualisation(item)" />
                                 <Icon class="edit" icon="material-symbols-light:delete-outline" width="30" height="30"
                                     style="color: red" @click="deleteVisualisation(item)" />
-
                             </div>
                             <div class="item" style="height: 95%; width: 95%;">
-
                                 <LineChart v-if="item.chart == 'LineChart'" :city="item.attributes.city"
-                                    :tableId="item.attributes.tableId" :title="item.attributes.title"
-                                    :xtitle="item.attributes.xtitle" :ytitle="item.attributes.ytitle"
-                                    :color="item.attributes.color" :target="item.attributes.target" />
+                                    :tableId="item.attributes.tableId" :title="item.attributes.title" :xtitle="item.attributes.xtitle"
+                                    :ytitle="item.attributes.ytitle" :color="item.attributes.color" :target="item.attributes.target" />
                                 <PieChart v-if="item.chart == 'PieChart'" :city="item.attributes.city"
                                     :tableId="item.attributes.tableId" :title="item.attributes.title" />
                                 <StatChart v-if="item.chart == 'StatChart'" :city="item.attributes.city"
@@ -788,7 +803,7 @@ const tempName = ref("")
                 </div>
             </div>
             <div class="forms">
-                <KPIForm v-if="tableForm" @cancel="toggleKPIForm" @createVisualisation="createVisualisation" :city=city
+                <KPIForm v-if="tableForm" @cancel="toggleKPIForm" @createVisualisation="createVisualisation" :city="city"
                     label="Enter the box's content:" :chart="currentSelectedChart" />
                 <LineChartForm v-if="lineChartBool" @cancel="toggleLineChartEdit" @updateChart="updateChart"
                     :city="currentItem.attributes.city" :title="currentItem.attributes.title"
@@ -799,7 +814,7 @@ const tempName = ref("")
                 <StatChartForm v-if="statChartBool" :title="currentItem.attributes.title"
                     :suffix="currentItem.attributes.suffix" @cancel="toggleStatChartEdit" @updateChart="updateChart" />
                 <TableForm v-if="tableBool" :city=city :title="currentItem.attributes.title"
-                    :tableId="currentItem.attributes.tableId" :columns=currentItem.attributes.columns
+                    :tableId="currentItem.attributes.tableId" :columns="currentItem.attributes.columns"
                     @cancel="toggleTableEdit" @updateChart="updateChart" />
             </div>
         </div>
@@ -810,8 +825,7 @@ const tempName = ref("")
                     <div class="left">
                         <v-menu>
                             <template v-slot:activator="{ props }">
-                                <v-btn size="x-large" class="button" style="color: #FFFFFF;" color="#aec326"  v-bind="props">
-                                    
+                                <v-btn size="x-large" class="button" style="color: #FFFFFF;" color="#aec326" v-bind="props">
                                     Dashboards: {{ selectedSection.name }}
                                     <Icon icon="icomoon-free:page-break" width="30" height="30" style="color: #FFFFFF; margin-left: 5px;" />
                                 </v-btn>
@@ -822,23 +836,20 @@ const tempName = ref("")
                                     <v-list-item-content>
                                         <span>{{ item.name }}</span>
                                     </v-list-item-content>
-    
                                 </v-list-item>
                                 <v-spacer></v-spacer>
-    
+
                                 <v-btn variant="text" @click="menu = false">
                                     Cancel
                                 </v-btn>
                             </v-list>
-                        </v-menu> 
+                        </v-menu>
                     </div>
                     <div class="right" style="display: flex; gap: 10px;">
-                        <div class="button">
-                        
+                        <div v-if="canCreateDashboard">
                             <v-btn rounded="0" size="x-large" @click="edit" color="#0177a9" class="button">
                                 Dashboard Builder
-                                <Icon icon="ion:construct" width="30" height="30"  style="color: #FFFFFF; margin-left: 5px;" />
-                                
+                                <Icon icon="ion:construct" width="30" height="30" style="color: #FFFFFF; margin-left: 5px;" />
                             </v-btn>
                         </div>
                         <div class="button">
@@ -883,6 +894,7 @@ const tempName = ref("")
         </div>
     </div>
 </template>
+
 
 <style lang="scss" scoped>
 .body {
