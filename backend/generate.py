@@ -2,9 +2,8 @@ import sys
 from datetime import datetime
 from generator.clima_generator import ClimaGenerator
 from besser.BUML.metamodel.structural.structural import DomainModel
-from besser.BUML.notations.plantUML.plantuml_to_buml import plantuml_to_buml
+from besser.BUML.notations.structuralPlantUML import plantuml_to_buml
 from besser.generators.sql_alchemy import SQLAlchemyGenerator
-from besser.generators.python_classes import Python_Generator
 from besser.generators.sql import SQLGenerator
 
 from textx import metamodel_from_file

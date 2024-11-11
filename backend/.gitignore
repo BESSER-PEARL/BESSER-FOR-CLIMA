@@ -4,4 +4,6 @@ docs/_build/
 *.pyc
 *.pyo
 env
-generator/generated_output
+besser_venv
+generator/generated_output/auth
+start.bat

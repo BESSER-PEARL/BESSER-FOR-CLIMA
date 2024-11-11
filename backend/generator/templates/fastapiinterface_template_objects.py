@@ -1,33 +1,39 @@
-from fastapi import FastAPI, HTTPException, Body, Query
-from fastapi.middleware.cors import CORSMiddleware
-import psycopg2
-from pydantic import BaseModel
-from typing import List, Optional
-from sqlalchemy import create_engine, func 
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy import select
-from typing import Union
+# Python standard library imports
 import os
-from sqlalchemy import inspect, MetaData
+import json
+import logging
+
+# FastAPI related imports
+from fastapi import FastAPI, HTTPException, Body, Query, File, UploadFile, Depends
+from fastapi.middleware.cors import CORSMiddleware
+
+# Database related imports
+import psycopg2
+from sqlalchemy import create_engine, func, inspect, MetaData, select
+from sqlalchemy.orm import sessionmaker, aliased
+from sqlalchemy.exc import IntegrityError
+
+# Type hints and data validation
+from typing import List, Optional, Union
+from pydantic import BaseModel
+
+# Geospatial imports
+from geoalchemy2.shape import from_shape
+from shapely.geometry import shape
+
+# Authentication related imports
+from passlib.context import CryptContext
+from auth.auth_handler import sign_jwt, refresh_jwt
+from auth.auth_model import UserSchema, UserLoginSchema, TokenSchema
+from auth.auth_bearer import JWTBearer
+
+# Local application imports
 {% set ns = namespace(first_object_added=false) -%}
 from pydantic_classes import {% for object in classes %}{% if not ns.first_object_added -%}{% set ns.first_object_added = true -%}{% else -%}, {% endif -%} {{object.name}}{% endfor %}
 {% set ns.first_object_added=false -%}
 from sql_alchemy import Base
 from sql_alchemy import {% for object in classes %}{% if not ns.first_object_added -%}{% set ns.first_object_added = true -%}{% else -%}, {% endif -%} {{object.name}} as {{object.name}}DB{% endfor %}
 from sql_alchemy import KPI as KPIDB
-from sqlalchemy.orm import aliased
-
-from fastapi import File, UploadFile, HTTPException
-from geoalchemy2.shape import from_shape
-from shapely.geometry import shape
-import json
-
-from auth.auth_handler import sign_jwt, refresh_jwt
-from auth.auth_model import UserSchema, UserLoginSchema, TokenSchema
-
-from fastapi import  Depends
-from auth.auth_bearer import JWTBearer
 
 import logging
 
@@ -265,49 +271,65 @@ except:
 {{class.name | lower}}_alias = aliased({{class.name}}DB)
 {% endfor %}  
     
+{% set is_active = false %}
 
-{% for object in objects %}
-    {%- for parent in object.dep_from -%}
-        {%- if parent.name == "City" %}             
-@app.post("/{{parent.className.name}}/kpi/{{object.className.name}}", dependencies=[Depends(JWTBearer())], response_model=List[KPIValue], summary="Add a KPI object", tags = ["KPI"])
-async def add_kpi_value_{{-object.className.name-}}(kpis: List[KPIValue]= Body(..., description="KPI object to add")):
+{% set city_object = objects | selectattr("name", "equalto", "City") | first %}
+
+# KPI
+{% if city_object %}
+@app.post("/city/{city_name}/kpi/{kpi_id}", dependencies=[Depends(JWTBearer())], response_model=List[KPIValue], summary="Add KPI values", tags=["KPI"])
+async def add_kpi_values(
+    city_name: str,
+    kpi_id: str,
+    kpis: List[KPIValue] = Body(...),
+):
+    """Add KPI values for any city"""
+    # Get city object
+    city = session.query(CityDB).filter(func.lower(CityDB.name) == func.lower(city_name)).first()
+    if not city:
+        raise HTTPException(status_code=404, detail=f"City {city_name} not found")
+    # Get KPI object
+    kpi = session.query(KPIDB).filter_by(id=kpi_id, city_id=city.id).first()
+    if not kpi:
+        raise HTTPException(status_code=404, detail=f"KPI {kpi_id} not found for city {city_name}")
     db_entries = []
-    for kpi in kpis:    
+    for kpi_value in kpis:
         try:
-            # Check if an entry with the same timestamp and kpi_id already exists
-            existing_entry = session.query(KPIValueDB).filter_by(timestamp=kpi.timestamp, kpi_id={{object.className.name}}.id).first()
+            existing_entry = session.query(KPIValueDB).filter_by(
+                timestamp=kpi_value.timestamp,
+                kpi_id=kpi.id
+            ).first()
+            
             if existing_entry:
-                existing_entry.kpiValue = kpi.kpiValue
-                existing_entry.currentStanding = kpi.currentStanding
-                existing_entry.values = {{object.className.name}}
+                existing_entry.kpiValue = kpi_value.kpiValue
+                existing_entry.currentStanding = kpi_value.currentStanding
                 session.commit()
                 session.refresh(existing_entry)
                 db_entries.append(existing_entry)
-            else: 
-                db_entry = KPIValueDB(**kpi.dict())
-                db_entry.values = {{object.className.name}}           
+            else:
+                db_entry = KPIValueDB(**kpi_value.dict())
+                db_entry.kpi_id = kpi.id
                 session.add(db_entry)
                 session.commit()
-                session.refresh(db_entry)   
+                session.refresh(db_entry)
                 db_entries.append(db_entry)
-        except IntegrityError: 
+                
+        except IntegrityError:
             session.rollback()
-            print("Error integrity")
-            raise HTTPException(status_code=400, detail="Integrity error occurred.")
-        except:
+            raise HTTPException(status_code=400, detail="Integrity error occurred")
+        except Exception as e:
             session.rollback()
-            print("Error")
-            raise HTTPException(status_code=400, detail="An unexpected error occurred.")
-
+            raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+            
     return db_entries
-        {%- endif -%}
-    {%- endfor -%}  
-{%- endfor %}
+{% endif %}
 
-{% for object in objects %}
-    {% if object.name == "City" %}
-        {% for class in classes %}
-            {% for parent in class.parents() %}
+# Visualisations
+
+{% for object in objects -%}
+    {% if object.name == "City" -%}
+        {% for class in classes -%}
+            {% for parent in class.parents() -%}
                 {% if parent.name == "Visualisation" %}            
 @app.post("/{{object.className.name}}/visualization/{{class.name}}/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
 async def add_or_update_{{class.name}}_{{object.className.name}}(id: int, chart: {{class.name}}= Body(..., description="Chart object to add")):
@@ -368,7 +390,7 @@ async def delete_visualizations_{{object.className.name}}(ids: List[int], depend
 
 {% for object in objects %}
     {% if object.name == "City" %} 
-@app.get("/{{object.className.name}}/kpis", response_model=list[object], summary="get a KPI object")
+@app.get("/{{object.className.name}}/kpis", response_model=list[object], summary="get all KPI object",  tags=["KPI"])
 async def get_kpis_{{object.className.name}}():
     try:
         results_list = []

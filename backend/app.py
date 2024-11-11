@@ -8,7 +8,7 @@ import json
 import sys
 from datetime import datetime
 from besser.BUML.metamodel.structural.structural import DomainModel
-from besser.BUML.notations.plantUML.plantuml_to_buml import plantuml_to_buml
+from besser.BUML.notations.structuralPlantUML import plantuml_to_buml
 
 from generate import plantuml_to_object
 
