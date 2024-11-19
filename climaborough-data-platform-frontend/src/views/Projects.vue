@@ -1,10 +1,17 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import LoginForm from '../components/forms/LoginForm.vue'
 
-import { useI18n } from 'vue-i18n';
-const { locale } = useI18n();
 const loggedIn = ref(false)
+const userCity = ref(localStorage.getItem("userCityName") || "")
+console.log("User City:", userCity.value)
+console.log("User Type:", localStorage.getItem("userType"))
+
+const isCityUser = computed(() => {
+  const matches = projects.some(project => project.title === userCity.value)
+  console.log("Matches any project:", matches)
+  return localStorage.getItem("userType") === "cityuser" && matches
+})
 
 const checkIfLogged = () => {
   var userName = localStorage.getItem("login")
@@ -45,83 +52,129 @@ const projects = [
 </script>
 
 <template>
-  <div v-if=loggedIn class="body">
-    <a style="margin-left: 15px; margin-top: 60px; font-weight: bolder; font-size: 50px; color: #0177a9;">{{$t('projectview.title')}}</a>
-    <div class="hub">
-      <h1 style="margin-left: 80px; margin-top: 30px">{{$t('projectview.hub1')}}</h1>
-      <div class="icon-container">
-
-        <div v-for="project in projects" :key="project.id">
-          <div v-if="project.hub == 1" class="icon">
-            <RouterLink :to='"Dashboard/" + project.title'>
-              <div>
-                <img class="imagebutton" :src=project.image><br>
+  <div v-if="loggedIn" class="body">
+    <a style="margin-left: 15px; margin-top: 60px; font-weight: bolder; font-size: 50px; color: #0177a9;">{{ $t('projectview.title') }}</a>
+    
+    <!-- Affichage pour les comptes ville -->
+    <template v-if="isCityUser">
+      <div class="hub">
+        <h1 style="margin-left: 80px; margin-top: 30px">My Project</h1>
+        <div class="icon-container">
+          <div v-for="project in projects" :key="project.id">
+            <div v-if="project.title === userCity" class="icon">
+              <RouterLink :to='"Dashboard/" + project.title'>
+                <div>
+                  <img class="imagebutton" :src="project.image"><br>
+                </div>
+              </RouterLink>
+              <div class="info">
+                <img :src="project.imageball">
+                {{ project.title }}
               </div>
-            </RouterLink>
-            <div class="info">
-              <img :src=project.imageball>
-              {{ project.title }}
-            </div>
-            <div class="grey">
-              {{ project.type }}
+              <div class="grey">
+                {{ project.type }}
+              </div>
             </div>
           </div>
         </div>
-
       </div>
 
-    </div>
-
-    <div class="hub">
-      <h1 style="margin-left: 80px; margin-top: 30px;">{{$t('projectview.hub2')}}</h1>
-      <div class="icon-container">
-        <div v-for="project in projects" :key="project.id">
-          <div v-if="project.hub == 2" class="icon">
-            <RouterLink :to='"Dashboard/" + project.title'>
-              <div>
-                <img class="imagebutton" :src=project.image><br>
+      <div class="hub">
+        <h1 style="margin-left: 80px; margin-top: 30px">Other Projects</h1>
+        <div class="icon-container">
+          <div v-for="project in projects" :key="project.id">
+            <div v-if="project.title !== userCity" class="icon">
+              <RouterLink :to='"Dashboard/" + project.title'>
+                <div>
+                  <img class="imagebutton" :src="project.image"><br>
+                </div>
+              </RouterLink>
+              <div class="info">
+                <img :src="project.imageball">
+                {{ project.title }}
               </div>
-            </RouterLink>
-            <div class="info">
-              <img :src=project.imageball>
-              {{ project.title }}
-            </div>
-            <div class="grey">
-              {{ project.type }}
+              <div class="grey">
+                {{ project.type }}
+              </div>
             </div>
           </div>
         </div>
-
       </div>
-    </div>
+    </template>
 
+    <!-- Affichage original pour les autres types de comptes -->
+    <template v-else>
+      <div class="hub">
+        <h1 style="margin-left: 80px; margin-top: 30px">{{ $t('projectview.hub1') }}</h1>
+        <div class="icon-container">
+          <div v-for="project in projects" :key="project.id">
+            <div v-if="project.hub == 1" class="icon">
+              <RouterLink :to='"Dashboard/" + project.title'>
+                <div>
+                  <img class="imagebutton" :src="project.image"><br>
+                </div>
+              </RouterLink>
+              <div class="info">
+                <img :src="project.imageball">
+                {{ project.title }}
+              </div>
+              <div class="grey">
+                {{ project.type }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
+      <div class="hub">
+        <h1 style="margin-left: 80px; margin-top: 30px">{{ $t('projectview.hub2') }}</h1>
+        <div class="icon-container">
+          <div v-for="project in projects" :key="project.id">
+            <div v-if="project.hub == 2" class="icon">
+              <RouterLink :to='"Dashboard/" + project.title'>
+                <div>
+                  <img class="imagebutton" :src="project.image"><br>
+                </div>
+              </RouterLink>
+              <div class="info">
+                <img :src="project.imageball">
+                {{ project.title }}
+              </div>
+              <div class="grey">
+                {{ project.type }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
   </div>
-  <div v-else class="login-warning">
 
+  <div v-else class="login-warning">
     <p>{{ $t('denied_subheader') }}</p>
     <div class="login" style="padding: 40px;">
       <LoginForm />
     </div>
-
   </div>
 </template>
 
 <style lang="scss" scoped>
-
-
-
 .body {
   margin: 10px;
   min-height: 90vh;
+}
+
+.hub h1 {
+  margin-left: 80px;
+  margin-top: 30px;
+  padding-left: 15px;
+  border-left: 4px solid #aec326;;
 }
 
 .icon-container {
   display: flex;
   margin-left: var(--starting-position);
   flex-wrap: wrap;
-  // Add margin to the top of the container
-  /* Center content horizontally */
 }
 
 .icon {
@@ -135,23 +188,19 @@ const projects = [
 
 .imagebutton {
   transition: box-shadow 0.1s ease;
-  align-self: flex-start; // Align the image to the start of the container
+  align-self: flex-start;
 }
 
 .imagebutton:hover {
   cursor: pointer;
-  /* Cursor on hover */
   box-shadow: 1px 1px 5px 5px rgba(0, 0, 0, 0.5);
 }
 
 .info {
-  /* You can adjust the width as needed */
   flex: 1;
-  /* Allow containers to grow and fill available space */
   display: flex;
   justify-content: left;
   align-items: center;
-  /* Center items horizontally within each container */
   color: #575757;
 }
 

@@ -13,6 +13,7 @@ const rules = [value => {
     if (value == "") {
         return "Please enter an email address!"
     }
+    return true
 }]
 
 
@@ -35,32 +36,30 @@ const login = async () => {
         if (response.ok) {
             console.log("got log in response")
             const data = await response.json()
-            console.log("this is the data")
-            console.log(data)
-            if (data) {
-                if ('access_token' in data) {
-                    window.alert("Successful login")
-                    localStorage.setItem("login", data["firstName"])
-                    localStorage.setItem("loginToken", data["access_token"])
-                    window.location.reload();
-                } else {
-                    window.alert("Wrong Credentials")
-                }
-
+            console.log("this is the data", data)
+            if (data && 'access_token' in data) {
+                window.alert("Successful login")
+                localStorage.setItem("login", data["firstName"])
+                localStorage.setItem("loginToken", data["access_token"])
+                localStorage.setItem("userType", data["type_spec"])
+                localStorage.setItem("userCityName", data["city_name"])
+                window.location.reload();
             } else {
                 window.alert("Wrong Credentials")
-
             }
         } else {
-
+            window.alert("Wrong Credentials")
         }
     } catch (err) {
-
         console.error(err)
     }
 }
 
 const menu = ref(false)
+
+const toggleLogin = () => {
+  window.history.back()
+}
 
 </script>
 
