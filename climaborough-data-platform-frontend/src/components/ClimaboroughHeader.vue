@@ -361,6 +361,7 @@ header {
   top: 0;
   z-index: 100;
   max-height: 100vh;
+  border-bottom: 2px solid #aec326;
   nav {
     display: flex;
     align-items: center;

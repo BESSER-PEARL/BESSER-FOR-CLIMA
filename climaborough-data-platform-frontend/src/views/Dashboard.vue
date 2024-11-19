@@ -673,6 +673,28 @@ function cancelClick(event) {
 
 const tempName = ref("")
 
+// Ajouter cette nouvelle fonction
+const exportToPNG = async () => {
+    try {
+        const element = document.querySelector('.grid-space-static') || document.querySelector('.grid-space');
+        if (!element) return;
+
+        const canvas = await html2canvas(element, {
+            useCORS: true,
+            allowTaint: true,
+            scale: 2,
+            backgroundColor: '#FFFFFF'
+        });
+
+        const link = document.createElement('a');
+        link.download = `${city.value}_dashboard.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    } catch (error) {
+        console.error('Error exporting to PNG:', error);
+    }
+};
+
 </script>
 
 <template>
@@ -733,9 +755,6 @@ const tempName = ref("")
                             <Icon icon="material-symbols:border-all" width="30" height="30" style="color: #FFFFFF" />
                             Organise and Resize
                         </v-btn>
-                        <v-btn rounded="0" size="x-large" @click="exportToPDF" color="#0177a9" class="button">
-                            Export Dashboard as PDF
-                        </v-btn>
                     </div>
                 </div>
             </div>
@@ -775,7 +794,10 @@ const tempName = ref("")
                     <GridLayout v-model:layout="selectedSection.layout" ref="gridLayout" :col-num="12" :row-height="30"
                         is-draggable is-bounded use-css-transforms restore-on-drag :vertical-compact="false" style="min-height: 800px;">
                         <GridItem class="test" v-for="item in selectedSection.layout" :key="item.i" :x="item.x" :y="item.y" :w="item.w" :h="item.h" :i="item.i" :id="item.id">
-                            <div class="delete" style="display: flex; justify-content: flex-end">
+                            <div class="delete" style="display: flex; justify-content: flex-end; gap: 5px;">
+                                <Icon class="edit" icon="material-symbols:download" width="30" height="30"
+                                    style="color: #0177a9" @click="exportToPNG(item)" 
+                                    title="Export as PNG"/>
                                 <Icon class="edit" icon="material-symbols-light:edit-square-outline" width="30" height="30"
                                     style="color: #0177a9" @click="editVisualisation(item)" />
                                 <Icon class="edit" icon="material-symbols-light:delete-outline" width="30" height="30"
@@ -817,7 +839,6 @@ const tempName = ref("")
         </div>
         <div v-else-if="editMode == false" class="empty">
             <div class="header">
-                <h1 v-if="selectedSection.layout.length == 0">You need to add visualisations!</h1>
                 <v-col cols="auto" class="buttons" style="display: flex; justify-content: space-between; align-items: center;">
                     <div class="left">
                         <v-menu>
@@ -848,9 +869,6 @@ const tempName = ref("")
                                 Dashboard Builder
                                 <Icon icon="ion:construct" width="30" height="30" style="color: #FFFFFF; margin-left: 5px;" />
                             </v-btn>
-                        </div>
-                        <div class="button">
-                            <v-btn rounded="0" size="x-large" @click="exportToPDF" color="#0177a9" class="button">Export Dashboard as PDF</v-btn>
                         </div>
                     </div>
                 </v-col>
@@ -1074,5 +1092,16 @@ const tempName = ref("")
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
+}
+
+.delete {
+    .edit {
+        cursor: pointer;
+        transition: transform 0.2s ease;
+        
+        &:hover {
+            transform: scale(1.1);
+        }
+    }
 }
 </style>
