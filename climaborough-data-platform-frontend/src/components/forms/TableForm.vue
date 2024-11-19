@@ -90,9 +90,11 @@ const printt = () => {
     <div class="popup-inner">
       <label id="label" for="inputField">Title</label>
       <input type="text" id="inputField" v-model="title">
-      <div class="checklist" v-for="value in items" :key="value">
-        <input type="checkbox" :value="value" v-model="refColumns" @click="printt">
-        <label>{{ value }}</label>
+      <div class="checklist-container">
+        <div class="checklist" v-for="value in items" :key="value">
+          <input type="checkbox" :value="value" v-model="refColumns" @click="printt">
+          <label>{{ value }}</label>
+        </div>
       </div>
       <p v-if="error" style="color: red;"> Please enter a value! </p>
       <v-btn class="popup-button" @click="$emit('cancel')">Cancel</v-btn>
@@ -117,6 +119,9 @@ const printt = () => {
   .popup-inner {
     background: #ffffff;
     padding: 50px;
+    max-height: 80vh;
+    overflow-y: auto;
+    min-width: 400px;
   }
 
   #label {
@@ -145,6 +150,20 @@ const printt = () => {
 
   .popup-button {
     margin: 5px;
+  }
+
+  .checklist-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 15px 0;
+  }
+
+  .checklist {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
   }
 
 }

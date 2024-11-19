@@ -62,8 +62,6 @@ db_user = os.environ.get("DB_USER")
 if db_user is None:
     db_user = "root"
 
-engine = create_engine("postgresql://" + db_host + "/" + db_name +
-                       "?user=" + db_user + "&password=" + db_password)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

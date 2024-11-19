@@ -681,65 +681,63 @@ const tempName = ref("")
         <ElementForm v-if="popupTriggers.buttonTrigger" @cancel="toggleForm" @addElement="addElement" label="Enter the box's content:">
         </ElementForm>
 
-        <div v-if="editMode == true" class="empty">
+        <div v-if="editMode == true && canUpdateOrDeleteDashboard" class="empty">
             <div class="header">
-                <v-col cols="auto" class="buttons" style="flex-wrap: wrap;">
-                    <div class="button">
-                        <v-btn size="x-large" @click="edit" color="red" class="button">Turn off edit mode</v-btn>
+                <div class="header-content">
+                    <div class="left">
+                        <v-menu>
+                            <template v-slot:activator="{ props }">
+                                <v-btn size="x-large" class="button" style="color: #FFFFFF;" color="#aec326" v-bind="props">
+                                    Dashboards: {{ selectedSection.name }}
+                                    <Icon icon="icomoon-free:page-break" width="30" height="30" style="color: #FFFFFF; margin-left: 5px;" />
+                                </v-btn>
+                            </template>
+                            <v-list>
+                                <v-list-item v-for="(item, index) in sections" :key="index" :value="index" @click="setSection(item)"
+                                    style="display: flex; align-items: center">
+                                    <v-list-item-content v-if="!item.edit">
+                                        <span>{{ item.name }}</span>
+                                        <Icon class="edit" icon="material-symbols-light:edit-square-outline" width="30" height="30"
+                                            style="color: #0177a9;" @click="editSection(item, $event)" />
+                                        <Icon class="edit" icon="material-symbols-light:delete-outline" width="30" height="30"
+                                            style="color: red" @click="deleteSection(item, $event)" />
+                                    </v-list-item-content>
+                                    <v-list-item-content v-else style="display: flex;">
+                                        <v-text-field @click="cancelClick($event)" @keydown.space="cancelClick($event)" v-model="tempName"
+                                            style="width: 200px">
+                                        </v-text-field>
+                                        <Icon icon="material-symbols:check" width="30" height="30" @click="renameSection(item, $event)"
+                                            style="color: #aec326; margin-top: 10px;" />
+                                        <Icon class="edit" icon="material-symbols-light:delete-outline" width="30" height="30"
+                                            style="color: red" @click="deleteSection(item, $event)" />
+                                    </v-list-item-content>
+                                </v-list-item>
+                                <v-spacer></v-spacer>
+                                <v-btn variant="text" @click="menu = false">Cancel</v-btn>
+                                <v-btn color="primary" variant="text" @click="addSection($event)">Add section</v-btn>
+                            </v-list>
+                        </v-menu>
                     </div>
-                    <div class="button">
-                        <v-btn size="x-large" @click="storeVisualisations" class="button"
-                            style="background-color: #aec326; color: white; font-weight: bold;">Save Dashboard!</v-btn>
-                    </div>
-                    <div class="button">
-                        <v-btn size="x-large" @click="organizeVisualisations(false)" class="button" style="">
-                            <Icon icon="material-symbols:border-all" width="30" height="30" style="color: #0177a9" />
+                    <div class="right">
+                        <v-btn size="x-large" @click="edit" color="red" class="button">
+                            Turn off edit mode
+                        </v-btn>
+                        <v-btn size="x-large" @click="storeVisualisations" class="button" style="background-color: #aec326; color: white;">
+                            Save Dashboard
+                        </v-btn>
+                        <v-btn size="x-large" @click="organizeVisualisations(false)" color="#0177a9" class="button">
+                            <Icon icon="material-symbols:border-all" width="30" height="30" style="color: #FFFFFF" />
                             Organise Visualisations
                         </v-btn>
-                    </div>
-                    <div class="button">
-                        <v-btn size="x-large" @click="organizeVisualisations(true)" class="button" style="">
-                            <Icon icon="material-symbols:border-all" width="30" height="30" style="color: #0177a9" />
+                        <v-btn size="x-large" @click="organizeVisualisations(true)" color="#0177a9" class="button">
+                            <Icon icon="material-symbols:border-all" width="30" height="30" style="color: #FFFFFF" />
                             Organise and Resize
                         </v-btn>
+                        <v-btn rounded="0" size="x-large" @click="exportToPDF" color="#0177a9" class="button">
+                            Export Dashboard as PDF
+                        </v-btn>
                     </div>
-                    <v-menu>
-                        <template v-slot:activator="{ props }">
-                            <v-btn size="x-large" class="button" style="" v-bind="props">
-                                <Icon icon="icomoon-free:page-break" width="30" height="30" style="color: #0177a9" />
-                                Dashboards: {{ selectedSection.name }}
-                            </v-btn>
-                        </template>
-                        <v-list>
-                            <v-list-item v-for="(item, index) in sections" :key="index" :value="index" @click="setSection(item)"
-                                style="display: flex; align-items: center">
-                                <v-list-item-content v-if="!item.edit">
-                                    <span>{{ item.name }}</span>
-                                    <Icon class="edit" icon="material-symbols-light:edit-square-outline" width="30" height="30"
-                                        style="color: #0177a9;" @click="editSection(item, $event)" />
-                                    <Icon class="edit" icon="material-symbols-light:delete-outline" width="30" height="30"
-                                        style="color: red" @click="deleteSection(item, $event)" />
-                                </v-list-item-content>
-                                <v-list-item-content v-else style="display: flex;">
-                                    <v-text-field @click="cancelClick($event)" @keydown.space="cancelClick($event)" v-model="tempName"
-                                        style="width: 200px">
-                                    </v-text-field>
-                                    <Icon icon="material-symbols:check" width="30" height="30" @click="renameSection(item, $event)"
-                                        style="color: #aec326; margin-top: 10px;" />
-                                    <Icon class="edit" icon="material-symbols-light:delete-outline" width="30" height="30"
-                                        style="color: red" @click="deleteSection(item, $event)" />
-                                </v-list-item-content>
-                            </v-list-item>
-                            <v-spacer></v-spacer>
-                            <v-btn variant="text" @click="menu = false">
-                                Cancel
-                            </v-btn>
-                            <v-btn color="primary" variant="text" @click="addSection($event)">
-                                Add section
-                            </v-btn>
-                        </v-list>
-                    </v-menu>
-                </v-col>
+                </div>
             </div>
             <div class="container">
                 <div class="widget-bar">
@@ -776,9 +774,8 @@ const tempName = ref("")
                 <div ref="gridSpaceRef" class="grid-space">
                     <GridLayout v-model:layout="selectedSection.layout" ref="gridLayout" :col-num="12" :row-height="30"
                         is-draggable is-bounded use-css-transforms restore-on-drag :vertical-compact="false" style="min-height: 800px;">
-                        <GridItem class="test" v-for="item in selectedSection.layout" :key="item.i" v-if="canReadDashboard(city.value)"
-                            :x="item.x" :y="item.y" :w="item.w" :h="item.h" :i="item.i" :id="item.id">
-                            <div class="delete" v-if="canUpdateOrDeleteDashboard(item)" style="display: flex; justify-content: flex-end">
+                        <GridItem class="test" v-for="item in selectedSection.layout" :key="item.i" :x="item.x" :y="item.y" :w="item.w" :h="item.h" :i="item.i" :id="item.id">
+                            <div class="delete" style="display: flex; justify-content: flex-end">
                                 <Icon class="edit" icon="material-symbols-light:edit-square-outline" width="30" height="30"
                                     style="color: #0177a9" @click="editVisualisation(item)" />
                                 <Icon class="edit" icon="material-symbols-light:delete-outline" width="30" height="30"
@@ -1041,5 +1038,41 @@ const tempName = ref("")
     text-align: center;
     background-color: #fdd;
     border: 1px solid black;
+}
+
+.header {
+    margin-bottom: 20px;
+
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .left, .right {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .button {
+        height: 48px;
+        display: flex;
+        align-items: center;
+    }
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.right {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 </style>
