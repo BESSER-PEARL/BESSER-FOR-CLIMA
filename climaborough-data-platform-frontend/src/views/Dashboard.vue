@@ -90,25 +90,25 @@ const projects = {
 
 const exportToPDF = async () => {
     const pdf = new jsPDF('p', 'mm', 'a4');
-    const charts = layout.value.map(item => document.getElementById(item.id));
+    const charts = selectedSection.layout.map(item => document.getElementById(item.id));
 
     pdf.setFontSize(22);
-    pdf.text('Dashboard Report: ' + city.value, 10, 20); // Title text positioned at (10, 20)
+    pdf.text('Dashboard Report: ' + city.value, 10, 20);
 
     const pdfWidth = pdf.internal.pageSize.getWidth();
-    const margin = 10; // Margin from the edges of the PDF
-    const chartWidth = pdfWidth - 2 * margin; // Width of the chart
-    let y = 30; // Initial y position for the first chart
+    const margin = 10;
+    const chartWidth = pdfWidth - 2 * margin;
+    let y = 30;
 
-    // Function to draw a rounded border
     const drawRoundedBorder = (x, y, width, height, radius) => {
-        pdf.setDrawColor(200, 200, 200); // Light grey color
-        pdf.setLineWidth(1); // Increase border width for visibility
-        //pdf.roundedRect(x, y, width, height, radius, radius);
-        pdf.rect(x, y, width, height,)
+        pdf.setDrawColor(200, 200, 200);
+        pdf.setLineWidth(1);
+        pdf.rect(x, y, width, height);
     };
 
     for (let i = 0; i < charts.length; i++) {
+        if (!charts[i]) continue; // Skip if element not found
+
         const canvas = await html2canvas(charts[i], {
             useCORS: true,
             allowTaint: true,
@@ -118,19 +118,19 @@ const exportToPDF = async () => {
 
         const imgData = canvas.toDataURL('image/png');
         const imgProps = pdf.getImageProperties(imgData);
-        const imgHeight = (imgProps.height * chartWidth) / imgProps.width; // Scale height to match chart width
+        const imgHeight = (imgProps.height * chartWidth) / imgProps.width;
 
         if (i > 0 && y + imgHeight + 10 > pdf.internal.pageSize.getHeight()) {
             pdf.addPage();
-            y = 10; // Reset y position for new page
-            pdf.text('Dashboard Report: ' + city.value, 10, 20); // Re-add title
+            y = 10;
+            pdf.text('Dashboard Report: ' + city.value, 10, 20);
         }
 
-        const x = margin; // Centering based on the margin
-        drawRoundedBorder(x, y, chartWidth + 2, imgHeight + 2, 10); // Draw rounded border
-        pdf.addImage(imgData, 'PNG', x + 1, y + 1, chartWidth, imgHeight); // Add the image inside the border
+        const x = margin;
+        drawRoundedBorder(x, y, chartWidth + 2, imgHeight + 2, 10);
+        pdf.addImage(imgData, 'PNG', x + 1, y + 1, chartWidth, imgHeight);
 
-        y += imgHeight + 30; // Add space between charts
+        y += imgHeight + 30;
     }
 
     pdf.save('dashboard.pdf');
