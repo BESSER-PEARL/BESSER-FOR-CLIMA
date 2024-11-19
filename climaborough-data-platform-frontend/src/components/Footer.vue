@@ -110,4 +110,10 @@
 a {
   padding: 7px;
 }
+
+.footer {
+  background-color: #aec326;
+  width: 100%;
+  margin-top: auto;
+}
 </style>

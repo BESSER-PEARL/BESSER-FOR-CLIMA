@@ -75,7 +75,7 @@ const slides = [
 .main {
   display: flex;
   flex-direction: column;
-  min-height: 90vh;
+  min-height: 100vh;
 }
 .hero {
   display: flex; // Enable Flexbox
@@ -102,7 +102,7 @@ const slides = [
 
 .carousel {
   flex-grow: 1;
-  min-height: 60vh;
+  min-height: 70vh;
 
   .text-container {
     position: relative;

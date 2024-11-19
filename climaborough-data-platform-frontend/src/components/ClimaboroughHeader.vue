@@ -355,9 +355,11 @@ const menu = ref(false)
 
 <style lang="scss" scoped>
 header {
-
   background-color: #ececec;
   color: #086494;
+  position: sticky;
+  top: 0;
+  z-index: 100;
   max-height: 100vh;
   nav {
     display: flex;
