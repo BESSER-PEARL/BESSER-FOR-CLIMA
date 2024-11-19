@@ -151,11 +151,18 @@ const slides = [
 }
 
 .info-box {
-  flex: 0 0 60%; // Takes up 60% of the slide's width
+  flex: 0 0 60%;
   margin-right: 40px;
   background-color: #ffffff;
   color: rgb(0, 0, 0);
-  position: relative; // Ensure absolute positioning of text container within info-box
+  position: relative;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  
+  &:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+  }
 }
 
 

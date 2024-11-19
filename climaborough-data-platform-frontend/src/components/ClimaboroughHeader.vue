@@ -355,7 +355,7 @@ const menu = ref(false)
 
 <style lang="scss" scoped>
 header {
-  background-color: #ececec;
+  background-color: hsl(0, 0%, 100%);
   color: #086494;
   position: sticky;
   top: 0;
@@ -394,6 +394,22 @@ header {
 
       .user:hover {
         cursor: pointer;
+      }
+
+      a {
+        text-decoration: none;
+        color: inherit;
+        font-weight: bold;
+        font-size: 20px;
+        transition: all 0.3s ease;
+        padding: 5px 10px;
+        border-radius: 4px;
+
+        &:hover {
+          background-color: rgba(0, 0, 0, 0.1);
+          transform: translateY(-2px);
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
       }
 
       #login, a{
