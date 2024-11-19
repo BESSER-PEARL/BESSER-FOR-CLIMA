@@ -795,9 +795,6 @@ const exportToPNG = async () => {
                         is-draggable is-bounded use-css-transforms restore-on-drag :vertical-compact="false" style="min-height: 800px;">
                         <GridItem class="test" v-for="item in selectedSection.layout" :key="item.i" :x="item.x" :y="item.y" :w="item.w" :h="item.h" :i="item.i" :id="item.id">
                             <div class="delete" style="display: flex; justify-content: flex-end; gap: 5px;">
-                                <Icon class="edit" icon="material-symbols:download" width="30" height="30"
-                                    style="color: #0177a9" @click="exportToPNG(item)" 
-                                    title="Export as PNG"/>
                                 <Icon class="edit" icon="material-symbols-light:edit-square-outline" width="30" height="30"
                                     style="color: #0177a9" @click="editVisualisation(item)" />
                                 <Icon class="edit" icon="material-symbols-light:delete-outline" width="30" height="30"
@@ -864,6 +861,32 @@ const exportToPNG = async () => {
                         </v-menu>
                     </div>
                     <div class="right" style="display: flex; gap: 10px;">
+                        <v-menu>
+                            <template v-slot:activator="{ props }">
+                                <v-btn rounded="0" size="x-large" color="#0177a9" class="button" v-bind="props">
+                                    Export
+                                    <Icon icon="material-symbols:download" width="30" height="30" style="color: #FFFFFF; margin-left: 5px;" />
+                                </v-btn>
+                            </template>
+                            <v-list>
+                                <v-list-item @click="exportToPNG">
+                                    <v-list-item-title>
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <Icon icon="material-symbols:download" width="24" height="24" />
+                                            Export as PNG
+                                        </div>
+                                    </v-list-item-title>
+                                </v-list-item>
+                                <v-list-item @click="exportToPDF">
+                                    <v-list-item-title>
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <Icon icon="material-symbols:picture-as-pdf" width="24" height="24" />
+                                            Export as PDF
+                                        </div>
+                                    </v-list-item-title>
+                                </v-list-item>
+                            </v-list>
+                        </v-menu>
                         <div v-if="canCreateDashboard">
                             <v-btn rounded="0" size="x-large" @click="edit" color="#0177a9" class="button">
                                 Dashboard Builder
