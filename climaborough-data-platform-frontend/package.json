@@ -16,6 +16,7 @@
     "@vue-leaflet/vue-leaflet": "^0.10.1",
     "@vueuse/core": "^10.9.0",
     "apexcharts": "^3.48.0",
+    "climaborough-data-platform-frontend": "file:",
     "grid-layout-plus": "^1.0.4",
     "html2canvas": "^1.4.1",
     "jspdf": "^2.5.1",

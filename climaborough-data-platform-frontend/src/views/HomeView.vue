@@ -55,11 +55,11 @@ const slides = [
         </Slide>
         <template #addons>
           <Navigation>
-            <template #next>
-              <Icon icon="bxs:right-arrow" width="120" height="120" style="color: black" />
-            </template>
             <template #prev>
-              <Icon icon="bxs:left-arrow" width="120" height="120" style="color: black" />
+              <div class="custom-arrow">‹</div>
+            </template>
+            <template #next>
+              <div class="custom-arrow">›</div>
             </template>
           </Navigation>
           <Pagination />
@@ -136,8 +136,8 @@ const slides = [
 
 .carousel__prev,
 .carousel__next {
-  box-sizing: content-box;
-  border: 5px solid white;
+  background-color: transparent;
+  border: none;
 }
 
 .image-container {
@@ -178,6 +178,21 @@ const slides = [
   display: block;
   margin: 0 auto; // Center the button horizontally
 }
+
+.custom-arrow {
+  font-size: 60px;
+  font-weight: bold;
+  color: black;
+  cursor: pointer;
+  padding: 10px;
+  user-select: none;
+}
+
+.carousel__prev,
+.carousel__next {
+  background-color: transparent;
+  border: none;
+}
 </style>
 
 
@@ -185,8 +200,8 @@ const slides = [
 :root {
   --vc-nav-width: 60px;
   --vc-nav-height: 60px;
-  --vc-pgn-width: 20px;
-  --vc-pgn-height: 20px;
+  --vc-pgn-width: 15px;
+  --vc-pgn-height: 15px;
   --vc-pgn-margin: 5px;
   --vc-pgn-border-radius: 100%;
 }

@@ -30,7 +30,7 @@ pip install -r requirements.txt
 First generate the backend code by executing the generate.py:
 
 ```
-pyhton generate.py
+python generate.py
 ```
 
 This will generate:
@@ -45,6 +45,7 @@ For local development, I suggest deploying everything in a dockerized environmen
 Navigate to the "Docker" folder and execute:
 
 ```
+docker-compose build
 docker-compose up
 ```
 

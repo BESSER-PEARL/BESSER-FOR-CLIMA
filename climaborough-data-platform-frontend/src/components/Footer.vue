@@ -28,7 +28,9 @@
       </div>
     </div>
     <div class="third-level">
-      <span style="font-weight: bold; color: white; font-size: large;">{{ $t('footer.tos') }}</span>
+      <router-link to="/tos" style="text-decoration: none;">
+        <span style="font-weight: bold; color: white; font-size: large;">{{ $t('footer.tos') }}</span>
+      </router-link>
       <span class="separator"></span>
       <span style="font-weight: bold; color: white; font-size: large;">{{ $t('footer.socialMedia') }}</span>
       <span style="margin-left: 10px;">

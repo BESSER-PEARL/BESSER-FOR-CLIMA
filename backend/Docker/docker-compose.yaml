@@ -10,7 +10,7 @@ services:
       POSTGRES_PASSWORD: aaron
       PGDATA: /var/lib/postgresql/data
     volumes:
-      - C:/Users/conrardy/data:/var/lib/postgresql/data
+      - C:/Users/sulejmani/data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
 
