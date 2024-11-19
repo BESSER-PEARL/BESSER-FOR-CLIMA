@@ -84,6 +84,7 @@ class User(ABC, BaseModel):
     firstName: str
     password: str
     lastName: str
+    type_spec: str
     
 class Admin(User):
     pass 

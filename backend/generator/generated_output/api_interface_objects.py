@@ -63,6 +63,9 @@ if db_user is None:
     db_user = "root"
 
 
+engine = create_engine("postgresql://" + db_host + "/" + db_name +
+                       "?user=" + db_user + "&password=" + db_password)
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base.metadata.create_all(bind=engine)
@@ -94,30 +97,58 @@ except Exception as e:
 
 
 @app.post("/user/signup", dependencies=[Depends(JWTBearer())], tags=["user"])
-async def create_user(user: User = Body(...)):
+async def create_user(user: User = Body(...), city_id: Optional[int] = None):
+    # Check if user already exists
     user_db = session.query(UserDB).filter_by(email=user.email).first()
     if user_db is not None:
         return {"error": "User with email address '" + user.email + "' already registered!"}
+    
+    # Hash password
     hashed_password = pwd_context.hash(user.password)
-    statement = AdminDB(
+    
+    # Create appropriate user type based on discriminator
+    user_types = {
+        "admin": AdminDB,
+        "cityuser": CityUserDB,
+        "cityangel": CityAngelDB,
+        "solutionprovider": SolutionProviderDB,
+        "citizen": CitizenDB
+    }
+    
+    UserClass = user_types.get(user.type_spec)
+    if not UserClass:
+        return {"error": f"Invalid user type: {user.type_spec}"}
+    
+    # For cityuser, verify city exists
+    if user.type_spec == "cityuser":
+        if not city_id:
+            return {"error": "City ID is required for city users"}
+        city = session.query(CityDB).filter_by(id=city_id).first()
+        if not city:
+            return {"error": "Invalid city ID"}
+            
+    # Create user object
+    statement = UserClass(
         email=user.email,
         password=hashed_password,
         firstName=user.firstName,
         lastName=user.lastName
     )
+    
+    # Set city for cityuser
+    if user.type_spec == "cityuser":
+        statement.city_id = city_id
+        
     try:
         session.add(statement)
         session.commit()
         return sign_jwt(user.email)
     except IntegrityError:
         session.rollback()
-        print("error integrity")
         return {"error": "Integrity error"}
     except Exception as e:
-        print(e)
-        print("added user")
         session.rollback()
-        return {"error": "Exception " + e}
+        return {"error": f"Exception: {str(e)}"}
 
 @app.post("/user/refresh", dependencies=[Depends(JWTBearer())], tags=["user"])
 async def refresh_token(token: TokenSchema = Body(...)):
@@ -939,6 +970,7 @@ async def add_or_update_Map_torino(id: int, chart: Map= Body(..., description="C
             
             
             
+            
         
 @app.delete("/torino/visualizations")
 async def delete_visualizations_torino(ids: List[int], dependencies=[Depends(JWTBearer())], tags = ["Visualisation"]):
@@ -963,7 +995,6 @@ async def delete_visualizations_torino(ids: List[int], dependencies=[Depends(JWT
         print("COOL")
 
     
-            
             
             
             
@@ -1132,7 +1163,6 @@ async def add_or_update_Map_cascais(id: int, chart: Map= Body(..., description="
             
             
             
-            
         
 @app.delete("/cascais/visualizations")
 async def delete_visualizations_cascais(ids: List[int], dependencies=[Depends(JWTBearer())], tags = ["Visualisation"]):
@@ -1157,7 +1187,6 @@ async def delete_visualizations_cascais(ids: List[int], dependencies=[Depends(JW
         print("COOL")
 
     
-            
             
             
             
