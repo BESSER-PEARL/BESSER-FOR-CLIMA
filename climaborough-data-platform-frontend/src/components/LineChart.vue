@@ -130,16 +130,18 @@ watch(() => [props.title, props.xtitle, props.ytitle, props.color], () => {
 
 <template>
   <div id="container">
-    <div id="controls">
-      <button @click="chartType = 'line'">Line Chart</button>
-      <button @click="chartType = 'bar'">Bar Chart</button>
-      <button @click="chartType = 'area'">Area Chart</button>
-    </div>
     <div id="chart">
       <VueApexCharts type="line" height="100%" :options="chartOptions" :series="series"></VueApexCharts>
     </div>
-    <div class="update">
-      Last Update: {{ lastTimestamp }}
+    <div class="bottom-controls">
+      <select v-model="chartType" class="chart-select">
+        <option value="line">Line Chart</option>
+        <option value="bar">Bar Chart</option>
+        <option value="area">Area Chart</option>
+      </select>
+      <div class="update">
+        Last Update: {{ lastTimestamp }}
+      </div>
     </div>
   </div>
 </template>
@@ -166,5 +168,43 @@ watch(() => [props.title, props.xtitle, props.ytitle, props.color], () => {
   align-items: center;
   flex-shrink: 0;
   padding: 5px;
+}
+
+.chart-select {
+  padding: 8px 12px;
+  border: 2px solid #086494;
+  border-radius: 5px;
+  background-color: white;
+  color: #086494;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+  outline: none;
+
+  &:hover {
+    border-color: #064d6a;
+    background-color: #f8f9fa;
+  }
+
+  &:focus {
+    border-color: #043a52;
+    box-shadow: 0 0 0 2px rgba(8, 100, 148, 0.2);
+  }
+}
+
+.bottom-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px;
+  gap: 10px;
+}
+
+.chart-select {
+  min-width: 120px;
+}
+
+.update {
+  margin-left: auto;
 }
 </style>
