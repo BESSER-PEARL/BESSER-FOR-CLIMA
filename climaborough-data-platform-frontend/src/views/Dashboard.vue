@@ -467,48 +467,58 @@ const updateChart = (object) => {
 }
 
 const organizeVisualisations = (resizeBool) => {
-    let layoutCopy = selectedSection.layout
-    let sortedLayout = []
-    layoutCopy.forEach((object, index1) => {
-        object.position = object.x + object.y
-        if (sortedLayout.length == 0) {
-            sortedLayout.push(object)
+    let layoutCopy = selectedSection.layout;
+    let sortedLayout = [];
+    
+    // Sort widgets by their current positions
+    layoutCopy.forEach((object) => {
+        object.position = object.x + object.y;
+        if (sortedLayout.length === 0) {
+            sortedLayout.push(object);
         } else {
             for (let index = 0; index < sortedLayout.length; index++) {
                 const value = sortedLayout[index];
                 if (object.position <= value.position) {
                     sortedLayout.splice(index, 0, object);
-                    break; // Exit the loop once the object is inserted
+                    break;
                 } else if (index === sortedLayout.length - 1) {
                     sortedLayout.push(object);
-                    break; // Exit the loop after pushing the object at the end
+                    break;
                 }
             }
         }
+    });
 
-    })
-    let currX = 0
-    selectedSection.layout = []
-    let row = 0
-    let rowHeight = []
-    let currItemInRow = 0
+    let currX = 0;
+    selectedSection.layout = [];
+    let row = 0;
+
+    // Adjust layout and size of widgets
     sortedLayout.forEach((object) => {
         if (resizeBool) {
-            object.w = 4
-            object.h = 8
+            if (object.chart === "Map") {
+                // Set default size for Map widget
+                object.w = 7; // Default width for Map widget
+                object.h = 13; // Default height for Map widget
+            } else {
+                // New size for all other widgets
+                object.w = 4;
+                object.h = 8;
+            }
         }
-        if (currX + object.w > 12) {
-            currX = 0
-            row++
-        }
-        object.x = currX
-        currX = currX + object.w
-        object.y = row
-        selectedSection.layout.push(object)
-    })
-    return
 
-}
+        if (currX + object.w > 12) {
+            currX = 0;
+            row++;
+        }
+        object.x = currX;
+        currX += object.w;
+        object.y = row;
+
+        selectedSection.layout.push(object);
+    });
+};
+
 
 
 
@@ -562,6 +572,7 @@ const drag = throttle((chart) => {
 
         }
     }
+    
     const index = selectedSection.layout.findIndex(item => item.i === dropId);
     if (dragItemStop.value.chart) {
         dragItemStop.value = {}
