@@ -8,11 +8,13 @@ import ElementForm from '../components/ElementForm.vue'
 import KPIForm from '../components/KPIForm.vue'
 import LineChartForm from '../components/forms/LineChartForm.vue'
 import PieChartForm from '../components/forms/PieChartForm.vue'
+import BarChartForm from '../components/forms/BarChartForm.vue'
 import StatChartForm from '../components/forms/StatChartForm.vue'
 import TableForm from '../components/forms/TableForm.vue'
 
 import LineChart from '../components/LineChart.vue'
 import PieChart from '../components/PieChart.vue'
+import BarChart from '../components/BarChart.vue'
 import StatChart from '../components/StatChart.vue'
 import Table from '../components/Table.vue'
 import Map from '../components/Map.vue'
@@ -291,6 +293,7 @@ async function storeVisualisations() {
 
 const lineChartBool = ref(false)
 const pieChartBool = ref(false)
+const barChartBool = ref(false)
 const statChartBool = ref(false)
 const tableBool = ref(false)
 
@@ -384,6 +387,10 @@ const togglePieChartEdit = () => {
     pieChartBool.value = !pieChartBool.value
 }
 
+const toggleBarChartEdit = () => {
+    barChartBool.value = !barChartBool.value
+}
+
 const toggleStatChartEdit = () => {
     statChartBool.value = !statChartBool.value
 }
@@ -398,6 +405,8 @@ const editVisualisation = (item) => {
         toggleLineChartEdit()
     } else if (item.chart == "PieChart") {
         togglePieChartEdit()
+    } else if (item.chart == "BarChart") {
+        toggleBarChartEdit()
     } else if (item.chart == "StatChart") {
         toggleStatChartEdit()
     } else if (item.chart == "Table") {
@@ -414,6 +423,7 @@ const updateChart = (object) => {
         currentItem.value = {}
         lineChartBool.value = false
         pieChartBool.value = false
+        barChartBool.value = false
         statChartBool.value = false
         tableBool.value = false
     }
@@ -795,6 +805,7 @@ const exportToPDF = async () => {
         <ElementForm v-if="popupTriggers.buttonTrigger" @cancel="toggleForm" @addElement="addElement" label="Enter the box's content:">
         </ElementForm>
 
+        <!-- Dashboard Edit Mot -->
         <div v-if="editMode == true && canUpdateOrDeleteDashboard" class="empty">
             <div class="header">
                 <div class="header-content">
@@ -809,12 +820,16 @@ const exportToPDF = async () => {
                             <v-list>
                                 <v-list-item v-for="(item, index) in sections" :key="index" :value="index" @click="setSection(item)"
                                     style="display: flex; align-items: center">
-                                    <v-list-item-content v-if="!item.edit">
-                                        <span>{{ item.name }}</span>
-                                        <Icon class="edit" icon="material-symbols-light:edit-square-outline" width="30" height="30"
-                                            style="color: #0177a9;" @click="editSection(item, $event)" />
-                                        <Icon class="edit" icon="material-symbols-light:delete-outline" width="30" height="30"
-                                            style="color: red" @click="deleteSection(item, $event)" />
+                                    <v-list-item-content v-if="!item.edit" class="list-item-wrapper">
+                                        <div class="list-item-content">
+                                            <span>{{ item.name }}</span>
+                                            <div class="icon-group">
+                                                <Icon class="edit" icon="material-symbols-light:edit-square-outline" width="30" height="30"
+                                                    style="color: #0177a9;" @click="editSection(item, $event)" />
+                                                <Icon class="edit" icon="material-symbols-light:delete-outline" width="30" height="30"
+                                                    style="color: red" @click="deleteSection(item, $event)" />
+                                            </div>
+                                        </div>
                                     </v-list-item-content>
                                     <v-list-item-content v-else style="display: flex;">
                                         <v-text-field @click="cancelClick($event)" @keydown.space="cancelClick($event)" v-model="tempName"
@@ -865,6 +880,11 @@ const exportToPDF = async () => {
                             @dragend="dragEnd('PieChart')">
                             <img src="/PieChart.png" class="icon" style="width: 80px" @click="toggleKPIForm('PieChart')">
                         </div>
+                        <a>Bar Charts</a>
+                        <div class="widget-icon" draggable="true" unselectable="on" @drag="drag('BarChart')"
+                            @dragend="dragEnd('BarChart')">
+                            <img src="/PieChart.png" class="icon" style="width: 80px" @click="toggleKPIForm('BarChart')">
+                        </div>
                         <a>Stats Charts</a>
                         <div class="widget-icon" draggable="true" unselectable="on" @drag="drag('StatChart')"
                             @dragend="dragEnd('StatChart')">
@@ -898,6 +918,8 @@ const exportToPDF = async () => {
                                     :ytitle="item.attributes.ytitle" :color="item.attributes.color" :target="item.attributes.target" />
                                 <PieChart v-if="item.chart == 'PieChart'" :city="item.attributes.city"
                                     :tableId="item.attributes.tableId" :title="item.attributes.title" />
+                                <BarChart v-if="item.chart == 'BarChart'" :city="item.attributes.city"
+                                    :tableId="item.attributes.tableId" :title="item.attributes.title" />
                                 <StatChart v-if="item.chart == 'StatChart'" :city="item.attributes.city"
                                     :tableId="item.attributes.tableId" :title="item.attributes.title"
                                     :suffix="item.attributes.suffix" :id="item.id" :target="item.attributes.target" />
@@ -919,6 +941,8 @@ const exportToPDF = async () => {
                     :color="currentItem.attributes.color" />
                 <PieChartForm v-if="pieChartBool" :title="currentItem.attributes.title" @cancel="togglePieChartEdit"
                     @updateChart="updateChart" />
+                <BarChartForm v-if="barChartBool" :title="currentItem.attributes.title" 
+                    @cancel="toggleBarChartEdit" @updateChart="updateChart" />
                 <StatChartForm v-if="statChartBool" :title="currentItem.attributes.title"
                     :suffix="currentItem.attributes.suffix" @cancel="toggleStatChartEdit" @updateChart="updateChart" />
                 <TableForm v-if="tableBool" :city=city :title="currentItem.attributes.title"
@@ -926,6 +950,7 @@ const exportToPDF = async () => {
                     @cancel="toggleTableEdit" @updateChart="updateChart" />
             </div>
         </div>
+        <!-- Dashboard without edit -->
         <div v-else-if="editMode == false" class="empty">
             <div class="header">
                 <v-col cols="auto" class="buttons" style="display: flex; justify-content: space-between; align-items: center;">
@@ -1001,6 +1026,8 @@ const exportToPDF = async () => {
                                     :xtitle="item.attributes.xtitle" :ytitle="item.attributes.ytitle"
                                     :color="item.attributes.color" :target="item.attributes.target" />
                                 <PieChart v-if="item.chart == 'PieChart'" :city="item.attributes.city"
+                                    :tableId="item.attributes.tableId" :title="item.attributes.title" />
+                                <BarChart v-if="item.chart == 'BarChart'" :city="item.attributes.city"
                                     :tableId="item.attributes.tableId" :title="item.attributes.title" />
                                 <StatChart v-if="item.chart == 'StatChart'" :city="item.attributes.city"
                                     :tableId="item.attributes.tableId" :title="item.attributes.title"
@@ -1217,6 +1244,28 @@ const exportToPDF = async () => {
         &:hover {
             transform: scale(1.1);
         }
+    }
+}
+
+.list-item-wrapper {
+    width: 100%;
+    padding: 8px 0;
+}
+
+.list-item-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+
+    span {
+        flex-grow: 1;
+    }
+
+    .icon-group {
+        display: flex;
+        gap: 8px;
+        align-items: center;
     }
 }
 </style>
