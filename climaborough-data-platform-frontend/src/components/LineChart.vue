@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, watch, computed } from "vue";
+import { ref, computed, watch } from "vue";
 const props = defineProps({
   tableId: {
     type: Number,
@@ -26,9 +26,12 @@ const props = defineProps({
     default: '#086494'
   },
 })
-const chartOptions = ref({
+
+const chartType = ref('line'); // Reactive chart type
+
+const chartOptions = computed(() => ({
   chart: {
-    type: 'line',
+    type: chartType.value, // Use the reactive chartType
     zoom: {
       enabled: true
     }
@@ -37,18 +40,20 @@ const chartOptions = ref({
     enabled: false
   },
   stroke: {
-    curve: 'straight'
+    curve: chartType.value === 'area' ? 'smooth' : 'straight',
+    width: 2.2
   },
   title: {
     text: props.title,
+    style: {
+      fontSize: '20px',
+      fontWeight: 'bold'
+    },
+    offsetY: -8,
   },
   grid: {
     row: {
-      colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
-      opacity: 0.5
-    },
-    column: {
-      colors: undefined,
+      colors: ['#f3f3f3', 'transparent'],
       opacity: 0.5
     },
   },
@@ -59,11 +64,13 @@ const chartOptions = ref({
   yaxis: {
     title: { text: props.ytitle }
   }
-})
-const baseline = ref([])
-const values = ref([])
-const valuemappedtotime = ref([])
-const timestamps = ref([])
+}));
+
+const values = ref([]);
+const baseline = ref([]);
+const valuemappedtotime = ref([]);
+const timestamps = ref([]);
+
 const formatDate = (dateString) => {
   const date = new Date(dateString);
   const day = String(date.getDate()).padStart(2, '0');
@@ -72,12 +79,6 @@ const formatDate = (dateString) => {
   return `${day}/${month}/${year}`;
 };
 
-function getRandomInt(min, max) {
-    min = Math.ceil(min + max/8);
-    max = Math.floor(max-max/8);
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
 const lastTimestamp = computed(() => {
   if (timestamps.value.length > 0) {
     const lastTimestamp = timestamps.value[timestamps.value.length - 1];
@@ -85,172 +86,46 @@ const lastTimestamp = computed(() => {
   }
   return 'No updates available';
 });
+
 async function getItems() {
   try {
-    const response = await fetch('http://localhost:8000/' + props.city.toLowerCase() + '/kpi/?id=' + props.tableId)
+    const response = await fetch('http://localhost:8000/' + props.city.toLowerCase() + '/kpi/?id=' + props.tableId);
     const data = await response.json();
-    // Iterate over the list of strings and log each string
     data.forEach(item => {
-      values.value.push(item.kpiValue)
-      timestamps.value.push(item.timestamp)
-      valuemappedtotime.value.push({ x: item.timestamp, y: item.kpiValue })
-      let baseY = getRandomInt(0,item.kpiValue)
-      baseline.value.push({ x: item.timestamp, y: baseY })
+      values.value.push(item.kpiValue);
+      timestamps.value.push(item.timestamp);
+      valuemappedtotime.value.push({ x: item.timestamp, y: item.kpiValue });
+      baseline.value.push({ x: item.timestamp, y: Math.max(0, item.kpiValue - 10) }); // Example baseline
     });
-    if (valuemappedtotime.value.length == 1) {
-      valuemappedtotime.value.push(valuemappedtotime.value[0])
-    }
-
-    chartOptions.value = chartOptions.value = {
-
-      chart: {
-        type: 'line',
-        zoom: {
-          enabled: true
-        },
-        toolbar: {
-          offsetY: 20
-        }
-      },
-      dataLabels: {
-        enabled: false,
-      },
-      stroke: {
-        curve: 'straight',
-        width: 2.2
-      },
-      markers: {
-        size: 3,
-        colors: undefined,
-        strokeColors: '#fff',
-        strokeWidth: 1,
-        strokeOpacity: 0.9,
-        strokeDashArray: 0,
-        fillOpacity: 1,
-        discrete: [],
-        shape: "circle",
-        radius: 2,
-        offsetX: 0,
-        offsetY: 0,
-        onClick: undefined,
-        onDblClick: undefined,
-        showNullDataPoints: true,
-        hover: {
-          size: undefined,
-          sizeOffset: 3
-        }
-      },
-      title: {
-        text: props.title,
-        style: {
-          fontSize: '20px',
-          fontWeight: 'bold'
-        },
-        offsetY: -8,
-      },
-      grid: {
-        row: {
-          colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
-          opacity: 0.5
-        },
-        xaxis: {
-          lines: {
-            show: true
-          }
-        },
-      },
-      xaxis: {
-        type: 'datetime',
-        title: { text: props.xtitle }
-      },
-      yaxis: {
-        title: { text: props.ytitle }
-      }
-    }
-
   } catch (error) {
-    window.alert(error)
+    window.alert(error);
   }
 }
 
-getItems()
-console.log(valuemappedtotime.value)
+getItems();
 
-const series = ref([{
-  name: "Current Value", data: valuemappedtotime.value, color: props.color,
-}, {
-  name: "Baseline", data: baseline.value, color: "#FFB800",
-}])
-
+const series = ref([
+  {
+    name: "KPI Values",
+    data: valuemappedtotime.value,
+    color: props.color,
+  },
+  {
+    name: "Baseline",
+    data: baseline.value,
+    color: "#FFB800",
+  }
+]);
 
 watch(() => [props.title, props.xtitle, props.ytitle, props.color], () => {
-  series.value = [{
-    name: "Current Value", namedata: valuemappedtotime.value, color: props.color
-  }]
-  chartOptions.value = {
-    chart: {
-      type: 'line',
-      zoom: {
-        enabled: true
-      }
-    },
-    dataLabels: {
-      enabled: false
-    },
-    stroke: {
-      curve: 'straight',
-      width: 2.2
-    },
-    markers: {
-      size: 3,
-      colors: undefined,
-      strokeColors: '#fff',
-      strokeWidth: 1,
-      strokeOpacity: 0.9,
-      strokeDashArray: 0,
-      fillOpacity: 1,
-      discrete: [],
-      shape: "circle",
-      radius: 2,
-      offsetX: 0,
-      offsetY: 0,
-      onClick: undefined,
-      onDblClick: undefined,
-      showNullDataPoints: true,
-      hover: {
-        size: undefined,
-        sizeOffset: 3
-      }
-    },
-    title: {
-      text: props.title
-    },
-    grid: {
-      row: {
-        colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
-        opacity: 0.5
-      },
-      xaxis: {
-        lines: {
-          show: true
-        }
-      },
-    },
-    xaxis: {
-      xaxis: 'datetime',
-      title: { text: props.xtitle }
-    },
-    yaxis: {
-      title: { text: props.ytitle }
+  series.value = [
+    {
+      name: "KPI Values",
+      data: valuemappedtotime.value,
+      color: props.color
     }
-  }
-})
-
-const alert = ref(false)
-const toggleAlert = () => {
-  alert.value = !alert.value
-}
-
+  ];
+});
 </script>
 
 <template>
@@ -258,15 +133,17 @@ const toggleAlert = () => {
     <div id="chart">
       <VueApexCharts type="line" height="100%" :options="chartOptions" :series="series"></VueApexCharts>
     </div>
-    <div class="update">
-      Last Update: {{ lastTimestamp }}
-      <Icon v-if="alert" icon="mdi:bell" width="20" height="20" @click="toggleAlert"
-        style="margin-left: 5px;color: red" />
-      <Icon v-else icon="mdi:bell-outline" width="20" height="20" @click="toggleAlert"
-        style="margin-left: 5px;color: black" />
+    <div class="bottom-controls">
+      <select v-model="chartType" class="chart-select">
+        <option value="line">Line Chart</option>
+        <option value="bar">Bar Chart</option>
+        <option value="area">Area Chart</option>
+      </select>
+      <div class="update">
+        Last Update: {{ lastTimestamp }}
+      </div>
     </div>
   </div>
-
 </template>
 
 <style lang="scss" scoped>
@@ -277,19 +154,57 @@ const toggleAlert = () => {
   overflow: hidden;
 }
 
+#controls {
+  margin-bottom: 10px;
+}
+
 #chart {
   height: 100%;
 }
 
 .update {
   display: flex;
-  /* Add flex display */
   justify-content: flex-end;
-  /* Align items to the right */
   align-items: center;
-  /* Center items vertically */
   flex-shrink: 0;
-  /* Prevents the update element from shrinking */
   padding: 5px;
+}
+
+.chart-select {
+  padding: 8px 12px;
+  border: 2px solid #086494;
+  border-radius: 5px;
+  background-color: white;
+  color: #086494;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+  outline: none;
+
+  &:hover {
+    border-color: #064d6a;
+    background-color: #f8f9fa;
+  }
+
+  &:focus {
+    border-color: #043a52;
+    box-shadow: 0 0 0 2px rgba(8, 100, 148, 0.2);
+  }
+}
+
+.bottom-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px;
+  gap: 10px;
+}
+
+.chart-select {
+  min-width: 120px;
+}
+
+.update {
+  margin-left: auto;
 }
 </style>

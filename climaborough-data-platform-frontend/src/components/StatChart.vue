@@ -43,20 +43,21 @@ const resizeObserver = new ResizeObserver(entries => {
         weight: 'bold'
       },
       paper_bgcolor: "white",
-      margin: { t: 0, b: 0, l: 0, r: 0 },
+      margin: { t: 40, b: 0, l: 0, r: 0 }, // Added top margin for title
       width: document.querySelector(`[id='${props.id}mydiv']`).parentElement.clientWidth,
       height: document.querySelector(`[id='${props.id}mydiv']`).parentElement.clientHeight,
       autosize: true,
       title: {
         text: props.title,
-        x: 0, // Ensure the title is aligned to the left
-        y: 0.9,
+        x: 0.02, // Slight padding from left
+        y: 0.98, // Position from top
+        xanchor: 'left',
+        yanchor: 'top',
         font: {
           size: 20,
-
+          weight: 'bold',
         }
       }
-
     };
     Plotly.newPlot(props.id + "mydiv", data.value, layout.value, { displaylogo: false });
   }
@@ -164,17 +165,19 @@ async function getItems() {
         weight: 'bold'
       },
       paper_bgcolor: "white",
-      margin: { t: 0, b: 0, l: 0, r: 0 },
+      margin: { t: 40, b: 0, l: 0, r: 0 }, // Added top margin for title
       width: document.querySelector(`[id='${props.id}mydiv']`).parentElement.clientWidth,
       height: document.querySelector(`[id='${props.id}mydiv']`).parentElement.clientHeight,
       autosize: true,
       title: {
         text: props.title,
-        x: 0, // Ensure the title is aligned to the left
-        y: 0.9,
+        x: 0.02, // Slight padding from left
+        y: 0.98, // Position from top
+        xanchor: 'left',
+        yanchor: 'top',
         font: {
           size: 20,
-
+          weight: 'bold',
         }
       }
     };

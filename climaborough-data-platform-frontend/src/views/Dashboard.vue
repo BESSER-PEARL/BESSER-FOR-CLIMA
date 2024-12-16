@@ -88,53 +88,6 @@ const projects = {
 }
 
 
-const exportToPDF = async () => {
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const charts = selectedSection.layout.map(item => document.getElementById(item.id));
-
-    pdf.setFontSize(22);
-    pdf.text('Dashboard Report: ' + city.value, 10, 20);
-
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const margin = 10;
-    const chartWidth = pdfWidth - 2 * margin;
-    let y = 30;
-
-    const drawRoundedBorder = (x, y, width, height, radius) => {
-        pdf.setDrawColor(200, 200, 200);
-        pdf.setLineWidth(1);
-        pdf.rect(x, y, width, height);
-    };
-
-    for (let i = 0; i < charts.length; i++) {
-        if (!charts[i]) continue; // Skip if element not found
-
-        const canvas = await html2canvas(charts[i], {
-            useCORS: true,
-            allowTaint: true,
-            scale: 2,
-            backgroundColor: null
-        });
-
-        const imgData = canvas.toDataURL('image/png');
-        const imgProps = pdf.getImageProperties(imgData);
-        const imgHeight = (imgProps.height * chartWidth) / imgProps.width;
-
-        if (i > 0 && y + imgHeight + 10 > pdf.internal.pageSize.getHeight()) {
-            pdf.addPage();
-            y = 10;
-            pdf.text('Dashboard Report: ' + city.value, 10, 20);
-        }
-
-        const x = margin;
-        drawRoundedBorder(x, y, chartWidth + 2, imgHeight + 2, 10);
-        pdf.addImage(imgData, 'PNG', x + 1, y + 1, chartWidth, imgHeight);
-
-        y += imgHeight + 30;
-    }
-
-    pdf.save('dashboard.pdf');
-};
 
 const flag = projects[city.value]
 
@@ -467,48 +420,58 @@ const updateChart = (object) => {
 }
 
 const organizeVisualisations = (resizeBool) => {
-    let layoutCopy = selectedSection.layout
-    let sortedLayout = []
-    layoutCopy.forEach((object, index1) => {
-        object.position = object.x + object.y
-        if (sortedLayout.length == 0) {
-            sortedLayout.push(object)
+    let layoutCopy = selectedSection.layout;
+    let sortedLayout = [];
+    
+    // Sort widgets by their current positions
+    layoutCopy.forEach((object) => {
+        object.position = object.x + object.y;
+        if (sortedLayout.length === 0) {
+            sortedLayout.push(object);
         } else {
             for (let index = 0; index < sortedLayout.length; index++) {
                 const value = sortedLayout[index];
                 if (object.position <= value.position) {
                     sortedLayout.splice(index, 0, object);
-                    break; // Exit the loop once the object is inserted
+                    break;
                 } else if (index === sortedLayout.length - 1) {
                     sortedLayout.push(object);
-                    break; // Exit the loop after pushing the object at the end
+                    break;
                 }
             }
         }
+    });
 
-    })
-    let currX = 0
-    selectedSection.layout = []
-    let row = 0
-    let rowHeight = []
-    let currItemInRow = 0
+    let currX = 0;
+    selectedSection.layout = [];
+    let row = 0;
+
+    // Adjust layout and size of widgets
     sortedLayout.forEach((object) => {
         if (resizeBool) {
-            object.w = 4
-            object.h = 8
+            if (object.chart === "Map") {
+                // Set default size for Map widget
+                object.w = 7; // Default width for Map widget
+                object.h = 13; // Default height for Map widget
+            } else {
+                // New size for all other widgets
+                object.w = 4;
+                object.h = 8;
+            }
         }
-        if (currX + object.w > 12) {
-            currX = 0
-            row++
-        }
-        object.x = currX
-        currX = currX + object.w
-        object.y = row
-        selectedSection.layout.push(object)
-    })
-    return
 
-}
+        if (currX + object.w > 12) {
+            currX = 0;
+            row++;
+        }
+        object.x = currX;
+        currX += object.w;
+        object.y = row;
+
+        selectedSection.layout.push(object);
+    });
+};
+
 
 
 
@@ -562,6 +525,7 @@ const drag = throttle((chart) => {
 
         }
     }
+    
     const index = selectedSection.layout.findIndex(item => item.i === dropId);
     if (dragItemStop.value.chart) {
         dragItemStop.value = {}
@@ -676,23 +640,151 @@ const tempName = ref("")
 // Ajouter cette nouvelle fonction
 const exportToPNG = async () => {
     try {
+        // Get the dashboard container
         const element = document.querySelector('.grid-space-static') || document.querySelector('.grid-space');
         if (!element) return;
 
+        // Add temporary white background and padding for export
+        const originalBackground = element.style.background;
+        const originalPadding = element.style.padding;
+        element.style.background = '#ffffff';
+        element.style.padding = '20px';
+
+        // Create canvas with better quality settings
         const canvas = await html2canvas(element, {
             useCORS: true,
             allowTaint: true,
-            scale: 2,
-            backgroundColor: '#FFFFFF'
+            scale: 2, // Higher scale for better quality
+            backgroundColor: '#ffffff',
+            logging: false,
+            width: element.scrollWidth,
+            height: element.scrollHeight,
+            imageTimeout: 0,
+            onclone: (clonedDoc) => {
+                // Add header to cloned document
+                const header = clonedDoc.createElement('div');
+                header.style.padding = '20px';
+                header.style.background = '#0177a9';
+                header.style.color = '#ffffff';
+                header.style.fontSize = '24px';
+                header.style.fontWeight = 'bold';
+                header.style.marginBottom = '20px';
+                header.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>${city.value} Dashboard</span>
+                        <span style="font-size: 14px;">${new Date().toLocaleDateString()}</span>
+                    </div>
+                `;
+                const clonedElement = clonedDoc.querySelector('.grid-space-static') || clonedDoc.querySelector('.grid-space');
+                clonedElement.insertBefore(header, clonedElement.firstChild);
+            }
         });
 
+        // Restore original styles
+        element.style.background = originalBackground;
+        element.style.padding = originalPadding;
+
+        // Create and trigger download
         const link = document.createElement('a');
-        link.download = `${city.value}_dashboard.png`;
-        link.href = canvas.toDataURL('image/png');
+        link.download = `${city.value}_dashboard_${new Date().toISOString().split('T')[0]}.png`;
+        link.href = canvas.toDataURL('image/png', 1.0); // Maximum quality
+        document.body.appendChild(link);
         link.click();
+        document.body.removeChild(link);
+
     } catch (error) {
         console.error('Error exporting to PNG:', error);
     }
+};
+
+const exportToPDF = async () => {
+    // Create PDF with A4 dimensions and better quality settings
+    const pdf = new jsPDF('p', 'mm', 'a4', true);
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 15;
+    const contentWidth = pageWidth - (2 * margin);
+
+    // Helper function to add page header
+    const addHeader = (pageNumber, totalPages) => {
+        pdf.setFillColor(1, 119, 169); // #0177a9
+        pdf.rect(0, 0, pageWidth, 25, 'F');
+        
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFontSize(16);
+        pdf.text(`${city.value} Dashboard`, margin, 17);
+        
+        // Add date and page number
+        const pageInfo = `Page ${pageNumber} of ${totalPages}`;
+        const today = new Date().toLocaleDateString();
+        pdf.setFontSize(10);
+        pdf.text(today, pageWidth - margin - pdf.getTextWidth(today), 17);
+        pdf.text(pageInfo, pageWidth/2 - pdf.getTextWidth(pageInfo)/2, 17);
+    };
+
+    let yPosition = 35;
+    const charts = selectedSection.layout.map(item => document.getElementById(item.i));
+    let pageNumber = 1;
+    const totalPages = Math.ceil(charts.length / 2); // Estimate pages
+
+    addHeader(pageNumber, totalPages);
+
+    for (let i = 0; i < charts.length; i++) {
+        if (!charts[i]) continue;
+
+        try {
+            const canvas = await html2canvas(charts[i], {
+                useCORS: true,
+                allowTaint: true,
+                scale: 2,
+                backgroundColor: '#ffffff',
+                logging: false
+            });
+
+            const imgData = canvas.toDataURL('image/png', 1.0);
+            const imgWidth = contentWidth;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+            // Check if we need a new page
+            if (yPosition + imgHeight + 20 > pageHeight) {
+                pdf.addPage();
+                pageNumber++;
+                addHeader(pageNumber, totalPages);
+                yPosition = 35;
+            }
+
+            // Add chart title
+            pdf.setFontSize(12);
+            pdf.setTextColor(0, 0, 0);
+            const title = charts[i].querySelector('h3')?.textContent || `Chart ${i + 1}`;
+            pdf.text(title, margin, yPosition);
+            yPosition += 8;
+
+            // Add chart with white background and shadow
+            pdf.setFillColor(255, 255, 255);
+            pdf.setDrawColor(200, 200, 200);
+            pdf.roundedRect(margin - 1, yPosition - 1, imgWidth + 2, imgHeight + 2, 2, 2, 'FD');
+            pdf.addImage(imgData, 'PNG', margin, yPosition, imgWidth, imgHeight);
+            
+            yPosition += imgHeight + 20;
+
+        } catch (error) {
+            console.error('Error processing chart:', error);
+        }
+    }
+
+    // Add footer to each page
+    const totalPageCount = pdf.internal.getNumberOfPages();
+    for (let i = 1; i <= totalPageCount; i++) {
+        pdf.setPage(i);
+        pdf.setFontSize(8);
+        pdf.setTextColor(128, 128, 128);
+        const footerText = `Generated from ${city.value} Dashboard - ${new Date().toLocaleString()}`;
+        pdf.text(footerText, margin, pageHeight - 10);
+    }
+
+    // Save with formatted name
+    pdf.save(`${city.value}_dashboard_${new Date().toISOString().split('T')[0]}.pdf`);
 };
 
 </script>

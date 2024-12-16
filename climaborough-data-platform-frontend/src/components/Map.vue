@@ -28,7 +28,7 @@ const legend = ref(true)
 const center = ref([49.520300, 5.890186])
 
 if (props.city == "Cascais") {
-  center.value = [38.696912, -9.422269]
+  center.value = [38.696912, -9.422269] // TODO: Set the center of the map for Cascais and SELECT order of layer (backend)
   legend.value = false
 } else if (props.city == "Torino") {
   center.value = [45.070602, 7.682152]
