@@ -41,11 +41,12 @@ class TableColumn(BaseModel):
 class Map(Visualisation):
     pass 
     
-class User(ABC, BaseModel):
+class User(BaseModel):
     email: str
     firstName: str
     password: str
     lastName: str
+    type_spec: str
     
 class Admin(User):
     pass 
@@ -129,5 +130,4 @@ class KPIWasteSorted(KPI):
     target: int
     
 class KPITextileWastePerPerson(KPI):
-    pass 
-    
+    pass
