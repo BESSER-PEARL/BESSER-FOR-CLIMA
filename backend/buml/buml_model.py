@@ -1,9 +1,9 @@
 from besser.BUML.metamodel.structural import *  
 
 # Primitive Data Types
+datetime_type = PrimitiveDataType("datetime")
 int_type = PrimitiveDataType("int")
 str_type = PrimitiveDataType("str")
-datetime_type = PrimitiveDataType("datetime")
 
 # Classes
 City: Class = Class(name="City")
@@ -20,6 +20,7 @@ KPIPeakSolarEnergy: Class = Class(name="KPIPeakSolarEnergy")
 Visualisation: Class = Class(name="Visualisation", is_abstract=True)
 Table: Class = Class(name="Table")
 PieChart: Class = Class(name="PieChart")
+BarChart: Class = Class(name="BarChart")
 StatChart: Class = Class(name="StatChart")
 LineChart: Class = Class(name="LineChart")
 TableColumn: Class = Class(name="TableColumn")
@@ -106,6 +107,8 @@ Visualisation.attributes={Visualisation_xposition, Visualisation_yposition, Visu
 # Table class attributes and methods
 
 # PieChart class attributes and methods
+
+# BarChart class attributes and methods
 
 # StatChart class attributes and methods
 StatChart_unit: Property = Property(name="unit", type=str_type)
@@ -217,6 +220,7 @@ gen_KPI_KPITraffic: Generalization = Generalization(general=KPI, specific=KPITra
 gen_KPI_KPIMoney: Generalization = Generalization(general=KPI, specific=KPIMoney)
 gen_Visualisation_Table: Generalization = Generalization(general=Visualisation, specific=Table)
 gen_Visualisation_PieChart: Generalization = Generalization(general=Visualisation, specific=PieChart)
+gen_Visualisation_BarChart: Generalization = Generalization(general=Visualisation, specific=BarChart)
 gen_Visualisation_StatChart: Generalization = Generalization(general=Visualisation, specific=StatChart)
 gen_Visualisation_LineChart: Generalization = Generalization(general=Visualisation, specific=LineChart)
 gen_Visualisation_Map: Generalization = Generalization(general=Visualisation, specific=Map)
@@ -237,8 +241,8 @@ gen_KPI_KPITextileWastePerPerson: Generalization = Generalization(general=KPI, s
 # Domain Model
 domain: DomainModel = DomainModel(
 				name="Domain Model",
-				types={City, KPI, KPIValue, KPITemp, KPITraffic, KPICollectedWaste, KPISecondHandCustomers, KPIMoney, KPITotalRenewableEnergy, KPINumberHouseholdRenewableEnergy, KPIPeakSolarEnergy, Visualisation, Table, PieChart, StatChart, LineChart, TableColumn, Map, User, Admin, CityUser, CityAngel, SolutionProvider, Citizen, Dashboard, MapData, GeoJson, WMS, KPIParticipants, KPIWasteAvoided, KPICo2Avoided, KPIWasteSorted, KPITextileWastePerPerson},
+				types={City, KPI, KPIValue, KPITemp, KPITraffic, KPICollectedWaste, KPISecondHandCustomers, KPIMoney, KPITotalRenewableEnergy, KPINumberHouseholdRenewableEnergy, KPIPeakSolarEnergy, Visualisation, Table, PieChart, BarChart, StatChart, LineChart, TableColumn, Map, User, Admin, CityUser, CityAngel, SolutionProvider, Citizen, Dashboard, MapData, GeoJson, WMS, KPIParticipants, KPIWasteAvoided, KPICo2Avoided, KPIWasteSorted, KPITextileWastePerPerson},
 				associations={values, kpis, visualizedBy, has, consistsOf, shows, operatedBy, hasMapData, isDisplayedOnMap},
-				generalizations={gen_KPI_KPICollectedWaste, gen_KPI_KPISecondHandCustomers, gen_KPI_KPITotalRenewableEnergy, gen_KPI_KPINumberHouseholdRenewableEnergy, gen_KPI_KPIPeakSolarEnergy, gen_KPI_KPITemp, gen_KPI_KPITraffic, gen_KPI_KPIMoney, gen_Visualisation_Table, gen_Visualisation_PieChart, gen_Visualisation_StatChart, gen_Visualisation_LineChart, gen_Visualisation_Map, gen_User_Admin, gen_User_CityUser, gen_User_CityAngel, gen_User_SolutionProvider, gen_User_Citizen, gen_MapData_GeoJson, gen_MapData_WMS, gen_KPI_KPIParticipants, gen_KPI_KPIWasteAvoided, gen_KPI_KPICo2Avoided, gen_KPI_KPIWasteSorted, gen_KPI_KPITextileWastePerPerson},
+				generalizations={gen_KPI_KPICollectedWaste, gen_KPI_KPISecondHandCustomers, gen_KPI_KPITotalRenewableEnergy, gen_KPI_KPINumberHouseholdRenewableEnergy, gen_KPI_KPIPeakSolarEnergy, gen_KPI_KPITemp, gen_KPI_KPITraffic, gen_KPI_KPIMoney, gen_Visualisation_Table, gen_Visualisation_PieChart, gen_Visualisation_BarChart, gen_Visualisation_StatChart, gen_Visualisation_LineChart, gen_Visualisation_Map, gen_User_Admin, gen_User_CityUser, gen_User_CityAngel, gen_User_SolutionProvider, gen_User_Citizen, gen_MapData_GeoJson, gen_MapData_WMS, gen_KPI_KPIParticipants, gen_KPI_KPIWasteAvoided, gen_KPI_KPICo2Avoided, gen_KPI_KPIWasteSorted, gen_KPI_KPITextileWastePerPerson},
 				enumerations=set()
 				)

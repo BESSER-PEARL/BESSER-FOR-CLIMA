@@ -28,9 +28,9 @@ from auth.auth_model import UserSchema, UserLoginSchema, TokenSchema
 from auth.auth_bearer import JWTBearer
 
 # Local application imports
-from pydantic_classes import City, KPI, KPIValue, KPITemp, KPITraffic, KPICollectedWaste, KPISecondHandCustomers, KPIMoney, KPITotalRenewableEnergy, KPINumberHouseholdRenewableEnergy, KPIPeakSolarEnergy, Visualisation, Table, PieChart, StatChart, LineChart, TableColumn, Map, User, Admin, CityUser, CityAngel, SolutionProvider, Citizen, Dashboard, MapData, GeoJson, WMS, KPIParticipants, KPIWasteAvoided, KPICo2Avoided, KPIWasteSorted, KPITextileWastePerPerson
+from pydantic_classes import Visualisation, Table, PieChart, BarChart, StatChart, LineChart, TableColumn, Map, User, Admin, CityUser, CityAngel, SolutionProvider, Citizen, Dashboard, MapData, GeoJson, WMS, City, KPI, KPIValue, KPITemp, KPITraffic, KPICollectedWaste, KPISecondHandCustomers, KPIMoney, KPITotalRenewableEnergy, KPINumberHouseholdRenewableEnergy, KPIPeakSolarEnergy, KPIParticipants, KPIWasteAvoided, KPICo2Avoided, KPIWasteSorted, KPITextileWastePerPerson
 from sql_alchemy import Base
-from sql_alchemy import City as CityDB, KPI as KPIDB, KPIValue as KPIValueDB, KPITemp as KPITempDB, KPITraffic as KPITrafficDB, KPICollectedWaste as KPICollectedWasteDB, KPISecondHandCustomers as KPISecondHandCustomersDB, KPIMoney as KPIMoneyDB, KPITotalRenewableEnergy as KPITotalRenewableEnergyDB, KPINumberHouseholdRenewableEnergy as KPINumberHouseholdRenewableEnergyDB, KPIPeakSolarEnergy as KPIPeakSolarEnergyDB, Visualisation as VisualisationDB, Table as TableDB, PieChart as PieChartDB, StatChart as StatChartDB, LineChart as LineChartDB, TableColumn as TableColumnDB, Map as MapDB, User as UserDB, Admin as AdminDB, CityUser as CityUserDB, CityAngel as CityAngelDB, SolutionProvider as SolutionProviderDB, Citizen as CitizenDB, Dashboard as DashboardDB, MapData as MapDataDB, GeoJson as GeoJsonDB, WMS as WMSDB, KPIParticipants as KPIParticipantsDB, KPIWasteAvoided as KPIWasteAvoidedDB, KPICo2Avoided as KPICo2AvoidedDB, KPIWasteSorted as KPIWasteSortedDB, KPITextileWastePerPerson as KPITextileWastePerPersonDB
+from sql_alchemy import Visualisation as VisualisationDB, Table as TableDB, PieChart as PieChartDB, BarChart as BarChartDB, StatChart as StatChartDB, LineChart as LineChartDB, TableColumn as TableColumnDB, Map as MapDB, User as UserDB, Admin as AdminDB, CityUser as CityUserDB, CityAngel as CityAngelDB, SolutionProvider as SolutionProviderDB, Citizen as CitizenDB, Dashboard as DashboardDB, MapData as MapDataDB, GeoJson as GeoJsonDB, WMS as WMSDB, City as CityDB, KPI as KPIDB, KPIValue as KPIValueDB, KPITemp as KPITempDB, KPITraffic as KPITrafficDB, KPICollectedWaste as KPICollectedWasteDB, KPISecondHandCustomers as KPISecondHandCustomersDB, KPIMoney as KPIMoneyDB, KPITotalRenewableEnergy as KPITotalRenewableEnergyDB, KPINumberHouseholdRenewableEnergy as KPINumberHouseholdRenewableEnergyDB, KPIPeakSolarEnergy as KPIPeakSolarEnergyDB, KPIParticipants as KPIParticipantsDB, KPIWasteAvoided as KPIWasteAvoidedDB, KPICo2Avoided as KPICo2AvoidedDB, KPIWasteSorted as KPIWasteSortedDB, KPITextileWastePerPerson as KPITextileWastePerPersonDB
 from sql_alchemy import KPI as KPIDB
 
 import logging
@@ -61,7 +61,6 @@ if db_password is None:
 db_user = os.environ.get("DB_USER")
 if db_user is None:
     db_user = "root"
-
 
 engine = create_engine("postgresql://" + db_host + "/" + db_name +
                        "?user=" + db_user + "&password=" + db_password)
@@ -96,59 +95,59 @@ except Exception as e:
     print(e)
 
 
-@app.post("/user/signup", dependencies=[Depends(JWTBearer())], tags=["user"])
-async def create_user(user: User = Body(...), city_id: Optional[int] = None):
-    # Check if user already exists
-    user_db = session.query(UserDB).filter_by(email=user.email).first()
-    if user_db is not None:
-        return {"error": "User with email address '" + user.email + "' already registered!"}
-    
-    # Hash password
-    hashed_password = pwd_context.hash(user.password)
-    
-    # Create appropriate user type based on discriminator
-    user_types = {
-        "admin": AdminDB,
-        "cityuser": CityUserDB,
-        "cityangel": CityAngelDB,
-        "solutionprovider": SolutionProviderDB,
-        "citizen": CitizenDB
-    }
-    
-    UserClass = user_types.get(user.type_spec)
-    if not UserClass:
-        return {"error": f"Invalid user type: {user.type_spec}"}
-    
-    # For cityuser, verify city exists
-    if user.type_spec == "cityuser":
-        if not city_id:
-            return {"error": "City ID is required for city users"}
-        city = session.query(CityDB).filter_by(id=city_id).first()
-        if not city:
-            return {"error": "Invalid city ID"}
-            
-    # Create user object
-    statement = UserClass(
-        email=user.email,
-        password=hashed_password,
-        firstName=user.firstName,
-        lastName=user.lastName
-    )
-    
-    # Set city for cityuser
-    if user.type_spec == "cityuser":
-        statement.city_id = city_id
+    @app.post("/user/signup", dependencies=[Depends(JWTBearer())], tags=["user"])
+    async def create_user(user: User = Body(...), city_id: Optional[int] = None):
+        # Check if user already exists
+        user_db = session.query(UserDB).filter_by(email=user.email).first()
+        if user_db is not None:
+            return {"error": "User with email address '" + user.email + "' already registered!"}
         
-    try:
-        session.add(statement)
-        session.commit()
-        return sign_jwt(user.email)
-    except IntegrityError:
-        session.rollback()
-        return {"error": "Integrity error"}
-    except Exception as e:
-        session.rollback()
-        return {"error": f"Exception: {str(e)}"}
+        # Hash password
+        hashed_password = pwd_context.hash(user.password)
+        
+        # Create appropriate user type based on discriminator
+        user_types = {
+            "admin": AdminDB,
+            "cityuser": CityUserDB,
+            "cityangel": CityAngelDB,
+            "solutionprovider": SolutionProviderDB,
+            "citizen": CitizenDB
+        }
+        
+        UserClass = user_types.get(user.type_spec)
+        if not UserClass:
+            return {"error": f"Invalid user type: {user.type_spec}"}
+        
+        # For cityuser, verify city exists
+        if user.type_spec == "cityuser":
+            if not city_id:
+                return {"error": "City ID is required for city users"}
+            city = session.query(CityDB).filter_by(id=city_id).first()
+            if not city:
+                return {"error": "Invalid city ID"}
+                
+        # Create user object
+        statement = UserClass(
+            email=user.email,
+            password=hashed_password,
+            firstName=user.firstName,
+            lastName=user.lastName
+        )
+        
+        # Set city for cityuser
+        if user.type_spec == "cityuser":
+            statement.city_id = city_id
+            
+        try:
+            session.add(statement)
+            session.commit()
+            return sign_jwt(user.email)
+        except IntegrityError:
+            session.rollback()
+            return {"error": "Integrity error"}
+        except Exception as e:
+            session.rollback()
+            return {"error": f"Exception: {str(e)}"}
 
 @app.post("/user/refresh", dependencies=[Depends(JWTBearer())], tags=["user"])
 async def refresh_token(token: TokenSchema = Body(...)):
@@ -677,33 +676,13 @@ except:
 
 
            
-city_alias = aliased(CityDB)
-           
-kpi_alias = aliased(KPIDB)
-           
-kpivalue_alias = aliased(KPIValueDB)
-           
-kpitemp_alias = aliased(KPITempDB)
-           
-kpitraffic_alias = aliased(KPITrafficDB)
-           
-kpicollectedwaste_alias = aliased(KPICollectedWasteDB)
-           
-kpisecondhandcustomers_alias = aliased(KPISecondHandCustomersDB)
-           
-kpimoney_alias = aliased(KPIMoneyDB)
-           
-kpitotalrenewableenergy_alias = aliased(KPITotalRenewableEnergyDB)
-           
-kpinumberhouseholdrenewableenergy_alias = aliased(KPINumberHouseholdRenewableEnergyDB)
-           
-kpipeaksolarenergy_alias = aliased(KPIPeakSolarEnergyDB)
-           
 visualisation_alias = aliased(VisualisationDB)
            
 table_alias = aliased(TableDB)
            
 piechart_alias = aliased(PieChartDB)
+           
+barchart_alias = aliased(BarChartDB)
            
 statchart_alias = aliased(StatChartDB)
            
@@ -732,6 +711,28 @@ mapdata_alias = aliased(MapDataDB)
 geojson_alias = aliased(GeoJsonDB)
            
 wms_alias = aliased(WMSDB)
+           
+city_alias = aliased(CityDB)
+           
+kpi_alias = aliased(KPIDB)
+           
+kpivalue_alias = aliased(KPIValueDB)
+           
+kpitemp_alias = aliased(KPITempDB)
+           
+kpitraffic_alias = aliased(KPITrafficDB)
+           
+kpicollectedwaste_alias = aliased(KPICollectedWasteDB)
+           
+kpisecondhandcustomers_alias = aliased(KPISecondHandCustomersDB)
+           
+kpimoney_alias = aliased(KPIMoneyDB)
+           
+kpitotalrenewableenergy_alias = aliased(KPITotalRenewableEnergyDB)
+           
+kpinumberhouseholdrenewableenergy_alias = aliased(KPINumberHouseholdRenewableEnergyDB)
+           
+kpipeaksolarenergy_alias = aliased(KPIPeakSolarEnergyDB)
            
 kpiparticipants_alias = aliased(KPIParticipantsDB)
            
@@ -799,15 +800,7 @@ async def add_kpi_values(
 
 # Visualisations
 
-
             
-            
-            
-            
-            
-            
-            
-                        
 @app.post("/torino/visualization/Table/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
 async def add_or_update_Table_torino(id: int, chart: Table= Body(..., description="Chart object to add")):
     db_entry = TableDB(**chart.dict())
@@ -853,6 +846,36 @@ async def add_or_update_PieChart_torino(id: int, chart: PieChart= Body(..., desc
     else:
         # If the chart does not exist, create a new one
         db_entry = PieChartDB(**chart.dict())
+        db_entry.consistsOf = dashboard_torino
+        db_entry.kpi_id = id
+        try:
+            session.add(db_entry)
+            session.commit()
+            session.refresh(db_entry)
+        except IntegrityError: 
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error integrity")
+        except:
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error")
+        return db_entry.id
+                
+                        
+@app.post("/torino/visualization/BarChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_BarChart_torino(id: int, chart: BarChart= Body(..., description="Chart object to add")):
+    db_entry = BarChartDB(**chart.dict())
+    existing_chart = session.query(BarChartDB).filter(BarChartDB.i == db_entry.i).first()
+    if existing_chart:
+        # If the chart already exists, update it with the new data
+        existing_chart_data = chart.dict(exclude_unset=True)
+        for key, value in existing_chart_data.items():
+            setattr(existing_chart, key, value)
+        session.commit()
+        session.refresh(existing_chart)
+        return existing_chart.id
+    else:
+        # If the chart does not exist, create a new one
+        db_entry = BarChartDB(**chart.dict())
         db_entry.consistsOf = dashboard_torino
         db_entry.kpi_id = id
         try:
@@ -971,6 +994,13 @@ async def add_or_update_Map_torino(id: int, chart: Map= Body(..., description="C
             
             
             
+            
+            
+            
+            
+            
+            
+            
         
 @app.delete("/torino/visualizations")
 async def delete_visualizations_torino(ids: List[int], dependencies=[Depends(JWTBearer())], tags = ["Visualisation"]):
@@ -994,14 +1024,7 @@ async def delete_visualizations_torino(ids: List[int], dependencies=[Depends(JWT
         # Close the session
         print("COOL")
 
-    
-            
-            
-            
-            
-            
-            
-                        
+                
 @app.post("/cascais/visualization/Table/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
 async def add_or_update_Table_cascais(id: int, chart: Table= Body(..., description="Chart object to add")):
     db_entry = TableDB(**chart.dict())
@@ -1047,6 +1070,36 @@ async def add_or_update_PieChart_cascais(id: int, chart: PieChart= Body(..., des
     else:
         # If the chart does not exist, create a new one
         db_entry = PieChartDB(**chart.dict())
+        db_entry.consistsOf = dashboard_cascais
+        db_entry.kpi_id = id
+        try:
+            session.add(db_entry)
+            session.commit()
+            session.refresh(db_entry)
+        except IntegrityError: 
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error integrity")
+        except:
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error")
+        return db_entry.id
+                
+                        
+@app.post("/cascais/visualization/BarChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_BarChart_cascais(id: int, chart: BarChart= Body(..., description="Chart object to add")):
+    db_entry = BarChartDB(**chart.dict())
+    existing_chart = session.query(BarChartDB).filter(BarChartDB.i == db_entry.i).first()
+    if existing_chart:
+        # If the chart already exists, update it with the new data
+        existing_chart_data = chart.dict(exclude_unset=True)
+        for key, value in existing_chart_data.items():
+            setattr(existing_chart, key, value)
+        session.commit()
+        session.refresh(existing_chart)
+        return existing_chart.id
+    else:
+        # If the chart does not exist, create a new one
+        db_entry = BarChartDB(**chart.dict())
         db_entry.consistsOf = dashboard_cascais
         db_entry.kpi_id = id
         try:
@@ -1163,6 +1216,15 @@ async def add_or_update_Map_cascais(id: int, chart: Map= Body(..., description="
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
         
 @app.delete("/cascais/visualizations")
 async def delete_visualizations_cascais(ids: List[int], dependencies=[Depends(JWTBearer())], tags = ["Visualisation"]):
@@ -1186,14 +1248,7 @@ async def delete_visualizations_cascais(ids: List[int], dependencies=[Depends(JW
         # Close the session
         print("COOL")
 
-    
-            
-            
-            
-            
-            
-            
-                        
+                
 @app.post("/differdange/visualization/Table/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
 async def add_or_update_Table_differdange(id: int, chart: Table= Body(..., description="Chart object to add")):
     db_entry = TableDB(**chart.dict())
@@ -1239,6 +1294,36 @@ async def add_or_update_PieChart_differdange(id: int, chart: PieChart= Body(...,
     else:
         # If the chart does not exist, create a new one
         db_entry = PieChartDB(**chart.dict())
+        db_entry.consistsOf = dashboard_differdange
+        db_entry.kpi_id = id
+        try:
+            session.add(db_entry)
+            session.commit()
+            session.refresh(db_entry)
+        except IntegrityError: 
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error integrity")
+        except:
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error")
+        return db_entry.id
+                
+                        
+@app.post("/differdange/visualization/BarChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_BarChart_differdange(id: int, chart: BarChart= Body(..., description="Chart object to add")):
+    db_entry = BarChartDB(**chart.dict())
+    existing_chart = session.query(BarChartDB).filter(BarChartDB.i == db_entry.i).first()
+    if existing_chart:
+        # If the chart already exists, update it with the new data
+        existing_chart_data = chart.dict(exclude_unset=True)
+        for key, value in existing_chart_data.items():
+            setattr(existing_chart, key, value)
+        session.commit()
+        session.refresh(existing_chart)
+        return existing_chart.id
+    else:
+        # If the chart does not exist, create a new one
+        db_entry = BarChartDB(**chart.dict())
         db_entry.consistsOf = dashboard_differdange
         db_entry.kpi_id = id
         try:
@@ -1356,6 +1441,14 @@ async def add_or_update_Map_differdange(id: int, chart: Map= Body(..., descripti
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
         
 @app.delete("/differdange/visualizations")
 async def delete_visualizations_differdange(ids: List[int], dependencies=[Depends(JWTBearer())], tags = ["Visualisation"]):
@@ -1379,15 +1472,7 @@ async def delete_visualizations_differdange(ids: List[int], dependencies=[Depend
         # Close the session
         print("COOL")
 
-    
-            
-            
-            
-            
-            
-            
-            
-                        
+                
 @app.post("/sofia/visualization/Table/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
 async def add_or_update_Table_sofia(id: int, chart: Table= Body(..., description="Chart object to add")):
     db_entry = TableDB(**chart.dict())
@@ -1433,6 +1518,36 @@ async def add_or_update_PieChart_sofia(id: int, chart: PieChart= Body(..., descr
     else:
         # If the chart does not exist, create a new one
         db_entry = PieChartDB(**chart.dict())
+        db_entry.consistsOf = dashboard_sofia
+        db_entry.kpi_id = id
+        try:
+            session.add(db_entry)
+            session.commit()
+            session.refresh(db_entry)
+        except IntegrityError: 
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error integrity")
+        except:
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error")
+        return db_entry.id
+                
+                        
+@app.post("/sofia/visualization/BarChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_BarChart_sofia(id: int, chart: BarChart= Body(..., description="Chart object to add")):
+    db_entry = BarChartDB(**chart.dict())
+    existing_chart = session.query(BarChartDB).filter(BarChartDB.i == db_entry.i).first()
+    if existing_chart:
+        # If the chart already exists, update it with the new data
+        existing_chart_data = chart.dict(exclude_unset=True)
+        for key, value in existing_chart_data.items():
+            setattr(existing_chart, key, value)
+        session.commit()
+        session.refresh(existing_chart)
+        return existing_chart.id
+    else:
+        # If the chart does not exist, create a new one
+        db_entry = BarChartDB(**chart.dict())
         db_entry.consistsOf = dashboard_sofia
         db_entry.kpi_id = id
         try:
@@ -1537,6 +1652,14 @@ async def add_or_update_Map_sofia(id: int, chart: Map= Body(..., description="Ch
             raise HTTPException(status_code=400, detail="Error")
         return db_entry.id
                 
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -1910,6 +2033,22 @@ async def get_visualizations_torino():
                             
         query = session.query(visualisation_alias, piechart_alias).\
             join(piechart_alias, visualisation_alias.id == piechart_alias.id).\
+            join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
+            filter(func.lower(dashboard_alias.code) == func.lower("torino"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(visualisation_alias, barchart_alias).\
+            join(barchart_alias, visualisation_alias.id == barchart_alias.id).\
             join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
             filter(func.lower(dashboard_alias.code) == func.lower("torino"))
 
@@ -2325,6 +2464,22 @@ async def get_visualizations_cascais():
                         result_dict[key] = getattr(table, key)
             results_list.append(result_dict)
                             
+        query = session.query(visualisation_alias, barchart_alias).\
+            join(barchart_alias, visualisation_alias.id == barchart_alias.id).\
+            join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
+            filter(func.lower(dashboard_alias.code) == func.lower("cascais"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
         query = session.query(visualisation_alias, statchart_alias).\
             join(statchart_alias, visualisation_alias.id == statchart_alias.id).\
             join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
@@ -2726,6 +2881,22 @@ async def get_visualizations_differdange():
                         result_dict[key] = getattr(table, key)
             results_list.append(result_dict)
                             
+        query = session.query(visualisation_alias, barchart_alias).\
+            join(barchart_alias, visualisation_alias.id == barchart_alias.id).\
+            join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
+            filter(func.lower(dashboard_alias.code) == func.lower("differdange"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
         query = session.query(visualisation_alias, statchart_alias).\
             join(statchart_alias, visualisation_alias.id == statchart_alias.id).\
             join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
@@ -3113,6 +3284,22 @@ async def get_visualizations_sofia():
                             
         query = session.query(visualisation_alias, piechart_alias).\
             join(piechart_alias, visualisation_alias.id == piechart_alias.id).\
+            join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
+            filter(func.lower(dashboard_alias.code) == func.lower("sofia"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(visualisation_alias, barchart_alias).\
+            join(barchart_alias, visualisation_alias.id == barchart_alias.id).\
             join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
             filter(func.lower(dashboard_alias.code) == func.lower("sofia"))
 

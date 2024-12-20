@@ -6,47 +6,6 @@ from sqlalchemy.orm import declared_attr
 from abc import ABC, abstractmethod
 
 
-class City(BaseModel):
-    name: str
-    
-class KPI(ABC, BaseModel):
-    id_kpi: str
-    name: str
-    category: str
-    description: str
-    provider: str
-    calculationFrequency: str
-    unitText: str
-    
-class KPIValue(BaseModel):
-    timestamp: datetime
-    currentStanding: str
-    kpiValue: int
-    
-class KPITemp(KPI):
-    threshold: int
-    
-class KPITraffic(KPI):
-    target: int
-    
-class KPICollectedWaste(KPI):
-    target: int
-    
-class KPISecondHandCustomers(KPI):
-    target: int
-    
-class KPIMoney(KPI):
-    target: int
-    
-class KPITotalRenewableEnergy(KPI):
-    target: int
-    
-class KPINumberHouseholdRenewableEnergy(KPI):
-    target: int
-    
-class KPIPeakSolarEnergy(KPI):
-    target: int
-    
 class Visualisation(ABC, BaseModel):
     xposition: int
     yposition: int
@@ -63,15 +22,18 @@ class Table(Visualisation):
 class PieChart(Visualisation):
     pass 
     
+class BarChart(Visualisation):
+    pass 
+    
 class StatChart(Visualisation):
     unit: str
     target: int
     
 class LineChart(Visualisation):
+    target: int
     ytitle: str
     color: str
     xtitle: str
-    target: int
     
 class TableColumn(BaseModel):
     name: str
@@ -84,7 +46,6 @@ class User(ABC, BaseModel):
     firstName: str
     password: str
     lastName: str
-    type_spec: str
     
 class Admin(User):
     pass 
@@ -113,6 +74,47 @@ class GeoJson(MapData):
 class WMS(MapData):
     url: str
     name: str
+    
+class City(BaseModel):
+    name: str
+    
+class KPI(ABC, BaseModel):
+    id_kpi: str
+    name: str
+    category: str
+    description: str
+    provider: str
+    calculationFrequency: str
+    unitText: str
+    
+class KPIValue(BaseModel):
+    kpiValue: int
+    timestamp: datetime
+    currentStanding: str
+    
+class KPITemp(KPI):
+    threshold: int
+    
+class KPITraffic(KPI):
+    target: int
+    
+class KPICollectedWaste(KPI):
+    target: int
+    
+class KPISecondHandCustomers(KPI):
+    target: int
+    
+class KPIMoney(KPI):
+    target: int
+    
+class KPITotalRenewableEnergy(KPI):
+    target: int
+    
+class KPINumberHouseholdRenewableEnergy(KPI):
+    target: int
+    
+class KPIPeakSolarEnergy(KPI):
+    target: int
     
 class KPIParticipants(KPI):
     target: int

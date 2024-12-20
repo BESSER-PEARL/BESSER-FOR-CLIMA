@@ -20,109 +20,6 @@ class Base(DeclarativeBase):
 # Tables definition for many-to-many relationships
 
 # Tables definition
-class City(Base):
-    
-    __tablename__ = "city"
-    id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String(100))
-
-class KPI(Base):
-    
-    __tablename__ = "kpi"
-    id: Mapped[int] = mapped_column(primary_key=True)
-    id_kpi: Mapped[str] = mapped_column(String(100))
-    name: Mapped[str] = mapped_column(String(100))
-    category: Mapped[str] = mapped_column(String(100))
-    description: Mapped[str] = mapped_column(String(100))
-    provider: Mapped[str] = mapped_column(String(100))
-    calculationFrequency: Mapped[str] = mapped_column(String(100))
-    unitText: Mapped[str] = mapped_column(String(100))
-    type_spec: Mapped[str]
-    __mapper_args__ = {
-        "polymorphic_identity": "kpi",
-        "polymorphic_on": "type_spec",
-    }
-
-class KPIValue(Base):
-    
-    __tablename__ = "kpivalue"
-    id: Mapped[int] = mapped_column(primary_key=True)
-    timestamp: Mapped[datetime] = mapped_column(DateTime)
-    currentStanding: Mapped[str] = mapped_column(String(100))
-    kpiValue: Mapped[int] = mapped_column(Integer)
-
-class KPITemp(KPI):
-        
-    __tablename__ = "kpitemp"
-    id: Mapped[int] = mapped_column(ForeignKey("kpi.id"), primary_key=True)
-    threshold: Mapped[int] = mapped_column(Integer)
-    __mapper_args__ = {
-        "polymorphic_identity": "kpitemp",
-    }
-
-class KPITraffic(KPI):
-        
-    __tablename__ = "kpitraffic"
-    id: Mapped[int] = mapped_column(ForeignKey("kpi.id"), primary_key=True)
-    target: Mapped[int] = mapped_column(Integer)
-    __mapper_args__ = {
-        "polymorphic_identity": "kpitraffic",
-    }
-
-class KPICollectedWaste(KPI):
-        
-    __tablename__ = "kpicollectedwaste"
-    id: Mapped[int] = mapped_column(ForeignKey("kpi.id"), primary_key=True)
-    target: Mapped[int] = mapped_column(Integer)
-    __mapper_args__ = {
-        "polymorphic_identity": "kpicollectedwaste",
-    }
-
-class KPISecondHandCustomers(KPI):
-        
-    __tablename__ = "kpisecondhandcustomers"
-    id: Mapped[int] = mapped_column(ForeignKey("kpi.id"), primary_key=True)
-    target: Mapped[int] = mapped_column(Integer)
-    __mapper_args__ = {
-        "polymorphic_identity": "kpisecondhandcustomers",
-    }
-
-class KPIMoney(KPI):
-        
-    __tablename__ = "kpimoney"
-    id: Mapped[int] = mapped_column(ForeignKey("kpi.id"), primary_key=True)
-    target: Mapped[int] = mapped_column(Integer)
-    __mapper_args__ = {
-        "polymorphic_identity": "kpimoney",
-    }
-
-class KPITotalRenewableEnergy(KPI):
-        
-    __tablename__ = "kpitotalrenewableenergy"
-    id: Mapped[int] = mapped_column(ForeignKey("kpi.id"), primary_key=True)
-    target: Mapped[int] = mapped_column(Integer)
-    __mapper_args__ = {
-        "polymorphic_identity": "kpitotalrenewableenergy",
-    }
-
-class KPINumberHouseholdRenewableEnergy(KPI):
-        
-    __tablename__ = "kpinumberhouseholdrenewableenergy"
-    id: Mapped[int] = mapped_column(ForeignKey("kpi.id"), primary_key=True)
-    target: Mapped[int] = mapped_column(Integer)
-    __mapper_args__ = {
-        "polymorphic_identity": "kpinumberhouseholdrenewableenergy",
-    }
-
-class KPIPeakSolarEnergy(KPI):
-        
-    __tablename__ = "kpipeaksolarenergy"
-    id: Mapped[int] = mapped_column(ForeignKey("kpi.id"), primary_key=True)
-    target: Mapped[int] = mapped_column(Integer)
-    __mapper_args__ = {
-        "polymorphic_identity": "kpipeaksolarenergy",
-    }
-
 class Visualisation(Base):
     
     __tablename__ = "visualisation"
@@ -157,6 +54,14 @@ class PieChart(Visualisation):
         "polymorphic_identity": "piechart",
     }
 
+class BarChart(Visualisation):
+        
+    __tablename__ = "barchart"
+    id: Mapped[int] = mapped_column(ForeignKey("visualisation.id"), primary_key=True)
+    __mapper_args__ = {
+        "polymorphic_identity": "barchart",
+    }
+
 class StatChart(Visualisation):
         
     __tablename__ = "statchart"
@@ -171,10 +76,10 @@ class LineChart(Visualisation):
         
     __tablename__ = "linechart"
     id: Mapped[int] = mapped_column(ForeignKey("visualisation.id"), primary_key=True)
+    target: Mapped[int] = mapped_column(Integer)
     ytitle: Mapped[str] = mapped_column(String(100))
     color: Mapped[str] = mapped_column(String(100))
     xtitle: Mapped[str] = mapped_column(String(100))
-    target: Mapped[int] = mapped_column(Integer)
     __mapper_args__ = {
         "polymorphic_identity": "linechart",
     }
@@ -283,6 +188,109 @@ class WMS(MapData):
         "polymorphic_identity": "wms",
     }
 
+class City(Base):
+    
+    __tablename__ = "city"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(100))
+
+class KPI(Base):
+    
+    __tablename__ = "kpi"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    id_kpi: Mapped[str] = mapped_column(String(100))
+    name: Mapped[str] = mapped_column(String(100))
+    category: Mapped[str] = mapped_column(String(100))
+    description: Mapped[str] = mapped_column(String(100))
+    provider: Mapped[str] = mapped_column(String(100))
+    calculationFrequency: Mapped[str] = mapped_column(String(100))
+    unitText: Mapped[str] = mapped_column(String(100))
+    type_spec: Mapped[str]
+    __mapper_args__ = {
+        "polymorphic_identity": "kpi",
+        "polymorphic_on": "type_spec",
+    }
+
+class KPIValue(Base):
+    
+    __tablename__ = "kpivalue"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    kpiValue: Mapped[int] = mapped_column(Integer)
+    timestamp: Mapped[datetime] = mapped_column(DateTime)
+    currentStanding: Mapped[str] = mapped_column(String(100))
+
+class KPITemp(KPI):
+        
+    __tablename__ = "kpitemp"
+    id: Mapped[int] = mapped_column(ForeignKey("kpi.id"), primary_key=True)
+    threshold: Mapped[int] = mapped_column(Integer)
+    __mapper_args__ = {
+        "polymorphic_identity": "kpitemp",
+    }
+
+class KPITraffic(KPI):
+        
+    __tablename__ = "kpitraffic"
+    id: Mapped[int] = mapped_column(ForeignKey("kpi.id"), primary_key=True)
+    target: Mapped[int] = mapped_column(Integer)
+    __mapper_args__ = {
+        "polymorphic_identity": "kpitraffic",
+    }
+
+class KPICollectedWaste(KPI):
+        
+    __tablename__ = "kpicollectedwaste"
+    id: Mapped[int] = mapped_column(ForeignKey("kpi.id"), primary_key=True)
+    target: Mapped[int] = mapped_column(Integer)
+    __mapper_args__ = {
+        "polymorphic_identity": "kpicollectedwaste",
+    }
+
+class KPISecondHandCustomers(KPI):
+        
+    __tablename__ = "kpisecondhandcustomers"
+    id: Mapped[int] = mapped_column(ForeignKey("kpi.id"), primary_key=True)
+    target: Mapped[int] = mapped_column(Integer)
+    __mapper_args__ = {
+        "polymorphic_identity": "kpisecondhandcustomers",
+    }
+
+class KPIMoney(KPI):
+        
+    __tablename__ = "kpimoney"
+    id: Mapped[int] = mapped_column(ForeignKey("kpi.id"), primary_key=True)
+    target: Mapped[int] = mapped_column(Integer)
+    __mapper_args__ = {
+        "polymorphic_identity": "kpimoney",
+    }
+
+class KPITotalRenewableEnergy(KPI):
+        
+    __tablename__ = "kpitotalrenewableenergy"
+    id: Mapped[int] = mapped_column(ForeignKey("kpi.id"), primary_key=True)
+    target: Mapped[int] = mapped_column(Integer)
+    __mapper_args__ = {
+        "polymorphic_identity": "kpitotalrenewableenergy",
+    }
+
+class KPINumberHouseholdRenewableEnergy(KPI):
+        
+    __tablename__ = "kpinumberhouseholdrenewableenergy"
+    id: Mapped[int] = mapped_column(ForeignKey("kpi.id"), primary_key=True)
+    target: Mapped[int] = mapped_column(Integer)
+    __mapper_args__ = {
+        "polymorphic_identity": "kpinumberhouseholdrenewableenergy",
+    }
+
+class KPIPeakSolarEnergy(KPI):
+        
+    __tablename__ = "kpipeaksolarenergy"
+    id: Mapped[int] = mapped_column(ForeignKey("kpi.id"), primary_key=True)
+    target: Mapped[int] = mapped_column(Integer)
+    __mapper_args__ = {
+        "polymorphic_identity": "kpipeaksolarenergy",
+    }
+
 class KPIParticipants(KPI):
         
     __tablename__ = "kpiparticipants"
@@ -328,27 +336,11 @@ class KPITextileWastePerPerson(KPI):
     }
 
 
-#--- Foreign keys and relationships of the city table
-City.hasMapData: Mapped[List["MapData"]] = relationship("MapData", back_populates="hasMapData")
-City.operatedBy: Mapped[List["User"]] = relationship("User", back_populates="operatedBy")
-City.has: Mapped[List["Dashboard"]] = relationship("Dashboard", back_populates="has")
-City.kpis: Mapped[List["KPI"]] = relationship("KPI", back_populates="kpis")
-
-#--- Foreign keys and relationships of the kpi table
-KPI.visualizedBy: Mapped[List["Visualisation"]] = relationship("Visualisation", back_populates="visualizedBy")
-KPI.city_id: Mapped["City"] = mapped_column(ForeignKey("city.id"), nullable=False)
-KPI.kpis: Mapped["City"] = relationship("City", back_populates="kpis")
-KPI.values: Mapped[List["KPIValue"]] = relationship("KPIValue", back_populates="values")
-
-#--- Foreign keys and relationships of the kpivalue table
-KPIValue.kpi_id: Mapped["KPI"] = mapped_column(ForeignKey("kpi.id"), nullable=False)
-KPIValue.values: Mapped["KPI"] = relationship("KPI", back_populates="values")
-
 #--- Foreign keys and relationships of the visualisation table
-Visualisation.dashboard_id: Mapped["Dashboard"] = mapped_column(ForeignKey("dashboard.id"), nullable=False)
-Visualisation.consistsOf: Mapped["Dashboard"] = relationship("Dashboard", back_populates="consistsOf")
 Visualisation.kpi_id: Mapped["KPI"] = mapped_column(ForeignKey("kpi.id"), nullable=False)
 Visualisation.visualizedBy: Mapped["KPI"] = relationship("KPI", back_populates="visualizedBy")
+Visualisation.dashboard_id: Mapped["Dashboard"] = mapped_column(ForeignKey("dashboard.id"), nullable=False)
+Visualisation.consistsOf: Mapped["Dashboard"] = relationship("Dashboard", back_populates="consistsOf")
 
 #--- Foreign keys and relationships of the table table
 Table.shows: Mapped[List["TableColumn"]] = relationship("TableColumn", back_populates="shows")
@@ -371,6 +363,22 @@ Dashboard.city_id: Mapped["City"] = mapped_column(ForeignKey("city.id"), nullabl
 Dashboard.has: Mapped["City"] = relationship("City", back_populates="has")
 
 #--- Foreign keys and relationships of the mapdata table
+MapData.isDisplayedOnMap: Mapped[List["Map"]] = relationship("Map", back_populates="isDisplayedOnMap")
 MapData.city_id: Mapped["City"] = mapped_column(ForeignKey("city.id"), nullable=False)
 MapData.hasMapData: Mapped["City"] = relationship("City", back_populates="hasMapData")
-MapData.isDisplayedOnMap: Mapped[List["Map"]] = relationship("Map", back_populates="isDisplayedOnMap")
+
+#--- Foreign keys and relationships of the city table
+City.hasMapData: Mapped[List["MapData"]] = relationship("MapData", back_populates="hasMapData")
+City.operatedBy: Mapped[List["User"]] = relationship("User", back_populates="operatedBy")
+City.has: Mapped[List["Dashboard"]] = relationship("Dashboard", back_populates="has")
+City.kpis: Mapped[List["KPI"]] = relationship("KPI", back_populates="kpis")
+
+#--- Foreign keys and relationships of the kpi table
+KPI.visualizedBy: Mapped[List["Visualisation"]] = relationship("Visualisation", back_populates="visualizedBy")
+KPI.city_id: Mapped["City"] = mapped_column(ForeignKey("city.id"), nullable=False)
+KPI.kpis: Mapped["City"] = relationship("City", back_populates="kpis")
+KPI.values: Mapped[List["KPIValue"]] = relationship("KPIValue", back_populates="values")
+
+#--- Foreign keys and relationships of the kpivalue table
+KPIValue.kpi_id: Mapped["KPI"] = mapped_column(ForeignKey("kpi.id"), nullable=False)
+KPIValue.values: Mapped["KPI"] = relationship("KPI", back_populates="values")

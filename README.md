@@ -1,24 +1,103 @@
-# Template for BESSER-PEARL Organization Repositories
+# BESSER-FOR-CLIMA
 
-This Github template provides a collection of base files and configuration recommendations for kick-starting a new project in the BESSER-PEARL organization.
+This repository contains the DSL for the clima domain and the corresponding generators.
 
-## ⚒️ Using this template for your project
+## Table of Contents
+- [Introduction](#introduction)
+- [Setup and Installation](#setup-and-installation)
+- [Usage](#usage)
+- [Contributing](#contributing)
+- [License](#license)
+- [Contact Information](#contact-information)
 
-To use this template when creating a new repository in the BESSER-PEARL GitHub organization, you have to set the `Repository template` field to `BESSER-PEARL/template`.
+## Introduction
+BESSER-FOR-CLIMA is a platform with a low-code/no-code dashboard solution. As part of the ClimaBorough project, this platform enables:
 
-The new repository will use this one as a template, meaning that it will contain all the files. 
-Once the new repository is created, you can edit its files to adapt them to your needs.
+- Easy creation and management of climate data visualizations
+- Customizable dashboards for different cities
+- Automated code generation for data processing and analysis
+- Interactive data exploration and reporting capabilities
 
-## ☑️ Guidelines & Contributing
+The ClimaPlatform dashboard - a user-friendly interface for data visualization and management
 
-You will find a guided description of the steps you should follow in the [guidelines](guidelines.md) file.
+## Setup and Installation
 
-## 📓 Publishing the documentation to ReadTheDocs
+### Requirements
+- Python 3.11.1
+- Docker
+- Node.js v18
 
-This template also provides the base files to deploy the repository documentation using [ReadTheDocs](https://docs.readthedocs.io/en/stable/index.html). In the `docs` folder you can find and edit all the Sphinx documentation sources. You can check the documentation generated from this template at the [following link](https://besser-template.readthedocs.io/en/latest/). 
+### Backend Setup
 
-For more information on how to connect your repository, customize, and deploy the documentation with ReadTheDocs, you can follow [this tutorial](https://docs.readthedocs.io/en/stable/tutorial/index.html). If you do not plan to use ReadTheDocs, remove the `docs` folder and the `.readthedocs.yaml` file from your repository.
+#### Create a Virtual Environment
+```bash
+python -m venv env
 
-## 📚 References
+# Activate the environment:
+env\Scripts\Activate
 
-This project is an extended and adapted version (to the [BESSER-PEARL organization](https://github.com/organizations/BESSER-PEARL/)) of the [GitHub Best Practices Template](https://github.com/jlcanovas/gh-best-practices-template.git)
+# Install Requirements
+pip install -r requirements.txt
+```
+
+#### Generate Backend Code
+Run the generate.py script to generate the necessary code:
+```bash
+python generate.py
+```
+
+This will generate:
+- SQLAlchemy code
+- FastAPI code
+- Pydantic classes
+
+#### Local Development with Docker
+Navigate to the Docker folder and execute:
+```bash
+docker-compose build
+docker-compose up
+```
+
+This includes:
+- A PostgreSQL DB
+- PGAdmin at http://localhost:80
+- FastAPI application at http://localhost:8000
+
+### Frontend Setup
+
+#### Install Dependencies
+```bash
+npm install
+```
+
+#### Compile and Hot-Reload for Development
+```bash
+npm run dev
+```
+
+#### Docker Setup for Frontend
+Build the Docker image:
+```bash
+docker build -t frontend .
+```
+
+Run the Docker container:
+```bash
+docker run -p 3000:3000 -e API_URL=http://localhost:8000 -e WEBSOCKET_URL=ws://localhost:8765 frontend
+```
+
+Set environment variables:
+- API_URL: Address of your FastAPI application
+- WEBSOCKET_URL: Address of your bot application
+
+## Usage
+Provide examples of how to use the project, including any necessary commands or scripts.
+
+## Contributing
+We welcome contributions! Please see the guidelines for instructions on how to contribute to this project.
+
+## License
+This project is licensed under the MIT License.
+
+## Contact Information
+For support or questions, please contact the repository maintainers or open an issue on GitHub.
