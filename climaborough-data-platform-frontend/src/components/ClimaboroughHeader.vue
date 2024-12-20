@@ -250,7 +250,9 @@ const setLanguage = (language) => {
 
 }
 
-
+const closeMobileMenu = () => {
+  isMobileMenuOpen.value = false
+}
 
 onMounted(() => {
   startTokenCheck();
@@ -259,6 +261,11 @@ onMounted(() => {
 
 
 const menu = ref(false)
+const isMobileMenuOpen = ref(false)
+
+const toggleMobileMenu = () => {
+  isMobileMenuOpen.value = !isMobileMenuOpen.value
+}
 
 </script>
 
@@ -269,11 +276,17 @@ const menu = ref(false)
         <div class="branding">
           <RouterLink to="/"><img class="logo" src="../assets/clima.png" alt=""> </RouterLink>
         </div>
-        <ul class="nav-routes">
-          <RouterLink to="/">{{ $t('header.home') }}</RouterLink>
-          <RouterLink to="/projects">Dashboard</RouterLink>
+        
+        <!-- Add hamburger menu button -->
+        <div class="mobile-menu-button" @click="toggleMobileMenu">
+          <Icon :icon="isMobileMenuOpen ? 'mdi:close' : 'mdi:menu'" width="30" height="30" />
+        </div>
+
+        <ul class="nav-routes" :class="{ 'mobile-menu-active': isMobileMenuOpen }">
+          <RouterLink @click="closeMobileMenu" to="/">{{ $t('header.home') }}</RouterLink>
+          <RouterLink @click="closeMobileMenu" to="/projects">Dashboard</RouterLink>
         <!--  <RouterLink to="/bot">ClimaSolutions Bot</RouterLink>-->
-          <RouterLink to="/about">{{ $t('header.About') }}</RouterLink>
+          <RouterLink @click="closeMobileMenu" to="/about">{{ $t('header.About') }}</RouterLink>
           <div class="user" @click="toggleLogin">
             <div v-if=!loggedIn class="unauthenticated">
               <Icon icon="mingcute:user-4-fill" width="30" height="30" style="color: #aec326; margin-right: 5px" />
@@ -300,6 +313,11 @@ const menu = ref(false)
                   <v-divider></v-divider>
 
                   <v-list>
+                    <v-list-item v-if="userType === 'admin'">
+                      <v-btn color="primary" variant="text" @click="$router.push('/admin')">
+                        Admin Dashboard
+                      </v-btn>
+                    </v-list-item>
                     <v-list-item>
                       <v-btn color="primary" variant="text" @click="logOff">
                         Log out
@@ -316,7 +334,7 @@ const menu = ref(false)
           <li class="separator"></li> <!-- Separator line -->
           <v-menu>
             <template v-slot:activator="{ props }">
-              <p id="language" v-bind="props">
+              <p id="language" v-bind="props" @click="closeMobileMenu">
                 {{ selectedLanguage }}</p>
             </template>
             <v-list>
@@ -461,10 +479,67 @@ header {
       }
 
     }
+
+    .mobile-menu-button {
+      display: none;
+      cursor: pointer;
+      margin-left: auto;
+      color: #086494;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-button {
+        display: block;
+      }
+
+      .nav-routes {
+        display: none;
+        position: fixed;
+        top: 80px;
+        left: 0;
+        right: 0;
+        background: white;
+        flex-direction: column;
+        padding: 20px;
+        gap: 20px;
+        border-bottom: 2px solid #aec326;
+        
+        &.mobile-menu-active {
+          display: flex;
+        }
+
+        a {
+          width: 100%;
+          text-align: center;
+          padding: 10px;
+        }
+
+        .separator {
+          width: 100%;
+          height: 2px;
+          margin: 10px 0;
+        }
+
+        .user {
+          width: 100%;
+          justify-content: center;
+          
+          .unauthenticated, .authenticated {
+            justify-content: center;
+          }
+        }
+      }
+    }
   }
 }
 
-
+.branding {
+  @media (max-width: 768px) {
+    img {
+      max-width: 150px !important;
+    }
+  }
+}
 
 .popup {
   position: fixed;
@@ -492,6 +567,12 @@ header {
     margin-bottom: 5px;
   }
 
+  @media (max-width: 768px) {
+    .popup-inner {
+      width: 90%;
+      padding: 20px;
+    }
+  }
 }
 
 .language-dropdown {
