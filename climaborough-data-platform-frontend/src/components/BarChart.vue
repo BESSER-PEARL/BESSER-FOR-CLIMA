@@ -56,7 +56,8 @@ async function getItems() {
       stands.value.push(item.currentStanding);
       lastTimestamp.value = formatDate(item.timestamp);
     });
-
+    
+    items.value = data
     mapping.value = countOccurrences(stands.value);
 
     for (const [key, value] of Object.entries(mapping.value)) {

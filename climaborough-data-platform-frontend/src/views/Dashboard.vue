@@ -24,6 +24,7 @@ import { throttle } from '@vexip-ui/utils'
 
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { to } from 'plotly.js-dist';
 
 const loggedIn = ref(false)
 const userType = localStorage.getItem("userType");
@@ -326,10 +327,9 @@ const deleteVisualisation = (item) => {
 
 const toggleKPIForm = (chart) => {
     if (chart == "Map") {
-        createVisualisation('1', 'Map')
+        createVisualisation('1', 'Map', 'Map', {});
         return
     }
-    console.log("bro im peaking" + chart)
     tableForm.value = !tableForm.value
     currentSelectedChart.value = chart
 }
@@ -368,7 +368,8 @@ const createVisualisation = (tableId, tableName, chart, kpi) => {
     } else if (chart == "Table") {
 
     } else if (chart == "Map") {
-        console.log(vis)
+        vis.w = 7;
+        vis.h = 13; 
     }
     console.log(vis)
     console.log(kpi)
@@ -575,19 +576,27 @@ function dragEnd(chart) {
         mouseAt.x < parentRect.right &&
         mouseAt.y > parentRect.top &&
         mouseAt.y < parentRect.bottom;
+
     if (mouseInGrid) {
-        dragItemStop.value = JSON.parse(JSON.stringify(dragItem.value))
-        dragItemStop.value.chart = chart
-        gridLayout.value.dragEvent('dragend', dropId, dragItemStop.value.x, dragItemStop.value.y, dragItemStop.value.h, dragItemStop.value.w);
+        dragItemStop.value = JSON.parse(JSON.stringify(dragItem.value));
+        dragItemStop.value.chart = chart;
+
+        toggleKPIForm(chart);
+
+
+        gridLayout.value.dragEvent(
+            'dragend',
+            dropId,
+            dragItemStop.value.x,
+            dragItemStop.value.y,
+            dragItemStop.value.h,
+            dragItemStop.value.w
+        );
+
         selectedSection.layout = selectedSection.layout.filter(item => item.i !== dropId);
-        toggleKPIForm(chart)
     } else {
         return;
     }
-    // gridLayout.value.dragEvent('dragend', dragItem.value.i, dragItem.value.x, dragItem.value.y, dragItem.value.h, dragItem.value.w);
-    const item = gridLayout.value.getItem(dropId);
-
-    if (!item) return;
 }
 
 function addSection(event) {
@@ -883,7 +892,7 @@ const exportToPDF = async () => {
                         <a>Bar Charts</a>
                         <div class="widget-icon" draggable="true" unselectable="on" @drag="drag('BarChart')"
                             @dragend="dragEnd('BarChart')">
-                            <img src="/PieChart.png" class="icon" style="width: 80px" @click="toggleKPIForm('BarChart')">
+                            <img src="/BarChart.png" class="icon" style="width: 80px" @click="toggleKPIForm('BarChart')">
                         </div>
                         <a>Stats Charts</a>
                         <div class="widget-icon" draggable="true" unselectable="on" @drag="drag('StatChart')"
