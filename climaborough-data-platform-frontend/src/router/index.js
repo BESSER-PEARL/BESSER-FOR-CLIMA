@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
+import AdminDashboard from '../views/AdminDashboard.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -46,6 +47,19 @@ const router = createRouter({
       name: 'tos',
       // route level code-splitting
       component: () => import('../views/TOS.vue')
+    },
+    {
+      path: '/admin',
+      name: 'admin',
+      component: AdminDashboard,
+      beforeEnter: (to, from, next) => {
+        const userType = localStorage.getItem('userType');
+        if (userType === 'admin') {
+          next();
+        } else {
+          next('/');
+        }
+      }
     }
   ]
 })
