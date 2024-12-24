@@ -81,7 +81,7 @@ const layout = ref([
 const projects = {
     Differdange: "luxembourgball.png",
     Cascais: "portugalball.png",
-    Sofial: "bulgariaball.png",
+    Sofia: "bulgariaball.png",
     Maribor: "sloveniaball.png",
     Athens: "greeceball.png",
     Ioannina: "greeceball.png",
