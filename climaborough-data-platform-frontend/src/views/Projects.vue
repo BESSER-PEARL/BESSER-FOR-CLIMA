@@ -21,18 +21,29 @@ const checkIfLogged = () => {
 }
 checkIfLogged()
 
+const isMobile = ref(false)
+
+const checkMobile = () => {
+  isMobile.value = window.innerWidth <= 768
+}
+
 function updateCSSVariable() {
-  const screenWidth = window.innerWidth - 20;
-  const numIcons = Math.floor(screenWidth / 240);
-  const startingPosition = (screenWidth - numIcons * 240) / 2;
-  document.documentElement.style.setProperty('--starting-position', `${startingPosition}px`);
-  document.documentElement.style.setProperty('--starting-position', `140px`);
-  document.documentElement.style.setProperty('--margin-right', `140px`);
+  if (isMobile.value) {
+    document.documentElement.style.setProperty('--starting-position', '20px');
+    document.documentElement.style.setProperty('--margin-right', '20px');
+  } else {
+    const screenWidth = window.innerWidth - 20;
+    const numIcons = Math.floor(screenWidth / 240);
+    const startingPosition = (screenWidth - numIcons * 240) / 2;
+    document.documentElement.style.setProperty('--starting-position', `${startingPosition}px`);
+    document.documentElement.style.setProperty('--margin-right', '140px');
+  }
 }
 
 onMounted(() => {
-  updateCSSVariable();
-  window.addEventListener('resize', updateCSSVariable);
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
+  updateCSSVariable()
 });
 
 onBeforeUnmount(() => {
@@ -52,13 +63,13 @@ const projects = [
 </script>
 
 <template>
-  <div v-if="loggedIn" class="body">
-    <a style="margin-left: 15px; margin-top: 60px; font-weight: bolder; font-size: 50px; color: #0177a9;">{{ $t('projectview.title') }}</a>
+  <div v-if="loggedIn" class="body" :class="{ 'mobile': isMobile }">
+    <a class="main-title">{{ $t('projectview.title') }}</a>
     
     <!-- Affichage pour les comptes ville -->
     <template v-if="isCityUser">
       <div class="hub">
-        <h1 style="margin-left: 80px; margin-top: 30px">My Project</h1>
+        <h1>My Project</h1>
         <div class="icon-container">
           <div v-for="project in projects" :key="project.id">
             <div v-if="project.title === userCity" class="icon">
@@ -162,6 +173,61 @@ const projects = [
 .body {
   margin: 10px;
   min-height: 90vh;
+
+  &.mobile {
+    margin: 5px;
+
+    .main-title {
+      margin-left: 10px;
+      margin-top: 30px;
+      font-size: 30px;
+      display: block;
+    }
+
+    .hub h1 {
+      margin-left: 15px;
+      font-size: 24px;
+    }
+
+    .icon-container {
+      justify-content: center;
+      margin-left: 0;
+      padding: 0 10px;
+    }
+
+    .icon {
+      margin-right: 20px;
+      margin-top: 20px;
+      margin-bottom: 20px;
+      width: 140px;
+
+      .imagebutton {
+        width: 140px;
+        height: auto;
+      }
+
+      .info {
+        font-size: 14px;
+        
+        img {
+          width: 20px;
+          height: auto;
+        }
+      }
+
+      .grey {
+        font-size: 12px;
+      }
+    }
+  }
+}
+
+.main-title {
+  margin-left: 15px;
+  margin-top: 60px;
+  font-weight: bolder;
+  font-size: 50px;
+  color: #0177a9;
 }
 
 .hub h1 {
@@ -239,5 +305,42 @@ const projects = [
       text-decoration: none;
     }
   }
+
+  @media (max-width: 768px) {
+    padding: 20px;
+    height: calc(100vh - 80px);
+
+    h2 {
+      font-size: 20px;
+      margin-bottom: 15px;
+    }
+
+    p {
+      font-size: 16px;
+      padding: 0 20px;
+    }
+
+    .login {
+      width: 100%;
+      padding: 20px !important;
+    }
+  }
+}
+
+// Add touch-friendly interactions for mobile
+@media (max-width: 768px) {
+  .imagebutton {
+    &:active {
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+      transform: scale(0.98);
+    }
+  }
+}
+
+// Smooth transitions
+.icon, .imagebutton {
+  transition: all 0.2s ease;
+  will-change: transform;
+  transform: translateZ(0);
 }
 </style>

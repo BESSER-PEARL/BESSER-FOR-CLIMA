@@ -3,7 +3,7 @@
 import 'vue3-carousel/dist/carousel.css'
 import { Carousel, Slide, Pagination, Navigation } from 'vue3-carousel'
 import { RouterLink } from 'vue-router';
-
+import { ref, onMounted } from 'vue'
 
 const slides = [
   { id: 1, image: 'differdange.jpg', title: "Differdange", country: "Luxembourg", description: "t('homeview.carousel_differdange')" },
@@ -21,6 +21,17 @@ const slides = [
   { id: 12, image: 'prejador.jpg', title: "Prijedor", country: "Bosnia and Herzegovina", description: "t('homeview.carousel_prijedor')" },
   { id: 14, image: 'katowice.jpg', title: "Katowice", country: "Poland", description: "t('homeview.carousel_katowice')" }
 ]
+
+const isMobile = ref(false)
+
+onMounted(() => {
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
+})
+
+const checkMobile = () => {
+  isMobile.value = window.innerWidth <= 768
+}
 
 </script>
 
@@ -40,7 +51,7 @@ const slides = [
     <div class="carousel">
       <Carousel :autoplay="10000" pauseAutoplayOnHover wrapAround :transition="1500">
         <Slide v-for="slide in slides" :key="slide.id">
-          <div class="carousel__item">
+          <div class="carousel__item" :class="{ 'mobile-layout': isMobile }">
             <div class="image-container">
               <img :src="slide.image" :alt="'Slide ' + slide.id" class="slide-image">
             </div>
@@ -98,6 +109,27 @@ const slides = [
     font-size: 1vw;
   }
 
+  @media (max-width: 768px) {
+    height: 40vh;
+    
+    .text-container {
+      width: 90%;
+      margin: 10px;
+      padding: 15px;
+      font-size: 16px;
+      
+      h1 {
+        font-size: 24px;
+        margin-bottom: 10px;
+      }
+      
+      p {
+        font-size: 16px;
+        margin-bottom: 15px;
+      }
+    }
+  }
+
 }
 
 .carousel {
@@ -112,6 +144,50 @@ const slides = [
     text-align: left; // Align text to the left
     padding: 20px; // Padding inside the text container
     box-sizing: border-box; // Ensure padding is included in the max-height
+  }
+
+  @media (max-width: 768px) {
+    min-height: 60vh;
+
+    .carousel__item {
+      padding: 10px;
+      flex-direction: column;
+      
+      &.mobile-layout {
+        .image-container {
+          flex: 0 0 100%;
+          margin-bottom: 20px;
+          
+          img {
+            width: 100%;
+            max-width: 300px;
+          }
+        }
+        
+        .info-box {
+          flex: 0 0 100%;
+          margin-right: 0;
+          width: 100%;
+          
+          .text-container {
+            padding: 15px;
+            max-height: 250px;
+          }
+        }
+      }
+    }
+
+    .title {
+      font-size: 24px;
+    }
+
+    .subtitle {
+      font-size: 18px;
+    }
+
+    .description {
+      font-size: 14px;
+    }
   }
 }
 
@@ -199,6 +275,37 @@ const slides = [
 .carousel__next {
   background-color: transparent;
   border: none;
+}
+
+@media (max-width: 768px) {
+  .custom-arrow {
+    font-size: 40px;
+    padding: 5px;
+  }
+}
+
+// Optimize carousel controls for mobile
+:deep(.carousel__pagination) {
+  @media (max-width: 768px) {
+    bottom: 0;
+    padding: 10px 0;
+    
+    .carousel__pagination-button {
+      width: 10px;
+      height: 10px;
+      margin: 0 4px;
+    }
+  }
+}
+
+:deep(.carousel__nav) {
+  @media (max-width: 768px) {
+    .carousel__prev,
+    .carousel__next {
+      width: 40px;
+      height: 40px;
+    }
+  }
 }
 </style>
 
