@@ -22,7 +22,7 @@ let websocketService = null;
 
 function downloadPdf(pdfTitle) {
   const url = `/pdfs/${pdfTitle}`;
-  window.location.href = url; // Triggers the download
+  window.open(url, '_blank'); // Opens in new tab instead of downloading
 }
 
 
