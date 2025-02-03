@@ -284,6 +284,7 @@ const toggleMobileMenu = () => {
 
         <ul class="nav-routes" :class="{ 'mobile-menu-active': isMobileMenuOpen }">
           <RouterLink @click="closeMobileMenu" to="/">{{ $t('header.home') }}</RouterLink>
+          <RouterLink @click="closeMobileMenu" to="/demo">DEMO Dashboard</RouterLink>
           <RouterLink @click="closeMobileMenu" to="/projects">Dashboard</RouterLink>
         <!--  <RouterLink to="/bot">ClimaSolutions Bot</RouterLink>-->
           <RouterLink @click="closeMobileMenu" to="/about">{{ $t('header.About') }}</RouterLink>
