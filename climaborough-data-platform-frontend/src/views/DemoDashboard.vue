@@ -648,7 +648,7 @@ function cancelClick(event) {
 const tempName = ref("")
 
 // Ajouter cette nouvelle fonction
-const exportToPNG = async () => {
+const exportToPNG = async (filename) => {
     try {
         // Get the dashboard container
         const element = document.querySelector('.grid-space-static') || document.querySelector('.grid-space');
@@ -696,7 +696,7 @@ const exportToPNG = async () => {
 
         // Create and trigger download
         const link = document.createElement('a');
-        link.download = `${city.value}_dashboard_${new Date().toISOString().split('T')[0]}.png`;
+        link.download = `${filename}.png`;
         link.href = canvas.toDataURL('image/png', 1.0); // Maximum quality
         document.body.appendChild(link);
         link.click();
@@ -707,8 +707,123 @@ const exportToPNG = async () => {
     }
 };
 
-const exportToPDF = async () => {
-    // Create PDF with A4 dimensions and better quality settings
+const exportToPDF = async (filename) => {
+    if (!exportFileName.value) return;
+    showExportDialog.value = false;
+    
+    try {
+        const pdf = new jsPDF('p', 'mm', 'a4', true);
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        const margin = 15;
+        const contentWidth = pageWidth - (2 * margin);
+
+        // Helper function to add page header
+        const addHeader = (pageNumber, totalPages) => {
+            pdf.setFillColor(1, 119, 169);
+            pdf.rect(0, 0, pageWidth, 25, 'F');
+            
+            pdf.setTextColor(255, 255, 255);
+            pdf.setFontSize(16);
+            pdf.text(`${exportFileName.value}`, margin, 17);
+            
+            const pageInfo = `Page ${pageNumber} of ${totalPages}`;
+            const today = new Date().toLocaleDateString();
+            pdf.setFontSize(10);
+            pdf.text(today, pageWidth - margin - pdf.getTextWidth(today), 17);
+            pdf.text(pageInfo, pageWidth/2 - pdf.getTextWidth(pageInfo)/2, 17);
+        };
+
+        // Get all chart containers from the static grid
+        const chartContainers = document.querySelectorAll('.grid-space-static .item');
+        const totalPages = Math.ceil(chartContainers.length / 2);
+        let pageNumber = 1;
+        let yPosition = 35;
+
+        addHeader(pageNumber, totalPages);
+
+        // Process each chart container
+        for (let i = 0; i < chartContainers.length; i++) {
+            const container = chartContainers[i];
+            
+            try {
+                // Wait a bit for charts to render completely
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                const canvas = await html2canvas(container, {
+                    useCORS: true,
+                    allowTaint: true,
+                    scale: 2,
+                    backgroundColor: '#ffffff',
+                    logging: false,
+                    width: container.offsetWidth,
+                    height: container.offsetHeight
+                });
+
+                const imgData = canvas.toDataURL('image/png', 1.0);
+                const imgWidth = contentWidth;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+                // Check if we need a new page
+                if (yPosition + imgHeight + 20 > pageHeight) {
+                    pdf.addPage();
+                    pageNumber++;
+                    addHeader(pageNumber, totalPages);
+                    yPosition = 35;
+                }
+
+                // Add chart title
+                const titleElement = container.querySelector('h3');
+                if (titleElement) {
+                    pdf.setFontSize(12);
+                    pdf.setTextColor(0, 0, 0);
+                    pdf.text(titleElement.textContent, margin, yPosition);
+                    yPosition += 8;
+                }
+
+                // Add chart image
+                pdf.addImage(imgData, 'PNG', margin, yPosition, imgWidth, imgHeight);
+                yPosition += imgHeight + 20;
+
+            } catch (error) {
+                console.error('Error processing chart:', error);
+            }
+        }
+
+        // Add footer to each page
+        const totalPageCount = pdf.internal.getNumberOfPages();
+        for (let i = 1; i <= totalPageCount; i++) {
+            pdf.setPage(i);
+            pdf.setFontSize(8);
+            pdf.setTextColor(128, 128, 128);
+            const footerText = `Generated from ${city.value} Dashboard - ${new Date().toLocaleString()}`;
+            pdf.text(footerText, margin, pageHeight - 10);
+        }
+
+        // Save the PDF
+        pdf.save(`${exportFileName.value}.pdf`);
+
+    } catch (error) {
+        console.error('Error generating PDF:', error);
+        alert('Error generating PDF. Please try again.');
+    }
+};
+
+const chatMode = ref(false);
+
+const toggleChat = () => {
+  chatMode.value = !chatMode.value;
+};
+
+// Add near the top with other refs
+const showExportDialog = ref(false);
+const exportFileName = ref('');
+
+const handleExportPDF = async () => {
+  if (!exportFileName.value) return;
+  showExportDialog.value = false;
+  
+  try {
     const pdf = new jsPDF('p', 'mm', 'a4', true);
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
@@ -717,90 +832,93 @@ const exportToPDF = async () => {
 
     // Helper function to add page header
     const addHeader = (pageNumber, totalPages) => {
-        pdf.setFillColor(1, 119, 169); // #0177a9
-        pdf.rect(0, 0, pageWidth, 25, 'F');
-        
-        pdf.setTextColor(255, 255, 255);
-        pdf.setFontSize(16);
-        pdf.text(`${city.value} Dashboard`, margin, 17);
-        
-        // Add date and page number
-        const pageInfo = `Page ${pageNumber} of ${totalPages}`;
-        const today = new Date().toLocaleDateString();
-        pdf.setFontSize(10);
-        pdf.text(today, pageWidth - margin - pdf.getTextWidth(today), 17);
-        pdf.text(pageInfo, pageWidth/2 - pdf.getTextWidth(pageInfo)/2, 17);
+      pdf.setFillColor(1, 119, 169);
+      pdf.rect(0, 0, pageWidth, 25, 'F');
+      
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(16);
+      pdf.text(`${exportFileName.value}`, margin, 17);
+      
+      const pageInfo = `Page ${pageNumber} of ${totalPages}`;
+      const today = new Date().toLocaleDateString();
+      pdf.setFontSize(10);
+      pdf.text(today, pageWidth - margin - pdf.getTextWidth(today), 17);
+      pdf.text(pageInfo, pageWidth/2 - pdf.getTextWidth(pageInfo)/2, 17);
     };
 
-    let yPosition = 35;
-    const charts = selectedSection.layout.map(item => document.getElementById(item.i));
+    // Get all chart containers from the static grid
+    const chartContainers = document.querySelectorAll('.grid-space-static .item');
+    const totalPages = Math.ceil(chartContainers.length / 2);
     let pageNumber = 1;
-    const totalPages = Math.ceil(charts.length / 2); // Estimate pages
+    let yPosition = 35;
 
     addHeader(pageNumber, totalPages);
 
-    for (let i = 0; i < charts.length; i++) {
-        if (!charts[i]) continue;
+    // Process each chart container
+    for (let i = 0; i < chartContainers.length; i++) {
+      const container = chartContainers[i];
+      
+      try {
+        // Wait a bit for charts to render completely
+        await new Promise(resolve => setTimeout(resolve, 500));
 
-        try {
-            const canvas = await html2canvas(charts[i], {
-                useCORS: true,
-                allowTaint: true,
-                scale: 2,
-                backgroundColor: '#ffffff',
-                logging: false
-            });
+        const canvas = await html2canvas(container, {
+          useCORS: true,
+          allowTaint: true,
+          scale: 2,
+          backgroundColor: '#ffffff',
+          logging: false,
+          width: container.offsetWidth,
+          height: container.offsetHeight
+        });
 
-            const imgData = canvas.toDataURL('image/png', 1.0);
-            const imgWidth = contentWidth;
-            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        const imgData = canvas.toDataURL('image/png', 1.0);
+        const imgWidth = contentWidth;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-            // Check if we need a new page
-            if (yPosition + imgHeight + 20 > pageHeight) {
-                pdf.addPage();
-                pageNumber++;
-                addHeader(pageNumber, totalPages);
-                yPosition = 35;
-            }
-
-            // Add chart title
-            pdf.setFontSize(12);
-            pdf.setTextColor(0, 0, 0);
-            const title = charts[i].querySelector('h3')?.textContent || `Chart ${i + 1}`;
-            pdf.text(title, margin, yPosition);
-            yPosition += 8;
-
-            // Add chart with white background and shadow
-            pdf.setFillColor(255, 255, 255);
-            pdf.setDrawColor(200, 200, 200);
-            pdf.roundedRect(margin - 1, yPosition - 1, imgWidth + 2, imgHeight + 2, 2, 2, 'FD');
-            pdf.addImage(imgData, 'PNG', margin, yPosition, imgWidth, imgHeight);
-            
-            yPosition += imgHeight + 20;
-
-        } catch (error) {
-            console.error('Error processing chart:', error);
+        // Check if we need a new page
+        if (yPosition + imgHeight + 20 > pageHeight) {
+          pdf.addPage();
+          pageNumber++;
+          addHeader(pageNumber, totalPages);
+          yPosition = 35;
         }
+
+        // Add chart title
+        const titleElement = container.querySelector('h3');
+        if (titleElement) {
+          pdf.setFontSize(12);
+          pdf.setTextColor(0, 0, 0);
+          pdf.text(titleElement.textContent, margin, yPosition);
+          yPosition += 8;
+        }
+
+        // Add chart image
+        pdf.addImage(imgData, 'PNG', margin, yPosition, imgWidth, imgHeight);
+        yPosition += imgHeight + 20;
+
+      } catch (error) {
+        console.error('Error processing chart:', error);
+      }
     }
 
     // Add footer to each page
     const totalPageCount = pdf.internal.getNumberOfPages();
     for (let i = 1; i <= totalPageCount; i++) {
-        pdf.setPage(i);
-        pdf.setFontSize(8);
-        pdf.setTextColor(128, 128, 128);
-        const footerText = `Generated from ${city.value} Dashboard - ${new Date().toLocaleString()}`;
-        pdf.text(footerText, margin, pageHeight - 10);
+      pdf.setPage(i);
+      pdf.setFontSize(8);
+      pdf.setTextColor(128, 128, 128);
+      const footerText = `Generated from ${city.value} Dashboard - ${new Date().toLocaleString()}`;
+      pdf.text(footerText, margin, pageHeight - 10);
     }
 
-    // Save with formatted name
-    pdf.save(`${city.value}_dashboard_${new Date().toISOString().split('T')[0]}.pdf`);
-};
+    // Save the PDF
+    pdf.save(`${exportFileName.value}.pdf`);
 
-const chatMode = ref(false);
-
-const toggleChat = () => {
-  chatMode.value = !chatMode.value;
+  } catch (error) {
+    console.error('Error generating PDF:', error);
+    alert('Error generating PDF. Please try again.');
+  }
 };
 
 </script>
@@ -1008,32 +1126,10 @@ const toggleChat = () => {
                         </v-menu>
                     </div>
                     <div class="right" style="display: flex; gap: 10px;">
-                        <v-menu>
-                            <template v-slot:activator="{ props }">
-                                <v-btn rounded="0" size="x-large" color="#0177a9" class="button" v-bind="props">
-                                    Export
-                                    <Icon icon="material-symbols:download" width="30" height="30" style="color: #FFFFFF; margin-left: 5px;" />
-                                </v-btn>
-                            </template>
-                            <v-list>
-                                <v-list-item @click="exportToPNG">
-                                    <v-list-item-title>
-                                        <div style="display: flex; align-items: center; gap: 8px;">
-                                            <Icon icon="material-symbols:download" width="24" height="24" />
-                                            Export as PNG
-                                        </div>
-                                    </v-list-item-title>
-                                </v-list-item>
-                                <v-list-item @click="exportToPDF">
-                                    <v-list-item-title>
-                                        <div style="display: flex; align-items: center; gap: 8px;">
-                                            <Icon icon="material-symbols:picture-as-pdf" width="24" height="24" />
-                                            Export as PDF
-                                        </div>
-                                    </v-list-item-title>
-                                </v-list-item>
-                            </v-list>
-                        </v-menu>
+                        <v-btn rounded="0" size="x-large" color="#0177a9" class="button" @click="showExportDialog = true">
+                          Export to PDF
+                          <Icon icon="material-symbols:picture-as-pdf" width="30" height="30" style="color: #FFFFFF; margin-left: 5px;" />
+                        </v-btn>
                         <div v-if=true>
                             <v-btn rounded="0" size="x-large" @click="edit" color="#0177a9" class="button">
                                 Dashboard Builder
@@ -1098,13 +1194,6 @@ const toggleChat = () => {
             </div>
         </div>
     </div>
-    <div v-else class="login-warning">
-        <p>You need to login if you want to have access to the projects. Use the login button on the top right corner of
-            this page.</p>
-        <div class="login" style="padding: 40px;">
-            <LoginForm />
-        </div>
-    </div>
     <!-- <div v-if="chatMode" class="chat-popup">
       <div class="chat-popup-inner">
         <div class="chat-header">
@@ -1117,6 +1206,29 @@ const toggleChat = () => {
         />
       </div>
     </div> -->
+    <v-dialog v-model="showExportDialog" max-width="500px">
+      <v-card>
+        <v-card-title class="text-h5 pa-4" style="background-color: #0177a9; color: white;">
+          Export Dashboard to PDF
+        </v-card-title>
+        <v-card-text class="pa-4">
+          <v-text-field
+            v-model="exportFileName"
+            label="Document Title"
+            placeholder="Enter document title"
+            :rules="[v => !!v || 'Title is required']"
+            class="mt-4"
+          ></v-text-field>
+        </v-card-text>
+        <v-card-actions class="pa-4">
+          <v-spacer></v-spacer>
+          <v-btn color="grey" text @click="showExportDialog = false">Cancel</v-btn>
+          <v-btn color="#0177a9" @click="handleExportPDF" :disabled="!exportFileName">
+            Export
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 </template>
 
 
