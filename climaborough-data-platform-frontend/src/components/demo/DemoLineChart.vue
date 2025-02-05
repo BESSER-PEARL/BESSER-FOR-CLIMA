@@ -95,8 +95,14 @@ async function getItems() {
             values.value.push(item.kpiValue);
             timestamps.value.push(item.timestamp);
             valuemappedtotime.value.push({ x: item.timestamp, y: item.kpiValue });
-            baseline.value.push({ x: item.timestamp, y: Math.max(0, item.kpiValue - 10) });
         });
+
+        // Add fixed baseline for 15/01/2025 as a vertical line
+        const baselineDate = new Date('2025-01-15').toISOString();
+        baseline.value = [
+            { x: baselineDate, y: 0 },    // Start of line
+            { x: baselineDate, y: 100 }   // End of line
+        ];
     } catch (error) {
         window.alert('Error generating mock data');
     }
@@ -111,9 +117,9 @@ const series = ref([
     color: props.color,
   },
   {
-    name: "Baseline",
+    name: "Project Launch",  // Changed from "Baseline" to "Project Launch"
     data: baseline.value,
-    color: "#FFB800",
+    color: "#FF0000", // Red color
   }
 ]);
 
@@ -123,6 +129,11 @@ watch(() => [props.title, props.xtitle, props.ytitle, props.color], () => {
       name: "KPI Values",
       data: valuemappedtotime.value,
       color: props.color
+    },
+    {
+      name: "Project Launch",  // Changed from "Baseline" to "Project Launch"
+      data: baseline.value,
+      color: "#FF0000" // Red color
     }
   ];
 });

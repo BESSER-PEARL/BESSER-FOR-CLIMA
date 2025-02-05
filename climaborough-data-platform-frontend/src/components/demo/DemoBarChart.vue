@@ -1,5 +1,6 @@
 <script setup>
 import { ref, watch } from "vue";
+
 const props = defineProps({
   tableId: {
     type: Number,
@@ -8,66 +9,25 @@ const props = defineProps({
   title: {
     type: String,
     default: "Title"
+  },
+  series: {
+    type: Array,
+    default: () => []
+  },
+  labels: {
+    type: Array,
+    default: () => []
+  },
+  colors: {
+    type: Array,
+    default: () => ['#B1E3FF', '#A1E3CB', '#A8C5DA', '#69696A', '#95A4FC']
   }
 })
 
-const refTitle = ref(props.title);
+const chartSeries = ref(props.series.length ? props.series : [25, 15, 44, 55, 41])
+const chartLabels = ref(props.labels.length ? props.labels : ['Category A', 'Category B', 'Category C', 'Category D', 'Category E'])
 
-function countOccurrences(arr) {
-  const occurrences = {};
-  arr.forEach(item => {
-    if (occurrences[item]) {
-      occurrences[item]++;
-    } else {
-      occurrences[item] = 1;
-    }
-  });
-  return occurrences;
-}
-
-const items = ref([]);
-const values = ref([]);
-const stands = ref([]);
-const mapping = ref({});
-const series = ref([]);
-const labels = ref([]);
-
-const formatDate = (dateString) => {
-  const date = new Date(dateString);
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0'); // getMonth() is zero-based
-  const year = date.getFullYear();
-  return `${day}/${month}/${year}`;
-};
-const lastTimestamp = ref("No updates available");
-
-async function getItems() {
-  try {
-    // Generate mock data
-    const mockData = Array.from({ length: 5 }, () => ({
-      currentStanding: ['Category A', 'Category B', 'Category C', 'Category D'][Math.floor(Math.random() * 4)],
-      timestamp: new Date(Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000).toISOString(),
-      value: Math.floor(Math.random() * 100)
-    }));
-
-    mockData.forEach(item => {
-      items.value.push(item);
-      stands.value.push(item.currentStanding);
-      lastTimestamp.value = formatDate(item.timestamp);
-    });
-    
-    mapping.value = countOccurrences(stands.value);
-
-    for (const [key, value] of Object.entries(mapping.value)) {
-      labels.value.push(key);
-      series.value.push(value);
-    }
-  } catch (error) {
-    window.alert('Error generating mock data');
-  }
-}
-
-getItems();
+const lastTimestamp = ref(new Date().toLocaleDateString())
 
 const chartOptions = ref({
   chart: {
@@ -85,12 +45,12 @@ const chartOptions = ref({
     offsetY: -8,
   },
   xaxis: {
-    categories: labels.value,
+    categories: chartLabels.value,
     title: {
       text: "Categories",
     }
   },
-  colors: ['#B1E3FF', '#A1E3CB', '#A8C5DA', '#69696A', '#95A4FC'],
+  colors: ['B1E3FF', 'A1E3CB', 'A8C5DA', '69696A', '95A4FC'],
   dataLabels: {
     enabled: true,
     style: {
@@ -120,17 +80,29 @@ const chartOptions = ref({
   ]
 });
 
-watch(() => [props.title], () => {
+watch(() => [props.title, props.series, props.labels], () => {
+  if (props.series.length) chartSeries.value = props.series;
+  if (props.labels.length) chartLabels.value = props.labels;
+  
   chartOptions.value = {
     ...chartOptions.value,
     title: {
-      text: props.title
+      text: props.title,
+      style: {
+        fontSize: '20px',
+        fontWeight: 'bold'
+      },
+      offsetY: -8,
     },
     xaxis: {
-      categories: labels.value
-    }
+      categories: chartLabels.value,
+      title: {
+        text: "Categories",
+      }
+    },
+    colors: ['B1E3FF', 'A1E3CB', 'A8C5DA', '69696A', '95A4FC']
   }
-});
+}, { deep: true });
 
 const alert = ref(false);
 const toggleAlert = () => {
@@ -141,7 +113,7 @@ const toggleAlert = () => {
 <template>
   <div id="container">
     <div id="chart">
-      <VueApexCharts type="bar" height="100%" :options="chartOptions" :series="[ { data: series } ]"></VueApexCharts>
+      <VueApexCharts type="bar" height="100%" :options="chartOptions" :series="[{ data: chartSeries }]"></VueApexCharts>
     </div>
     <div class="update">
       Last Update: {{ lastTimestamp }}

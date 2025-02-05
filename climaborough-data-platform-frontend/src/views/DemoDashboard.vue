@@ -343,6 +343,9 @@ const createVisualisation = (tableId, tableName, chart, kpi) => {
     } else if (chart == "Map") {
         vis.w = 7;
         vis.h = 13; 
+    } else if (chart == "BarChart") {
+        vis.attributes.series = [25, 15, 44, 55, 41];
+        vis.attributes.labels = ['Category A', 'Category B', 'Category C', 'Category D', 'Category E'];
     }
 
     selectedSection.layout.push(vis)
@@ -393,18 +396,24 @@ const editVisualisation = (item) => {
 const updateChart = (object) => {
     const index = selectedSection.layout.findIndex(obj => obj.i === currentItem.value.i);
     if (index !== -1) {
+        // Update the attributes of the current item
         for (const [key, value] of Object.entries(object)) {
-            selectedSection.layout[index].attributes[key] = value
+            if (currentItem.value.chart === 'BarChart') {
+                // Ensure series and labels are properly updated for BarChart
+                currentItem.value.attributes[key] = value;
+                selectedSection.layout[index].attributes[key] = value;
+            } else {
+                currentItem.value.attributes[key] = value;
+                selectedSection.layout[index].attributes[key] = value;
+            }
         }
-        currentItem.value = {}
-        lineChartBool.value = false
-        pieChartBool.value = false
-        barChartBool.value = false
-        statChartBool.value = false
-        tableBool.value = false
-        gaugeChartBool.value = false
     }
-    saveTolocalStorage();
+    // Close all form modals
+    lineChartBool.value = false;
+    pieChartBool.value = false;
+    barChartBool.value = false;
+    statChartBool.value = false;
+    tableBool.value = false;
 }
 
 const organizeVisualisations = (resizeBool) => {
@@ -927,8 +936,12 @@ const toggleChat = () => {
                                     :ytitle="item.attributes.ytitle" :color="item.attributes.color" :target="item.attributes.target" />
                                 <PieChart v-if="item.chart == 'PieChart'" :city="item.attributes.city"
                                     :tableId="item.attributes.tableId" :title="item.attributes.title" />
-                                <BarChart v-if="item.chart == 'BarChart'" :city="item.attributes.city"
-                                    :tableId="item.attributes.tableId" :title="item.attributes.title" />
+                                <BarChart v-if="item.chart == 'BarChart'" 
+                                    :city="item.attributes.city"
+                                    :tableId="item.attributes.tableId" 
+                                    :title="item.attributes.title"
+                                    :series="item.attributes.series || []"
+                                    :labels="item.attributes.labels || []" />
                                 <StatChart v-if="item.chart == 'StatChart'" :city="item.attributes.city"
                                     :tableId="item.attributes.tableId" :title="item.attributes.title"
                                     :suffix="item.attributes.suffix" :id="item.id" :target="item.attributes.target" />
@@ -950,10 +963,16 @@ const toggleChat = () => {
                     :color="currentItem.attributes.color" />
                 <PieChartForm v-if="pieChartBool" :title="currentItem.attributes.title" @cancel="togglePieChartEdit"
                     @updateChart="updateChart" />
-                <BarChartForm v-if="barChartBool" :title="currentItem.attributes.title" 
-                    @cancel="toggleBarChartEdit" @updateChart="updateChart" />
+                <BarChartForm v-if="barChartBool" 
+                    :title="currentItem.attributes.title"
+                    :series="currentItem.attributes.series || []"
+                    :labels="currentItem.attributes.labels || []"
+                    @cancel="toggleBarChartEdit" 
+                    @updateChart="updateChart" />
                 <StatChartForm v-if="statChartBool" :title="currentItem.attributes.title"
-                    :suffix="currentItem.attributes.suffix" @cancel="toggleStatChartEdit" @updateChart="updateChart" />
+                    :suffix="currentItem.attributes.suffix" :value="currentItem.attributes.value"
+                    :target="currentItem.attributes.target"
+                    @cancel="toggleStatChartEdit" @updateChart="updateChart" />
                 <TableForm v-if="tableBool" :city=city :title="currentItem.attributes.title"
                     :tableId="currentItem.attributes.tableId" :columns="currentItem.attributes.columns"
                     @cancel="toggleTableEdit" @updateChart="updateChart" />
@@ -1038,8 +1057,12 @@ const toggleChat = () => {
                                     :color="item.attributes.color" :target="item.attributes.target" />
                                 <PieChart v-if="item.chart == 'PieChart'" :city="item.attributes.city"
                                     :tableId="item.attributes.tableId" :title="item.attributes.title" />
-                                <BarChart v-if="item.chart == 'BarChart'" :city="item.attributes.city"
-                                    :tableId="item.attributes.tableId" :title="item.attributes.title" />
+                                <BarChart v-if="item.chart == 'BarChart'" 
+                                    :city="item.attributes.city"
+                                    :tableId="item.attributes.tableId" 
+                                    :title="item.attributes.title"
+                                    :series="item.attributes.series || []"
+                                    :labels="item.attributes.labels || []" />
                                 <StatChart v-if="item.chart == 'StatChart'" :city="item.attributes.city"
                                     :tableId="item.attributes.tableId" :title="item.attributes.title"
                                     :suffix="item.attributes.suffix" :id="item.id" :target="item.attributes.target" />
