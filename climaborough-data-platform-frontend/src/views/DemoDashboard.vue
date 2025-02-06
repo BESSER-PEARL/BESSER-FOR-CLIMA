@@ -921,6 +921,16 @@ const handleExportPDF = async () => {
   }
 };
 
+// Add this new function near other functions in the script section
+const copyEmailToClipboard = () => {
+  const email = 'armen.sulejmani@list.lu'; 
+  navigator.clipboard.writeText(email).then(() => {
+    alert('Email copied to clipboard!');
+  }).catch(err => {
+    console.error('Failed to copy email:', err);
+  });
+};
+
 </script>
 
 <template>
@@ -1129,6 +1139,10 @@ const handleExportPDF = async () => {
                         <v-btn rounded="0" size="x-large" color="#0177a9" class="button" @click="showExportDialog = true">
                           Export to PDF
                           <Icon icon="material-symbols:picture-as-pdf" width="30" height="30" style="color: #FFFFFF; margin-left: 5px;" />
+                        </v-btn>
+                        <v-btn rounded="0" size="x-large" color="#0177a9" class="button" @click="copyEmailToClipboard">
+                          Copy Mail
+                          <Icon icon="material-symbols:mail" width="30" height="30" style="color: #FFFFFF; margin-left: 5px;" />
                         </v-btn>
                         <div v-if=true>
                             <v-btn rounded="0" size="x-large" @click="edit" color="#0177a9" class="button">
