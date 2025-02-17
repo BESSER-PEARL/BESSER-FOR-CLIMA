@@ -819,34 +819,34 @@ const toggleChat = () => {
 const showExportDialog = ref(false);
 const exportFileName = ref('');
 
+const isExporting = ref(false);
+
 const handleExportPDF = async () => {
   if (!exportFileName.value) return;
   showExportDialog.value = false;
+  isExporting.value = true;
   
   try {
     const pdf = new jsPDF('p', 'mm', 'a4', true);
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
     const margin = 15;
-    const contentWidth = pageWidth - (2 * margin);
+    // Reduce content width to make visualizations smaller
+    const contentWidth = (pageWidth - (2 * margin)) * 0.8; // Reduced to 80% of original width
 
     // Helper function to add page header
     const addHeader = (pageNumber, totalPages) => {
       pdf.setFillColor(1, 119, 169);
       pdf.rect(0, 0, pageWidth, 25, 'F');
-      
       pdf.setTextColor(255, 255, 255);
       pdf.setFontSize(16);
       pdf.text(`${exportFileName.value}`, margin, 17);
-      
-      const pageInfo = `Page ${pageNumber} of ${totalPages}`;
-      const today = new Date().toLocaleDateString();
       pdf.setFontSize(10);
-      pdf.text(today, pageWidth - margin - pdf.getTextWidth(today), 17);
-      pdf.text(pageInfo, pageWidth/2 - pdf.getTextWidth(pageInfo)/2, 17);
+      pdf.text(`Page ${pageNumber} of ${totalPages}`, pageWidth/2 - 20, 17);
+      pdf.text(new Date().toLocaleDateString(), pageWidth - margin - 25, 17);
     };
 
-    // Get all chart containers from the static grid
+    // Get all chart containers
     const chartContainers = document.querySelectorAll('.grid-space-static .item');
     const totalPages = Math.ceil(chartContainers.length / 2);
     let pageNumber = 1;
@@ -854,63 +854,68 @@ const handleExportPDF = async () => {
 
     addHeader(pageNumber, totalPages);
 
-    // Process each chart container
-    for (let i = 0; i < chartContainers.length; i++) {
-      const container = chartContainers[i];
+    // Process charts in batches of 2
+    const batchSize = 2;
+    for (let i = 0; i < chartContainers.length; i += batchSize) {
+      const batch = Array.from(chartContainers).slice(i, i + batchSize);
       
-      try {
-        // Wait a bit for charts to render completely
-        await new Promise(resolve => setTimeout(resolve, 500));
+      await Promise.all(batch.map(async (container) => {
+        try {
+          const canvas = await html2canvas(container, {
+            scale: 1.5, // Reduced scale for better performance
+            logging: false,
+            backgroundColor: '#ffffff',
+            useCORS: true,
+            allowTaint: true,
+            width: container.offsetWidth,
+            height: container.offsetHeight,
+            imageTimeout: 15000,
+            onclone: (doc) => {
+              // Remove unnecessary elements that might slow down rendering
+              doc.querySelectorAll('.delete, .edit').forEach(el => el.remove());
+            }
+          });
 
-        const canvas = await html2canvas(container, {
-          useCORS: true,
-          allowTaint: true,
-          scale: 2,
-          backgroundColor: '#ffffff',
-          logging: false,
-          width: container.offsetWidth,
-          height: container.offsetHeight
-        });
+          // Compress image data
+          const imgData = canvas.toDataURL('image/jpeg', 0.7); // Use JPEG with 70% quality
+          const imgWidth = contentWidth;
+          const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-        const imgData = canvas.toDataURL('image/png', 1.0);
-        const imgWidth = contentWidth;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+          // Check if we need a new page
+          if (yPosition + imgHeight > pageHeight - margin) {
+            pdf.addPage();
+            pageNumber++;
+            addHeader(pageNumber, totalPages);
+            yPosition = 35;
+          }
 
-        // Check if we need a new page
-        if (yPosition + imgHeight + 20 > pageHeight) {
-          pdf.addPage();
-          pageNumber++;
-          addHeader(pageNumber, totalPages);
-          yPosition = 35;
+          // Add chart title
+          const titleElement = container.querySelector('h3');
+          if (titleElement) {
+            pdf.setFontSize(12);
+            pdf.setTextColor(0, 0, 0);
+            pdf.text(titleElement.textContent, margin, yPosition);
+            yPosition += 8;
+          }
+
+          // Add chart image with smaller size
+          pdf.addImage(imgData, 'JPEG', margin + contentWidth * 0.1, yPosition, imgWidth, imgHeight);
+          yPosition += imgHeight + 10; // Reduced spacing between charts
+
+        } catch (error) {
+          console.warn('Error processing chart:', error);
         }
+      }));
 
-        // Add chart title
-        const titleElement = container.querySelector('h3');
-        if (titleElement) {
-          pdf.setFontSize(12);
-          pdf.setTextColor(0, 0, 0);
-          pdf.text(titleElement.textContent, margin, yPosition);
-          yPosition += 8;
-        }
-
-        // Add chart image
-        pdf.addImage(imgData, 'PNG', margin, yPosition, imgWidth, imgHeight);
-        yPosition += imgHeight + 20;
-
-      } catch (error) {
-        console.error('Error processing chart:', error);
-      }
+      // Add small delay between batches to prevent browser from freezing
+      await new Promise(resolve => setTimeout(resolve, 100));
     }
 
-    // Add footer to each page
-    const totalPageCount = pdf.internal.getNumberOfPages();
-    for (let i = 1; i <= totalPageCount; i++) {
-      pdf.setPage(i);
-      pdf.setFontSize(8);
-      pdf.setTextColor(128, 128, 128);
-      const footerText = `Generated from ${city.value} Dashboard - ${new Date().toLocaleString()}`;
-      pdf.text(footerText, margin, pageHeight - 10);
-    }
+    // Add footer
+    pdf.setFontSize(8);
+    pdf.setTextColor(128, 128, 128);
+    const footerText = `Generated from ${city.value} Dashboard`;
+    pdf.text(footerText, margin, pageHeight - 10);
 
     // Save the PDF
     pdf.save(`${exportFileName.value}.pdf`);
@@ -918,6 +923,8 @@ const handleExportPDF = async () => {
   } catch (error) {
     console.error('Error generating PDF:', error);
     alert('Error generating PDF. Please try again.');
+  } finally {
+    isExporting.value = false;
   }
 };
 
@@ -1044,7 +1051,7 @@ const copyEmailToClipboard = () => {
                         <a>Gauge Charts</a>
                         <div class="widget-icon" draggable="true" unselectable="on" @drag="drag('GaugeChart')"
                             @dragend="dragEnd('GaugeChart')">
-                            <img src="/Map.png" class="icon" style="width: 80px" @click="toggleKPIForm('GaugeChart')">
+                            <img src="/GaugeChart.png" class="icon" style="width: 80px" @click="toggleKPIForm('GaugeChart')">
                         </div>
                     </div>
                 </div>
@@ -1243,6 +1250,18 @@ const copyEmailToClipboard = () => {
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-overlay v-model="isExporting" class="align-center justify-center">
+        <div style="text-align: center;">
+            <v-progress-circular
+                color="#0177a9"
+                indeterminate
+                size="64"
+            ></v-progress-circular>
+            <div class="mt-4 text-white">
+                Generating PDF...
+            </div>
+        </div>
+    </v-overlay>
 </template>
 
 
