@@ -4,7 +4,21 @@ object "torino: City" as Torino {
 name = "Torino"
 }
 
+object "athens: City" as Athens {
+    name = "Athens"
+}
 
+object "grenoble: City" as Grenoble {
+    name = "Grenoble-Alpes"
+}
+
+object "maribor: City" as Maribor {
+    name = "Maribor"
+}
+
+object "ioannina: City" as Ioannina {
+    name = "Ioannina"
+}
 
 
 object "differdange: City" as Differdange {

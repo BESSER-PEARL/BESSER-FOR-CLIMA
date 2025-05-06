@@ -6,52 +6,19 @@ from sqlalchemy.orm import declared_attr
 from abc import ABC, abstractmethod
 
 
-class KPIValue(BaseModel):
-    currentStanding: str
-    timestamp: datetime
-    kpiValue: int
-    
 class User(ABC, BaseModel):
-    email: str
-    lastName: str
     firstName: str
     password: str
-    
-class CityUser(User):
-    pass 
-    
-class Admin(User):
-    pass 
-    
-class SolutionProvider(User):
-    pass 
-    
-class KPI(ABC, BaseModel):
-    provider: str
-    name: str
-    id_kpi: str
-    calculationFrequency: str
-    unitText: str
-    category: str
-    description: str
-    
-class KPITemp(KPI):
-    threshold: int
-    
-class KPISecondHandCustomers(KPI):
-    target: int
-    
-class KPIMoney(KPI):
-    target: int
+    email: str
+    lastName: str
     
 class CityAngel(User):
     pass 
     
-class KPITraffic(KPI):
-    target: int
-    
-class KPITotalRenewableEnergy(KPI):
-    target: int
+class KPIValue(BaseModel):
+    kpiValue: int
+    timestamp: datetime
+    currentStanding: str
     
 class Visualisation(ABC, BaseModel):
     title: str
@@ -63,39 +30,45 @@ class Visualisation(ABC, BaseModel):
     i: str
     height: int
     
+class PieChart(Visualisation):
+    pass 
+    
+class Table(Visualisation):
+    pass 
+    
 class LineChart(Visualisation):
-    xtitle: str
     ytitle: str
     color: str
     target: int
+    xtitle: str
     
-class BarChart(Visualisation):
-    pass 
-    
-class PieChart(Visualisation):
-    pass 
+class TableColumn(BaseModel):
+    name: str
     
 class StatChart(Visualisation):
     unit: str
     target: int
     
+class Dashboard(BaseModel):
+    code: str
+    
+class Map(Visualisation):
+    pass 
+    
+class Admin(User):
+    pass 
+    
+class Citizen(User):
+    pass 
+    
 class City(BaseModel):
     name: str
     
-class TableColumn(BaseModel):
-    name: str
-    
-class KPICollectedWaste(KPI):
-    target: int
-    
-class Table(Visualisation):
+class BarChart(Visualisation):
     pass 
     
-class KPITextileWastePerPerson(KPI):
+class CityUser(User):
     pass 
-    
-class KPINumberHouseholdRenewableEnergy(KPI):
-    target: int
     
 class MapData(ABC, BaseModel):
     title: str
@@ -107,27 +80,54 @@ class WMS(MapData):
     name: str
     url: str
     
-class Citizen(User):
-    pass 
+class KPI(ABC, BaseModel):
+    description: str
+    provider: str
+    name: str
+    id_kpi: str
+    calculationFrequency: str
+    unitText: str
+    category: str
     
 class KPIWasteSorted(KPI):
     target: int
     
-class Map(Visualisation):
-    pass 
+class KPISecondHandCustomers(KPI):
+    target: int
+    
+class KPITraffic(KPI):
+    target: int
     
 class KPICo2Avoided(KPI):
     target: int
     
-class KPIPeakSolarEnergy(KPI):
-    target: int
+class KPITemp(KPI):
+    threshold: int
     
-class Dashboard(BaseModel):
-    code: str
+class KPINumberHouseholdRenewableEnergy(KPI):
+    target: int
     
 class KPIParticipants(KPI):
     target: int
     
 class KPIWasteAvoided(KPI):
+    target: int
+    
+class KPITotalRenewableEnergy(KPI):
+    target: int
+    
+class KPICollectedWaste(KPI):
+    target: int
+    
+class SolutionProvider(User):
+    pass 
+    
+class KPITextileWastePerPerson(KPI):
+    pass 
+    
+class KPIMoney(KPI):
+    target: int
+    
+class KPIPeakSolarEnergy(KPI):
     target: int
     
