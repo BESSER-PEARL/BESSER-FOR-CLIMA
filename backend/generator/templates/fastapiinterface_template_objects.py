@@ -278,7 +278,7 @@ except:
 {% if object.name == "City" -%}
 dashboard_{{object.className.name}} = session.query(DashboardDB).filter_by(code="{{object.className.name}}").first()
 if dashboard_{{object.className.name}} is None:
-    dashboard_{{object.className.name}} = DashboardDB(code="{{object.className.name}}", has={{object.className.name}})
+    dashboard_{{object.className.name}} = DashboardDB(code="{{object.className.name}}", City={{object.className.name}})
 
 try:
     session.add(dashboard_{{object.className.name}})
@@ -308,7 +308,7 @@ except:
 @app.post("/city/{city_name}/kpi/{kpi_id}", dependencies=[Depends(JWTBearer())], response_model=List[KPIValue], summary="Add KPI values", tags=["KPI"])
 async def add_kpi_values(
     city_name: str,
-    kpi_id: str,
+    kpi_id: int,
     kpis: List[KPIValue] = Body(...),
 ):
     """Add KPI values for any city"""
@@ -350,6 +350,43 @@ async def add_kpi_values(
             raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
             
     return db_entries
+
+
+@app.get("/city/{city_name}/kpis", response_model=list[object], summary="Get all KPI objects", tags=["KPI"])
+async def get_kpis(city_name: str):
+    """Get all KPIs for a specific city"""
+    try:
+        # Get city object
+        city = session.query(CityDB).filter(func.lower(CityDB.name) == func.lower(city_name)).first()
+        if not city:
+            raise HTTPException(status_code=404, detail=f"City {city_name} not found")
+            
+        results_list = []
+        {% for class in classes -%}
+            {% for parent in class.parents() -%}
+                {% if parent.name == "KPI" %}            
+        query = session.query(kpi_alias, {{class.name | lower }}_alias).\
+            join({{class.name | lower }}_alias, kpi_alias.id == {{class.name | lower}}_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(city_alias.id == city.id)
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                {% endif -%}
+            {% endfor -%}
+        {%- endfor %}
+        return results_list
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 {% endif %}
 
 # Visualisations

@@ -145,5 +145,9 @@
             "calculationFrequency": "Yearly",
             "unitText": "Kg"
         }
-    }
+    },
+    "athens": {},
+    "grenoble": {},
+    "maribor": {},
+    "ioannina": {}
 }

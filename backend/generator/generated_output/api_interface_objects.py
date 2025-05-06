@@ -28,9 +28,9 @@ from auth.auth_model import UserSchema, UserLoginSchema, TokenSchema
 from auth.auth_bearer import JWTBearer
 
 # Local application imports
-from pydantic_classes import Visualisation, Table, PieChart, BarChart, StatChart, LineChart, TableColumn, Map, User, Admin, CityUser, CityAngel, SolutionProvider, Citizen, Dashboard, MapData, GeoJson, WMS, City, KPI, KPIValue, KPITemp, KPITraffic, KPICollectedWaste, KPISecondHandCustomers, KPIMoney, KPITotalRenewableEnergy, KPINumberHouseholdRenewableEnergy, KPIPeakSolarEnergy, KPIParticipants, KPIWasteAvoided, KPICo2Avoided, KPIWasteSorted, KPITextileWastePerPerson
+from pydantic_classes import KPIValue, User, CityUser, Admin, SolutionProvider, KPI, KPITemp, KPISecondHandCustomers, KPIMoney, CityAngel, KPITraffic, KPITotalRenewableEnergy, Visualisation, LineChart, BarChart, PieChart, StatChart, City, TableColumn, KPICollectedWaste, Table, KPITextileWastePerPerson, KPINumberHouseholdRenewableEnergy, MapData, GeoJson, WMS, Citizen, KPIWasteSorted, Map, KPICo2Avoided, KPIPeakSolarEnergy, Dashboard, KPIParticipants, KPIWasteAvoided
 from sql_alchemy import Base
-from sql_alchemy import Visualisation as VisualisationDB, Table as TableDB, PieChart as PieChartDB, BarChart as BarChartDB, StatChart as StatChartDB, LineChart as LineChartDB, TableColumn as TableColumnDB, Map as MapDB, User as UserDB, Admin as AdminDB, CityUser as CityUserDB, CityAngel as CityAngelDB, SolutionProvider as SolutionProviderDB, Citizen as CitizenDB, Dashboard as DashboardDB, MapData as MapDataDB, GeoJson as GeoJsonDB, WMS as WMSDB, City as CityDB, KPI as KPIDB, KPIValue as KPIValueDB, KPITemp as KPITempDB, KPITraffic as KPITrafficDB, KPICollectedWaste as KPICollectedWasteDB, KPISecondHandCustomers as KPISecondHandCustomersDB, KPIMoney as KPIMoneyDB, KPITotalRenewableEnergy as KPITotalRenewableEnergyDB, KPINumberHouseholdRenewableEnergy as KPINumberHouseholdRenewableEnergyDB, KPIPeakSolarEnergy as KPIPeakSolarEnergyDB, KPIParticipants as KPIParticipantsDB, KPIWasteAvoided as KPIWasteAvoidedDB, KPICo2Avoided as KPICo2AvoidedDB, KPIWasteSorted as KPIWasteSortedDB, KPITextileWastePerPerson as KPITextileWastePerPersonDB
+from sql_alchemy import KPIValue as KPIValueDB, User as UserDB, CityUser as CityUserDB, Admin as AdminDB, SolutionProvider as SolutionProviderDB, KPI as KPIDB, KPITemp as KPITempDB, KPISecondHandCustomers as KPISecondHandCustomersDB, KPIMoney as KPIMoneyDB, CityAngel as CityAngelDB, KPITraffic as KPITrafficDB, KPITotalRenewableEnergy as KPITotalRenewableEnergyDB, Visualisation as VisualisationDB, LineChart as LineChartDB, BarChart as BarChartDB, PieChart as PieChartDB, StatChart as StatChartDB, City as CityDB, TableColumn as TableColumnDB, KPICollectedWaste as KPICollectedWasteDB, Table as TableDB, KPITextileWastePerPerson as KPITextileWastePerPersonDB, KPINumberHouseholdRenewableEnergy as KPINumberHouseholdRenewableEnergyDB, MapData as MapDataDB, GeoJson as GeoJsonDB, WMS as WMSDB, Citizen as CitizenDB, KPIWasteSorted as KPIWasteSortedDB, Map as MapDB, KPICo2Avoided as KPICo2AvoidedDB, KPIPeakSolarEnergy as KPIPeakSolarEnergyDB, Dashboard as DashboardDB, KPIParticipants as KPIParticipantsDB, KPIWasteAvoided as KPIWasteAvoidedDB
 from sql_alchemy import KPI as KPIDB
 
 import logging
@@ -195,6 +195,126 @@ async def user_login(user: UserLoginSchema = Body(...)):
     
     
 
+ioannina = session.query(CityDB).filter_by(name= "Ioannina").first()
+
+if ioannina is None:
+    ioannina = CityDB(name= "Ioannina")
+try:
+    session.add(ioannina)
+    session.commit()
+except IntegrityError: 
+    session.rollback()
+    print("error integrity")
+except:
+    session.rollback()
+    print("error already added? 1")
+
+
+dashboard_ioannina = session.query(DashboardDB).filter_by(code="ioannina").first()
+if dashboard_ioannina is None:
+    dashboard_ioannina = DashboardDB(code="ioannina", City=ioannina)
+
+try:
+    session.add(dashboard_ioannina)
+    session.commit()
+except IntegrityError:
+    session.rollback()
+    print("error integrity")
+except:
+    session.rollback()
+    print("error already added? 1")
+
+
+maribor = session.query(CityDB).filter_by(name= "Maribor").first()
+
+if maribor is None:
+    maribor = CityDB(name= "Maribor")
+try:
+    session.add(maribor)
+    session.commit()
+except IntegrityError: 
+    session.rollback()
+    print("error integrity")
+except:
+    session.rollback()
+    print("error already added? 2")
+
+
+dashboard_maribor = session.query(DashboardDB).filter_by(code="maribor").first()
+if dashboard_maribor is None:
+    dashboard_maribor = DashboardDB(code="maribor", City=maribor)
+
+try:
+    session.add(dashboard_maribor)
+    session.commit()
+except IntegrityError:
+    session.rollback()
+    print("error integrity")
+except:
+    session.rollback()
+    print("error already added? 2")
+
+
+grenoble = session.query(CityDB).filter_by(name= "Grenoble-Alpes").first()
+
+if grenoble is None:
+    grenoble = CityDB(name= "Grenoble-Alpes")
+try:
+    session.add(grenoble)
+    session.commit()
+except IntegrityError: 
+    session.rollback()
+    print("error integrity")
+except:
+    session.rollback()
+    print("error already added? 3")
+
+
+dashboard_grenoble = session.query(DashboardDB).filter_by(code="grenoble").first()
+if dashboard_grenoble is None:
+    dashboard_grenoble = DashboardDB(code="grenoble", City=grenoble)
+
+try:
+    session.add(dashboard_grenoble)
+    session.commit()
+except IntegrityError:
+    session.rollback()
+    print("error integrity")
+except:
+    session.rollback()
+    print("error already added? 3")
+
+
+athens = session.query(CityDB).filter_by(name= "Athens").first()
+
+if athens is None:
+    athens = CityDB(name= "Athens")
+try:
+    session.add(athens)
+    session.commit()
+except IntegrityError: 
+    session.rollback()
+    print("error integrity")
+except:
+    session.rollback()
+    print("error already added? 4")
+
+
+dashboard_athens = session.query(DashboardDB).filter_by(code="athens").first()
+if dashboard_athens is None:
+    dashboard_athens = DashboardDB(code="athens", City=athens)
+
+try:
+    session.add(dashboard_athens)
+    session.commit()
+except IntegrityError:
+    session.rollback()
+    print("error integrity")
+except:
+    session.rollback()
+    print("error already added? 4")
+
+
 torino = session.query(CityDB).filter_by(name= "Torino").first()
 
 if torino is None:
@@ -207,12 +327,12 @@ except IntegrityError:
     print("error integrity")
 except:
     session.rollback()
-    print("error already added? 1")
+    print("error already added? 5")
 
 
 dashboard_torino = session.query(DashboardDB).filter_by(code="torino").first()
 if dashboard_torino is None:
-    dashboard_torino = DashboardDB(code="torino", has=torino)
+    dashboard_torino = DashboardDB(code="torino", City=torino)
 
 try:
     session.add(dashboard_torino)
@@ -222,7 +342,7 @@ except IntegrityError:
     print("error integrity")
 except:
     session.rollback()
-    print("error already added? 1")
+    print("error already added? 5")
 
 
 cascais = session.query(CityDB).filter_by(name= "Cascais").first()
@@ -237,12 +357,12 @@ except IntegrityError:
     print("error integrity")
 except:
     session.rollback()
-    print("error already added? 2")
+    print("error already added? 6")
 
 
 dashboard_cascais = session.query(DashboardDB).filter_by(code="cascais").first()
 if dashboard_cascais is None:
-    dashboard_cascais = DashboardDB(code="cascais", has=cascais)
+    dashboard_cascais = DashboardDB(code="cascais", City=cascais)
 
 try:
     session.add(dashboard_cascais)
@@ -252,7 +372,7 @@ except IntegrityError:
     print("error integrity")
 except:
     session.rollback()
-    print("error already added? 2")
+    print("error already added? 6")
 
 
 differdange = session.query(CityDB).filter_by(name= "Differdange").first()
@@ -267,12 +387,12 @@ except IntegrityError:
     print("error integrity")
 except:
     session.rollback()
-    print("error already added? 3")
+    print("error already added? 7")
 
 
 dashboard_differdange = session.query(DashboardDB).filter_by(code="differdange").first()
 if dashboard_differdange is None:
-    dashboard_differdange = DashboardDB(code="differdange", has=differdange)
+    dashboard_differdange = DashboardDB(code="differdange", City=differdange)
 
 try:
     session.add(dashboard_differdange)
@@ -282,7 +402,7 @@ except IntegrityError:
     print("error integrity")
 except:
     session.rollback()
-    print("error already added? 3")
+    print("error already added? 7")
 
 
 sofia = session.query(CityDB).filter_by(name= "Sofia").first()
@@ -297,12 +417,12 @@ except IntegrityError:
     print("error integrity")
 except:
     session.rollback()
-    print("error already added? 4")
+    print("error already added? 8")
 
 
 dashboard_sofia = session.query(DashboardDB).filter_by(code="sofia").first()
 if dashboard_sofia is None:
-    dashboard_sofia = DashboardDB(code="sofia", has=sofia)
+    dashboard_sofia = DashboardDB(code="sofia", City=sofia)
 
 try:
     session.add(dashboard_sofia)
@@ -312,75 +432,15 @@ except IntegrityError:
     print("error integrity")
 except:
     session.rollback()
-    print("error already added? 4")
+    print("error already added? 8")
 
 
 kpiCollectedClothes2 = session.query(KPICollectedWasteDB).filter_by(id_kpi= "waste_015", name= "Amount of collected textile clothes", category= "Waste", description= "Amount of collected textile clothes", provider= "City of Torino", calculationFrequency= "Monthly", unitText= "Kg", target= 100).first()
 
 if kpiCollectedClothes2 is None:
-    kpiCollectedClothes2 = KPICollectedWasteDB(id_kpi= "waste_015", name= "Amount of collected textile clothes", category= "Waste", description= "Amount of collected textile clothes", provider= "City of Torino", calculationFrequency= "Monthly", unitText= "Kg", target= 100, kpis=torino)
+    kpiCollectedClothes2 = KPICollectedWasteDB(id_kpi= "waste_015", name= "Amount of collected textile clothes", category= "Waste", description= "Amount of collected textile clothes", provider= "City of Torino", calculationFrequency= "Monthly", unitText= "Kg", target= 100, KPI=torino)
 try:
     session.add(kpiCollectedClothes2)
-    session.commit()
-except IntegrityError: 
-    session.rollback()
-    print("error integrity")
-except:
-    session.rollback()
-    print("error already added? 5")
-
-
-kpiHouseholdInvolvedThreeBagCollection = session.query(KPIParticipantsDB).filter_by(id_kpi= "participants_006", name= "Households participating in the three bags collection", category= "Waste", description= "Households participating in the three bags collection", provider= "Torino", calculationFrequency= "Monthly", unitText= "Households", target= 100).first()
-
-if kpiHouseholdInvolvedThreeBagCollection is None:
-    kpiHouseholdInvolvedThreeBagCollection = KPIParticipantsDB(id_kpi= "participants_006", name= "Households participating in the three bags collection", category= "Waste", description= "Households participating in the three bags collection", provider= "Torino", calculationFrequency= "Monthly", unitText= "Households", target= 100, kpis=torino)
-try:
-    session.add(kpiHouseholdInvolvedThreeBagCollection)
-    session.commit()
-except IntegrityError: 
-    session.rollback()
-    print("error integrity")
-except:
-    session.rollback()
-    print("error already added? 6")
-
-
-kpiTextileWastePerPerson = session.query(KPITextileWastePerPersonDB).filter_by(id_kpi= "waste_010", name= "Amount of yearly textile waste per person", category= "Waste", description= "Amount of yearly textile waste per person", provider= "City", calculationFrequency= "Yearly", unitText= "Kg").first()
-
-if kpiTextileWastePerPerson is None:
-    kpiTextileWastePerPerson = KPITextileWastePerPersonDB(id_kpi= "waste_010", name= "Amount of yearly textile waste per person", category= "Waste", description= "Amount of yearly textile waste per person", provider= "City", calculationFrequency= "Yearly", unitText= "Kg", kpis=torino)
-try:
-    session.add(kpiTextileWastePerPerson)
-    session.commit()
-except IntegrityError: 
-    session.rollback()
-    print("error integrity")
-except:
-    session.rollback()
-    print("error already added? 7")
-
-
-kpiCollectedWaste = session.query(KPICollectedWasteDB).filter_by(id_kpi= "waste_007", name= "Amount of collected textile waste", category= "Waste", description= "Amount of collected textile waste", provider= "ReLearn", calculationFrequency= "Monthly", unitText= "Kg", target= 6000).first()
-
-if kpiCollectedWaste is None:
-    kpiCollectedWaste = KPICollectedWasteDB(id_kpi= "waste_007", name= "Amount of collected textile waste", category= "Waste", description= "Amount of collected textile waste", provider= "ReLearn", calculationFrequency= "Monthly", unitText= "Kg", target= 6000, kpis=torino)
-try:
-    session.add(kpiCollectedWaste)
-    session.commit()
-except IntegrityError: 
-    session.rollback()
-    print("error integrity")
-except:
-    session.rollback()
-    print("error already added? 8")
-
-
-kpiWasteSorted = session.query(KPIWasteSortedDB).filter_by(id_kpi= "waste_006", name= "Amount of correctly sorted waste in bins using ReLearn sensors", category= "Waste", description= "Amount of correctly sorted waste in bins using ReLearn sensors", provider= "ReLearn", calculationFrequency= "Monthly", unitText= "Kg", target= 1000).first()
-
-if kpiWasteSorted is None:
-    kpiWasteSorted = KPIWasteSortedDB(id_kpi= "waste_006", name= "Amount of correctly sorted waste in bins using ReLearn sensors", category= "Waste", description= "Amount of correctly sorted waste in bins using ReLearn sensors", provider= "ReLearn", calculationFrequency= "Monthly", unitText= "Kg", target= 1000, kpis=torino)
-try:
-    session.add(kpiWasteSorted)
     session.commit()
 except IntegrityError: 
     session.rollback()
@@ -390,12 +450,12 @@ except:
     print("error already added? 9")
 
 
-kpiCo2Avoided = session.query(KPICo2AvoidedDB).filter_by(id_kpi= "co2_001", name= "Co2 avoided through collection of waste through Re4Circular", category= "Waste", description= "Co2 avoided through collection of waste through Re4Circular", provider= "DKSR", calculationFrequency= "Monthly", unitText= "Tons", target= 1).first()
+kpiHouseholdInvolvedThreeBagCollection = session.query(KPIParticipantsDB).filter_by(id_kpi= "participants_006", name= "Households participating in the three bags collection", category= "Waste", description= "Households participating in the three bags collection", provider= "Torino", calculationFrequency= "Monthly", unitText= "Households", target= 100).first()
 
-if kpiCo2Avoided is None:
-    kpiCo2Avoided = KPICo2AvoidedDB(id_kpi= "co2_001", name= "Co2 avoided through collection of waste through Re4Circular", category= "Waste", description= "Co2 avoided through collection of waste through Re4Circular", provider= "DKSR", calculationFrequency= "Monthly", unitText= "Tons", target= 1, kpis=torino)
+if kpiHouseholdInvolvedThreeBagCollection is None:
+    kpiHouseholdInvolvedThreeBagCollection = KPIParticipantsDB(id_kpi= "participants_006", name= "Households participating in the three bags collection", category= "Waste", description= "Households participating in the three bags collection", provider= "Torino", calculationFrequency= "Monthly", unitText= "Households", target= 100, KPI=torino)
 try:
-    session.add(kpiCo2Avoided)
+    session.add(kpiHouseholdInvolvedThreeBagCollection)
     session.commit()
 except IntegrityError: 
     session.rollback()
@@ -405,12 +465,12 @@ except:
     print("error already added? 10")
 
 
-kpiWasteAvoided = session.query(KPIWasteAvoidedDB).filter_by(id_kpi= "waste_001", name= "Waste avoided through Re4Circular", category= "Waste", description= "Waste avoided through Re4Circular (collecting material before it becomes waste)", provider= "Re4Circular", calculationFrequency= "Monthly", unitText= "Tons", target= 10).first()
+kpiTextileWastePerPerson = session.query(KPITextileWastePerPersonDB).filter_by(id_kpi= "waste_010", name= "Amount of yearly textile waste per person", category= "Waste", description= "Amount of yearly textile waste per person", provider= "City", calculationFrequency= "Yearly", unitText= "Kg").first()
 
-if kpiWasteAvoided is None:
-    kpiWasteAvoided = KPIWasteAvoidedDB(id_kpi= "waste_001", name= "Waste avoided through Re4Circular", category= "Waste", description= "Waste avoided through Re4Circular (collecting material before it becomes waste)", provider= "Re4Circular", calculationFrequency= "Monthly", unitText= "Tons", target= 10, kpis=torino)
+if kpiTextileWastePerPerson is None:
+    kpiTextileWastePerPerson = KPITextileWastePerPersonDB(id_kpi= "waste_010", name= "Amount of yearly textile waste per person", category= "Waste", description= "Amount of yearly textile waste per person", provider= "City", calculationFrequency= "Yearly", unitText= "Kg", KPI=torino)
 try:
-    session.add(kpiWasteAvoided)
+    session.add(kpiTextileWastePerPerson)
     session.commit()
 except IntegrityError: 
     session.rollback()
@@ -420,12 +480,12 @@ except:
     print("error already added? 11")
 
 
-kpiReuseBusinesses = session.query(KPIParticipantsDB).filter_by(id_kpi= "participants_005", name= "Businesses re-using textiles through Re4Circular", category= "Waste", description= "Businesses re-using textiles through Re4Circular", provider= "Re4Circular", calculationFrequency= "Monthly", unitText= "Number of businesses", target= 10).first()
+kpiCollectedWaste = session.query(KPICollectedWasteDB).filter_by(id_kpi= "waste_007", name= "Amount of collected textile waste", category= "Waste", description= "Amount of collected textile waste", provider= "ReLearn", calculationFrequency= "Monthly", unitText= "Kg", target= 6000).first()
 
-if kpiReuseBusinesses is None:
-    kpiReuseBusinesses = KPIParticipantsDB(id_kpi= "participants_005", name= "Businesses re-using textiles through Re4Circular", category= "Waste", description= "Businesses re-using textiles through Re4Circular", provider= "Re4Circular", calculationFrequency= "Monthly", unitText= "Number of businesses", target= 10, kpis=torino)
+if kpiCollectedWaste is None:
+    kpiCollectedWaste = KPICollectedWasteDB(id_kpi= "waste_007", name= "Amount of collected textile waste", category= "Waste", description= "Amount of collected textile waste", provider= "ReLearn", calculationFrequency= "Monthly", unitText= "Kg", target= 6000, KPI=torino)
 try:
-    session.add(kpiReuseBusinesses)
+    session.add(kpiCollectedWaste)
     session.commit()
 except IntegrityError: 
     session.rollback()
@@ -435,12 +495,12 @@ except:
     print("error already added? 12")
 
 
-kpiInvolvedBusinesses = session.query(KPIParticipantsDB).filter_by(id_kpi= "participants_004", name= "Businesses active on Re4Circular", category= "Waste", description= "Businesses active on Re4Circular", provider= "Re4Circular", calculationFrequency= "Monthly", unitText= "Number of businesses", target= 20).first()
+kpiWasteSorted = session.query(KPIWasteSortedDB).filter_by(id_kpi= "waste_006", name= "Amount of correctly sorted waste in bins using ReLearn sensors", category= "Waste", description= "Amount of correctly sorted waste in bins using ReLearn sensors", provider= "ReLearn", calculationFrequency= "Monthly", unitText= "Kg", target= 1000).first()
 
-if kpiInvolvedBusinesses is None:
-    kpiInvolvedBusinesses = KPIParticipantsDB(id_kpi= "participants_004", name= "Businesses active on Re4Circular", category= "Waste", description= "Businesses active on Re4Circular", provider= "Re4Circular", calculationFrequency= "Monthly", unitText= "Number of businesses", target= 20, kpis=torino)
+if kpiWasteSorted is None:
+    kpiWasteSorted = KPIWasteSortedDB(id_kpi= "waste_006", name= "Amount of correctly sorted waste in bins using ReLearn sensors", category= "Waste", description= "Amount of correctly sorted waste in bins using ReLearn sensors", provider= "ReLearn", calculationFrequency= "Monthly", unitText= "Kg", target= 1000, KPI=torino)
 try:
-    session.add(kpiInvolvedBusinesses)
+    session.add(kpiWasteSorted)
     session.commit()
 except IntegrityError: 
     session.rollback()
@@ -450,12 +510,12 @@ except:
     print("error already added? 13")
 
 
-kpiInformedBusinesses = session.query(KPIParticipantsDB).filter_by(id_kpi= "participants_003", name= "Businesses informed through Re4Circular", category= "Waste", description= "Businesses informed through Re4Circular", provider= "Re4Circular", calculationFrequency= "Monthly", unitText= "Number of businesses", target= 50).first()
+kpiCo2Avoided = session.query(KPICo2AvoidedDB).filter_by(id_kpi= "co2_001", name= "Co2 avoided through collection of waste through Re4Circular", category= "Waste", description= "Co2 avoided through collection of waste through Re4Circular", provider= "DKSR", calculationFrequency= "Monthly", unitText= "Tons", target= 1).first()
 
-if kpiInformedBusinesses is None:
-    kpiInformedBusinesses = KPIParticipantsDB(id_kpi= "participants_003", name= "Businesses informed through Re4Circular", category= "Waste", description= "Businesses informed through Re4Circular", provider= "Re4Circular", calculationFrequency= "Monthly", unitText= "Number of businesses", target= 50, kpis=torino)
+if kpiCo2Avoided is None:
+    kpiCo2Avoided = KPICo2AvoidedDB(id_kpi= "co2_001", name= "Co2 avoided through collection of waste through Re4Circular", category= "Waste", description= "Co2 avoided through collection of waste through Re4Circular", provider= "DKSR", calculationFrequency= "Monthly", unitText= "Tons", target= 1, KPI=torino)
 try:
-    session.add(kpiInformedBusinesses)
+    session.add(kpiCo2Avoided)
     session.commit()
 except IntegrityError: 
     session.rollback()
@@ -465,12 +525,12 @@ except:
     print("error already added? 14")
 
 
-kpiInvolvedCitizens = session.query(KPIParticipantsDB).filter_by(id_kpi= "participants_002", name= "Citizens active on Re4Circular", category= "Waste", description= "Citizens active on Re4Circular", provider= "Re4Circular", calculationFrequency= "Monthly", unitText= "Number of people", target= 500).first()
+kpiWasteAvoided = session.query(KPIWasteAvoidedDB).filter_by(id_kpi= "waste_001", name= "Waste avoided through Re4Circular", category= "Waste", description= "Waste avoided through Re4Circular (collecting material before it becomes waste)", provider= "Re4Circular", calculationFrequency= "Monthly", unitText= "Tons", target= 10).first()
 
-if kpiInvolvedCitizens is None:
-    kpiInvolvedCitizens = KPIParticipantsDB(id_kpi= "participants_002", name= "Citizens active on Re4Circular", category= "Waste", description= "Citizens active on Re4Circular", provider= "Re4Circular", calculationFrequency= "Monthly", unitText= "Number of people", target= 500, kpis=torino)
+if kpiWasteAvoided is None:
+    kpiWasteAvoided = KPIWasteAvoidedDB(id_kpi= "waste_001", name= "Waste avoided through Re4Circular", category= "Waste", description= "Waste avoided through Re4Circular (collecting material before it becomes waste)", provider= "Re4Circular", calculationFrequency= "Monthly", unitText= "Tons", target= 10, KPI=torino)
 try:
-    session.add(kpiInvolvedCitizens)
+    session.add(kpiWasteAvoided)
     session.commit()
 except IntegrityError: 
     session.rollback()
@@ -480,12 +540,12 @@ except:
     print("error already added? 15")
 
 
-kpiDiscardedWaste = session.query(KPICollectedWasteDB).filter_by(id_kpi= "waste_013", name= "Amount of textile waste discarded from the differentiated share", category= "Waste", description= "Amount of textile waste discarded from the differentiated share", provider= "City of Torino", calculationFrequency= "Monthly", unitText= "Kg", target= 50).first()
+kpiReuseBusinesses = session.query(KPIParticipantsDB).filter_by(id_kpi= "participants_005", name= "Businesses re-using textiles through Re4Circular", category= "Waste", description= "Businesses re-using textiles through Re4Circular", provider= "Re4Circular", calculationFrequency= "Monthly", unitText= "Number of businesses", target= 10).first()
 
-if kpiDiscardedWaste is None:
-    kpiDiscardedWaste = KPICollectedWasteDB(id_kpi= "waste_013", name= "Amount of textile waste discarded from the differentiated share", category= "Waste", description= "Amount of textile waste discarded from the differentiated share", provider= "City of Torino", calculationFrequency= "Monthly", unitText= "Kg", target= 50, kpis=torino)
+if kpiReuseBusinesses is None:
+    kpiReuseBusinesses = KPIParticipantsDB(id_kpi= "participants_005", name= "Businesses re-using textiles through Re4Circular", category= "Waste", description= "Businesses re-using textiles through Re4Circular", provider= "Re4Circular", calculationFrequency= "Monthly", unitText= "Number of businesses", target= 10, KPI=torino)
 try:
-    session.add(kpiDiscardedWaste)
+    session.add(kpiReuseBusinesses)
     session.commit()
 except IntegrityError: 
     session.rollback()
@@ -495,12 +555,12 @@ except:
     print("error already added? 16")
 
 
-kpiInformedCitizens = session.query(KPIParticipantsDB).filter_by(id_kpi= "participants_001", name= "Citizens informed through Re4Circular", category= "Waste", description= "Citizens informed through Re4Circular", provider= "Re4Circular", calculationFrequency= "Monthly", unitText= "Number of people", target= 1000).first()
+kpiInvolvedBusinesses = session.query(KPIParticipantsDB).filter_by(id_kpi= "participants_004", name= "Businesses active on Re4Circular", category= "Waste", description= "Businesses active on Re4Circular", provider= "Re4Circular", calculationFrequency= "Monthly", unitText= "Number of businesses", target= 20).first()
 
-if kpiInformedCitizens is None:
-    kpiInformedCitizens = KPIParticipantsDB(id_kpi= "participants_001", name= "Citizens informed through Re4Circular", category= "Waste", description= "Citizens informed through Re4Circular", provider= "Re4Circular", calculationFrequency= "Monthly", unitText= "Number of people", target= 1000, kpis=torino)
+if kpiInvolvedBusinesses is None:
+    kpiInvolvedBusinesses = KPIParticipantsDB(id_kpi= "participants_004", name= "Businesses active on Re4Circular", category= "Waste", description= "Businesses active on Re4Circular", provider= "Re4Circular", calculationFrequency= "Monthly", unitText= "Number of businesses", target= 20, KPI=torino)
 try:
-    session.add(kpiInformedCitizens)
+    session.add(kpiInvolvedBusinesses)
     session.commit()
 except IntegrityError: 
     session.rollback()
@@ -510,12 +570,12 @@ except:
     print("error already added? 17")
 
 
-kpiCollectedTextileWasteEcoIsole = session.query(KPICollectedWasteDB).filter_by(id_kpi= "waste_014", name= "Amount of textile left in the indifferentiated waste (Eco-Isole)", category= "Waste", description= "Amount of textile left in the indifferentiated waste (Eco-Isole)", provider= "City of Torino", calculationFrequency= "Monthly", unitText= "Kg", target= 3000).first()
+kpiInformedBusinesses = session.query(KPIParticipantsDB).filter_by(id_kpi= "participants_003", name= "Businesses informed through Re4Circular", category= "Waste", description= "Businesses informed through Re4Circular", provider= "Re4Circular", calculationFrequency= "Monthly", unitText= "Number of businesses", target= 50).first()
 
-if kpiCollectedTextileWasteEcoIsole is None:
-    kpiCollectedTextileWasteEcoIsole = KPICollectedWasteDB(id_kpi= "waste_014", name= "Amount of textile left in the indifferentiated waste (Eco-Isole)", category= "Waste", description= "Amount of textile left in the indifferentiated waste (Eco-Isole)", provider= "City of Torino", calculationFrequency= "Monthly", unitText= "Kg", target= 3000, kpis=torino)
+if kpiInformedBusinesses is None:
+    kpiInformedBusinesses = KPIParticipantsDB(id_kpi= "participants_003", name= "Businesses informed through Re4Circular", category= "Waste", description= "Businesses informed through Re4Circular", provider= "Re4Circular", calculationFrequency= "Monthly", unitText= "Number of businesses", target= 50, KPI=torino)
 try:
-    session.add(kpiCollectedTextileWasteEcoIsole)
+    session.add(kpiInformedBusinesses)
     session.commit()
 except IntegrityError: 
     session.rollback()
@@ -525,12 +585,12 @@ except:
     print("error already added? 18")
 
 
-kpiCollectedTextileWaste = session.query(KPICollectedWasteDB).filter_by(id_kpi= "waste_012", name= "Amount of other types of textiles collected", category= "Waste", description= "Amount of other types of textiles collected", provider= "City of Torino", calculationFrequency= "Monthly", unitText= "Kg", target= 5000).first()
+kpiInvolvedCitizens = session.query(KPIParticipantsDB).filter_by(id_kpi= "participants_002", name= "Citizens active on Re4Circular", category= "Waste", description= "Citizens active on Re4Circular", provider= "Re4Circular", calculationFrequency= "Monthly", unitText= "Number of people", target= 500).first()
 
-if kpiCollectedTextileWaste is None:
-    kpiCollectedTextileWaste = KPICollectedWasteDB(id_kpi= "waste_012", name= "Amount of other types of textiles collected", category= "Waste", description= "Amount of other types of textiles collected", provider= "City of Torino", calculationFrequency= "Monthly", unitText= "Kg", target= 5000, kpis=torino)
+if kpiInvolvedCitizens is None:
+    kpiInvolvedCitizens = KPIParticipantsDB(id_kpi= "participants_002", name= "Citizens active on Re4Circular", category= "Waste", description= "Citizens active on Re4Circular", provider= "Re4Circular", calculationFrequency= "Monthly", unitText= "Number of people", target= 500, KPI=torino)
 try:
-    session.add(kpiCollectedTextileWaste)
+    session.add(kpiInvolvedCitizens)
     session.commit()
 except IntegrityError: 
     session.rollback()
@@ -540,12 +600,12 @@ except:
     print("error already added? 19")
 
 
-kpiCollectedClothes = session.query(KPICollectedWasteDB).filter_by(id_kpi= "waste_011", name= "Amount of collected textile clothes", category= "Waste", description= "Amount of collected textile clothes", provider= "City of Torino", calculationFrequency= "Monthly", unitText= "Kg", target= 6000).first()
+kpiDiscardedWaste = session.query(KPICollectedWasteDB).filter_by(id_kpi= "waste_013", name= "Amount of textile waste discarded from the differentiated share", category= "Waste", description= "Amount of textile waste discarded from the differentiated share", provider= "City of Torino", calculationFrequency= "Monthly", unitText= "Kg", target= 50).first()
 
-if kpiCollectedClothes is None:
-    kpiCollectedClothes = KPICollectedWasteDB(id_kpi= "waste_011", name= "Amount of collected textile clothes", category= "Waste", description= "Amount of collected textile clothes", provider= "City of Torino", calculationFrequency= "Monthly", unitText= "Kg", target= 6000, kpis=torino)
+if kpiDiscardedWaste is None:
+    kpiDiscardedWaste = KPICollectedWasteDB(id_kpi= "waste_013", name= "Amount of textile waste discarded from the differentiated share", category= "Waste", description= "Amount of textile waste discarded from the differentiated share", provider= "City of Torino", calculationFrequency= "Monthly", unitText= "Kg", target= 50, KPI=torino)
 try:
-    session.add(kpiCollectedClothes)
+    session.add(kpiDiscardedWaste)
     session.commit()
 except IntegrityError: 
     session.rollback()
@@ -555,12 +615,12 @@ except:
     print("error already added? 20")
 
 
-kpiCSecondHandCustomers_Cascais = session.query(KPISecondHandCustomersDB).filter_by(id_kpi= "waste002", name= "Customers in second hand shops", category= "Waste", description= "Daily number of customers in second hand shops", provider= "Shops", calculationFrequency= "Daily", unitText= "Number of people", target= 1000).first()
+kpiInformedCitizens = session.query(KPIParticipantsDB).filter_by(id_kpi= "participants_001", name= "Citizens informed through Re4Circular", category= "Waste", description= "Citizens informed through Re4Circular", provider= "Re4Circular", calculationFrequency= "Monthly", unitText= "Number of people", target= 1000).first()
 
-if kpiCSecondHandCustomers_Cascais is None:
-    kpiCSecondHandCustomers_Cascais = KPISecondHandCustomersDB(id_kpi= "waste002", name= "Customers in second hand shops", category= "Waste", description= "Daily number of customers in second hand shops", provider= "Shops", calculationFrequency= "Daily", unitText= "Number of people", target= 1000, kpis=cascais)
+if kpiInformedCitizens is None:
+    kpiInformedCitizens = KPIParticipantsDB(id_kpi= "participants_001", name= "Citizens informed through Re4Circular", category= "Waste", description= "Citizens informed through Re4Circular", provider= "Re4Circular", calculationFrequency= "Monthly", unitText= "Number of people", target= 1000, KPI=torino)
 try:
-    session.add(kpiCSecondHandCustomers_Cascais)
+    session.add(kpiInformedCitizens)
     session.commit()
 except IntegrityError: 
     session.rollback()
@@ -570,12 +630,12 @@ except:
     print("error already added? 21")
 
 
-kpiCollectedWaste_Cascais = session.query(KPICollectedWasteDB).filter_by(id_kpi= "waste001", name= "Collected Textile Waste in Ton", category= "Waste", description= "Total textile waste collected in Cascais", provider= "WasteDepartment", calculationFrequency= "Weekly", unitText= "Tons", target= 10).first()
+kpiCollectedTextileWasteEcoIsole = session.query(KPICollectedWasteDB).filter_by(id_kpi= "waste_014", name= "Amount of textile left in the indifferentiated waste (Eco-Isole)", category= "Waste", description= "Amount of textile left in the indifferentiated waste (Eco-Isole)", provider= "City of Torino", calculationFrequency= "Monthly", unitText= "Kg", target= 3000).first()
 
-if kpiCollectedWaste_Cascais is None:
-    kpiCollectedWaste_Cascais = KPICollectedWasteDB(id_kpi= "waste001", name= "Collected Textile Waste in Ton", category= "Waste", description= "Total textile waste collected in Cascais", provider= "WasteDepartment", calculationFrequency= "Weekly", unitText= "Tons", target= 10, kpis=cascais)
+if kpiCollectedTextileWasteEcoIsole is None:
+    kpiCollectedTextileWasteEcoIsole = KPICollectedWasteDB(id_kpi= "waste_014", name= "Amount of textile left in the indifferentiated waste (Eco-Isole)", category= "Waste", description= "Amount of textile left in the indifferentiated waste (Eco-Isole)", provider= "City of Torino", calculationFrequency= "Monthly", unitText= "Kg", target= 3000, KPI=torino)
 try:
-    session.add(kpiCollectedWaste_Cascais)
+    session.add(kpiCollectedTextileWasteEcoIsole)
     session.commit()
 except IntegrityError: 
     session.rollback()
@@ -585,12 +645,12 @@ except:
     print("error already added? 22")
 
 
-kpiPeakSolarEnergy_Differdange = session.query(KPIPeakSolarEnergyDB).filter_by(id_kpi= "energy003", name= "Peak solar energy", category= "Energy", description= "Peak solar energy in Differdange", provider= "Differdange", calculationFrequency= "Monthly", unitText= "KW peak", target= 1000).first()
+kpiCollectedTextileWaste = session.query(KPICollectedWasteDB).filter_by(id_kpi= "waste_012", name= "Amount of other types of textiles collected", category= "Waste", description= "Amount of other types of textiles collected", provider= "City of Torino", calculationFrequency= "Monthly", unitText= "Kg", target= 5000).first()
 
-if kpiPeakSolarEnergy_Differdange is None:
-    kpiPeakSolarEnergy_Differdange = KPIPeakSolarEnergyDB(id_kpi= "energy003", name= "Peak solar energy", category= "Energy", description= "Peak solar energy in Differdange", provider= "Differdange", calculationFrequency= "Monthly", unitText= "KW peak", target= 1000, kpis=differdange)
+if kpiCollectedTextileWaste is None:
+    kpiCollectedTextileWaste = KPICollectedWasteDB(id_kpi= "waste_012", name= "Amount of other types of textiles collected", category= "Waste", description= "Amount of other types of textiles collected", provider= "City of Torino", calculationFrequency= "Monthly", unitText= "Kg", target= 5000, KPI=torino)
 try:
-    session.add(kpiPeakSolarEnergy_Differdange)
+    session.add(kpiCollectedTextileWaste)
     session.commit()
 except IntegrityError: 
     session.rollback()
@@ -600,12 +660,12 @@ except:
     print("error already added? 23")
 
 
-kpiNumberHouseholdRenewableEnergy_Differdange = session.query(KPINumberHouseholdRenewableEnergyDB).filter_by(id_kpi= "energy002", name= "Household with renewable energy", category= "Energy", description= "Number of households producing any kind of renewable energy", provider= "Citizens", calculationFrequency= "Monthly", unitText= "Number", target= 500).first()
+kpiCollectedClothes = session.query(KPICollectedWasteDB).filter_by(id_kpi= "waste_011", name= "Amount of collected textile clothes", category= "Waste", description= "Amount of collected textile clothes", provider= "City of Torino", calculationFrequency= "Monthly", unitText= "Kg", target= 6000).first()
 
-if kpiNumberHouseholdRenewableEnergy_Differdange is None:
-    kpiNumberHouseholdRenewableEnergy_Differdange = KPINumberHouseholdRenewableEnergyDB(id_kpi= "energy002", name= "Household with renewable energy", category= "Energy", description= "Number of households producing any kind of renewable energy", provider= "Citizens", calculationFrequency= "Monthly", unitText= "Number", target= 500, kpis=differdange)
+if kpiCollectedClothes is None:
+    kpiCollectedClothes = KPICollectedWasteDB(id_kpi= "waste_011", name= "Amount of collected textile clothes", category= "Waste", description= "Amount of collected textile clothes", provider= "City of Torino", calculationFrequency= "Monthly", unitText= "Kg", target= 6000, KPI=torino)
 try:
-    session.add(kpiNumberHouseholdRenewableEnergy_Differdange)
+    session.add(kpiCollectedClothes)
     session.commit()
 except IntegrityError: 
     session.rollback()
@@ -615,12 +675,12 @@ except:
     print("error already added? 24")
 
 
-kpiTotalRenewableEnergy_Differdange = session.query(KPITotalRenewableEnergyDB).filter_by(id_kpi= "energy001", name= "Percentage of renewable energy in Differdange", category= "Energy", description= "Percentage of renewable energy in Differdange based on total amount of energy", provider= "Solution Provider", calculationFrequency= "Monthly", unitText= "Percentage", target= 20).first()
+kpiCSecondHandCustomers_Cascais = session.query(KPISecondHandCustomersDB).filter_by(id_kpi= "waste002", name= "Customers in second hand shops", category= "Waste", description= "Daily number of customers in second hand shops", provider= "Shops", calculationFrequency= "Daily", unitText= "Number of people", target= 1000).first()
 
-if kpiTotalRenewableEnergy_Differdange is None:
-    kpiTotalRenewableEnergy_Differdange = KPITotalRenewableEnergyDB(id_kpi= "energy001", name= "Percentage of renewable energy in Differdange", category= "Energy", description= "Percentage of renewable energy in Differdange based on total amount of energy", provider= "Solution Provider", calculationFrequency= "Monthly", unitText= "Percentage", target= 20, kpis=differdange)
+if kpiCSecondHandCustomers_Cascais is None:
+    kpiCSecondHandCustomers_Cascais = KPISecondHandCustomersDB(id_kpi= "waste002", name= "Customers in second hand shops", category= "Waste", description= "Daily number of customers in second hand shops", provider= "Shops", calculationFrequency= "Daily", unitText= "Number of people", target= 1000, KPI=cascais)
 try:
-    session.add(kpiTotalRenewableEnergy_Differdange)
+    session.add(kpiCSecondHandCustomers_Cascais)
     session.commit()
 except IntegrityError: 
     session.rollback()
@@ -630,12 +690,12 @@ except:
     print("error already added? 25")
 
 
-kpiTrafficCongestion_Sofia = session.query(KPITrafficDB).filter_by(id_kpi= "traffic001", name= "Traffic Congestion Level", category= "Transport", description= "Measures the level of traffic congestion", provider= "TransportDepartment", calculationFrequency= "Hourly", unitText= "Number of Cars", target= 30).first()
+kpiCollectedWaste_Cascais = session.query(KPICollectedWasteDB).filter_by(id_kpi= "waste001", name= "Collected Textile Waste in Ton", category= "Waste", description= "Total textile waste collected in Cascais", provider= "WasteDepartment", calculationFrequency= "Weekly", unitText= "Tons", target= 10).first()
 
-if kpiTrafficCongestion_Sofia is None:
-    kpiTrafficCongestion_Sofia = KPITrafficDB(id_kpi= "traffic001", name= "Traffic Congestion Level", category= "Transport", description= "Measures the level of traffic congestion", provider= "TransportDepartment", calculationFrequency= "Hourly", unitText= "Number of Cars", target= 30, kpis=sofia)
+if kpiCollectedWaste_Cascais is None:
+    kpiCollectedWaste_Cascais = KPICollectedWasteDB(id_kpi= "waste001", name= "Collected Textile Waste in Ton", category= "Waste", description= "Total textile waste collected in Cascais", provider= "WasteDepartment", calculationFrequency= "Weekly", unitText= "Tons", target= 10, KPI=cascais)
 try:
-    session.add(kpiTrafficCongestion_Sofia)
+    session.add(kpiCollectedWaste_Cascais)
     session.commit()
 except IntegrityError: 
     session.rollback()
@@ -645,12 +705,12 @@ except:
     print("error already added? 26")
 
 
-kpiMoney_Differdange = session.query(KPIMoneyDB).filter_by(id_kpi= "money001", name= "Money Invested", category= "Environment", description= "Measures the money invested in green stuff", provider= "BankService", calculationFrequency= "Weekly", unitText= "Euros", target= 1000).first()
+kpiPeakSolarEnergy_Differdange = session.query(KPIPeakSolarEnergyDB).filter_by(id_kpi= "energy003", name= "Peak solar energy", category= "Energy", description= "Peak solar energy in Differdange", provider= "Differdange", calculationFrequency= "Monthly", unitText= "KW peak", target= 1000).first()
 
-if kpiMoney_Differdange is None:
-    kpiMoney_Differdange = KPIMoneyDB(id_kpi= "money001", name= "Money Invested", category= "Environment", description= "Measures the money invested in green stuff", provider= "BankService", calculationFrequency= "Weekly", unitText= "Euros", target= 1000, kpis=differdange)
+if kpiPeakSolarEnergy_Differdange is None:
+    kpiPeakSolarEnergy_Differdange = KPIPeakSolarEnergyDB(id_kpi= "energy003", name= "Peak solar energy", category= "Energy", description= "Peak solar energy in Differdange", provider= "Differdange", calculationFrequency= "Monthly", unitText= "KW peak", target= 1000, KPI=differdange)
 try:
-    session.add(kpiMoney_Differdange)
+    session.add(kpiPeakSolarEnergy_Differdange)
     session.commit()
 except IntegrityError: 
     session.rollback()
@@ -660,12 +720,12 @@ except:
     print("error already added? 27")
 
 
-kpiTemp_Differdange = session.query(KPITempDB).filter_by(id_kpi= "temp001", name= "Average Temperature", category= "Environment", description= "Measures the average temperature of the city", provider= "WeatherService", calculationFrequency= "Daily", unitText= "Celsius", threshold= 25).first()
+kpiNumberHouseholdRenewableEnergy_Differdange = session.query(KPINumberHouseholdRenewableEnergyDB).filter_by(id_kpi= "energy002", name= "Household with renewable energy", category= "Energy", description= "Number of households producing any kind of renewable energy", provider= "Citizens", calculationFrequency= "Monthly", unitText= "Number", target= 500).first()
 
-if kpiTemp_Differdange is None:
-    kpiTemp_Differdange = KPITempDB(id_kpi= "temp001", name= "Average Temperature", category= "Environment", description= "Measures the average temperature of the city", provider= "WeatherService", calculationFrequency= "Daily", unitText= "Celsius", threshold= 25, kpis=differdange)
+if kpiNumberHouseholdRenewableEnergy_Differdange is None:
+    kpiNumberHouseholdRenewableEnergy_Differdange = KPINumberHouseholdRenewableEnergyDB(id_kpi= "energy002", name= "Household with renewable energy", category= "Energy", description= "Number of households producing any kind of renewable energy", provider= "Citizens", calculationFrequency= "Monthly", unitText= "Number", target= 500, KPI=differdange)
 try:
-    session.add(kpiTemp_Differdange)
+    session.add(kpiNumberHouseholdRenewableEnergy_Differdange)
     session.commit()
 except IntegrityError: 
     session.rollback()
@@ -675,36 +735,112 @@ except:
     print("error already added? 28")
 
 
+kpiTotalRenewableEnergy_Differdange = session.query(KPITotalRenewableEnergyDB).filter_by(id_kpi= "energy001", name= "Percentage of renewable energy in Differdange", category= "Energy", description= "Percentage of renewable energy in Differdange based on total amount of energy", provider= "Solution Provider", calculationFrequency= "Monthly", unitText= "Percentage", target= 20).first()
+
+if kpiTotalRenewableEnergy_Differdange is None:
+    kpiTotalRenewableEnergy_Differdange = KPITotalRenewableEnergyDB(id_kpi= "energy001", name= "Percentage of renewable energy in Differdange", category= "Energy", description= "Percentage of renewable energy in Differdange based on total amount of energy", provider= "Solution Provider", calculationFrequency= "Monthly", unitText= "Percentage", target= 20, KPI=differdange)
+try:
+    session.add(kpiTotalRenewableEnergy_Differdange)
+    session.commit()
+except IntegrityError: 
+    session.rollback()
+    print("error integrity")
+except:
+    session.rollback()
+    print("error already added? 29")
+
+
+kpiTrafficCongestion_Sofia = session.query(KPITrafficDB).filter_by(id_kpi= "traffic001", name= "Traffic Congestion Level", category= "Transport", description= "Measures the level of traffic congestion", provider= "TransportDepartment", calculationFrequency= "Hourly", unitText= "Number of Cars", target= 30).first()
+
+if kpiTrafficCongestion_Sofia is None:
+    kpiTrafficCongestion_Sofia = KPITrafficDB(id_kpi= "traffic001", name= "Traffic Congestion Level", category= "Transport", description= "Measures the level of traffic congestion", provider= "TransportDepartment", calculationFrequency= "Hourly", unitText= "Number of Cars", target= 30, KPI=sofia)
+try:
+    session.add(kpiTrafficCongestion_Sofia)
+    session.commit()
+except IntegrityError: 
+    session.rollback()
+    print("error integrity")
+except:
+    session.rollback()
+    print("error already added? 30")
+
+
+kpiMoney_Differdange = session.query(KPIMoneyDB).filter_by(id_kpi= "money001", name= "Money Invested", category= "Environment", description= "Measures the money invested in green stuff", provider= "BankService", calculationFrequency= "Weekly", unitText= "Euros", target= 1000).first()
+
+if kpiMoney_Differdange is None:
+    kpiMoney_Differdange = KPIMoneyDB(id_kpi= "money001", name= "Money Invested", category= "Environment", description= "Measures the money invested in green stuff", provider= "BankService", calculationFrequency= "Weekly", unitText= "Euros", target= 1000, KPI=differdange)
+try:
+    session.add(kpiMoney_Differdange)
+    session.commit()
+except IntegrityError: 
+    session.rollback()
+    print("error integrity")
+except:
+    session.rollback()
+    print("error already added? 31")
+
+
+kpiTemp_Differdange = session.query(KPITempDB).filter_by(id_kpi= "temp001", name= "Average Temperature", category= "Environment", description= "Measures the average temperature of the city", provider= "WeatherService", calculationFrequency= "Daily", unitText= "Celsius", threshold= 25).first()
+
+if kpiTemp_Differdange is None:
+    kpiTemp_Differdange = KPITempDB(id_kpi= "temp001", name= "Average Temperature", category= "Environment", description= "Measures the average temperature of the city", provider= "WeatherService", calculationFrequency= "Daily", unitText= "Celsius", threshold= 25, KPI=differdange)
+try:
+    session.add(kpiTemp_Differdange)
+    session.commit()
+except IntegrityError: 
+    session.rollback()
+    print("error integrity")
+except:
+    session.rollback()
+    print("error already added? 32")
+
+
            
-visualisation_alias = aliased(VisualisationDB)
-           
-table_alias = aliased(TableDB)
-           
-piechart_alias = aliased(PieChartDB)
-           
-barchart_alias = aliased(BarChartDB)
-           
-statchart_alias = aliased(StatChartDB)
-           
-linechart_alias = aliased(LineChartDB)
-           
-tablecolumn_alias = aliased(TableColumnDB)
-           
-map_alias = aliased(MapDB)
+kpivalue_alias = aliased(KPIValueDB)
            
 user_alias = aliased(UserDB)
            
-admin_alias = aliased(AdminDB)
-           
 cityuser_alias = aliased(CityUserDB)
            
-cityangel_alias = aliased(CityAngelDB)
+admin_alias = aliased(AdminDB)
            
 solutionprovider_alias = aliased(SolutionProviderDB)
            
-citizen_alias = aliased(CitizenDB)
+kpi_alias = aliased(KPIDB)
            
-dashboard_alias = aliased(DashboardDB)
+kpitemp_alias = aliased(KPITempDB)
+           
+kpisecondhandcustomers_alias = aliased(KPISecondHandCustomersDB)
+           
+kpimoney_alias = aliased(KPIMoneyDB)
+           
+cityangel_alias = aliased(CityAngelDB)
+           
+kpitraffic_alias = aliased(KPITrafficDB)
+           
+kpitotalrenewableenergy_alias = aliased(KPITotalRenewableEnergyDB)
+           
+visualisation_alias = aliased(VisualisationDB)
+           
+linechart_alias = aliased(LineChartDB)
+           
+barchart_alias = aliased(BarChartDB)
+           
+piechart_alias = aliased(PieChartDB)
+           
+statchart_alias = aliased(StatChartDB)
+           
+city_alias = aliased(CityDB)
+           
+tablecolumn_alias = aliased(TableColumnDB)
+           
+kpicollectedwaste_alias = aliased(KPICollectedWasteDB)
+           
+table_alias = aliased(TableDB)
+           
+kpitextilewasteperperson_alias = aliased(KPITextileWastePerPersonDB)
+           
+kpinumberhouseholdrenewableenergy_alias = aliased(KPINumberHouseholdRenewableEnergyDB)
            
 mapdata_alias = aliased(MapDataDB)
            
@@ -712,37 +848,21 @@ geojson_alias = aliased(GeoJsonDB)
            
 wms_alias = aliased(WMSDB)
            
-city_alias = aliased(CityDB)
+citizen_alias = aliased(CitizenDB)
            
-kpi_alias = aliased(KPIDB)
+kpiwastesorted_alias = aliased(KPIWasteSortedDB)
            
-kpivalue_alias = aliased(KPIValueDB)
+map_alias = aliased(MapDB)
            
-kpitemp_alias = aliased(KPITempDB)
-           
-kpitraffic_alias = aliased(KPITrafficDB)
-           
-kpicollectedwaste_alias = aliased(KPICollectedWasteDB)
-           
-kpisecondhandcustomers_alias = aliased(KPISecondHandCustomersDB)
-           
-kpimoney_alias = aliased(KPIMoneyDB)
-           
-kpitotalrenewableenergy_alias = aliased(KPITotalRenewableEnergyDB)
-           
-kpinumberhouseholdrenewableenergy_alias = aliased(KPINumberHouseholdRenewableEnergyDB)
+kpico2avoided_alias = aliased(KPICo2AvoidedDB)
            
 kpipeaksolarenergy_alias = aliased(KPIPeakSolarEnergyDB)
+           
+dashboard_alias = aliased(DashboardDB)
            
 kpiparticipants_alias = aliased(KPIParticipantsDB)
            
 kpiwasteavoided_alias = aliased(KPIWasteAvoidedDB)
-           
-kpico2avoided_alias = aliased(KPICo2AvoidedDB)
-           
-kpiwastesorted_alias = aliased(KPIWasteSortedDB)
-           
-kpitextilewasteperperson_alias = aliased(KPITextileWastePerPersonDB)
   
     
 
@@ -754,7 +874,7 @@ kpitextilewasteperperson_alias = aliased(KPITextileWastePerPersonDB)
 @app.post("/city/{city_name}/kpi/{kpi_id}", dependencies=[Depends(JWTBearer())], response_model=List[KPIValue], summary="Add KPI values", tags=["KPI"])
 async def add_kpi_values(
     city_name: str,
-    kpi_id: str,
+    kpi_id: int,
     kpis: List[KPIValue] = Body(...),
 ):
     """Add KPI values for any city"""
@@ -798,13 +918,247 @@ async def add_kpi_values(
     return db_entries
 
 
+@app.get("/city/{city_name}/kpis", response_model=list[object], summary="Get all KPI objects", tags=["KPI"])
+async def get_kpis(city_name: str):
+    """Get all KPIs for a specific city"""
+    try:
+        # Get city object
+        city = session.query(CityDB).filter(func.lower(CityDB.name) == func.lower(city_name)).first()
+        if not city:
+            raise HTTPException(status_code=404, detail=f"City {city_name} not found")
+            
+        results_list = []
+                    
+        query = session.query(kpi_alias, kpitemp_alias).\
+            join(kpitemp_alias, kpi_alias.id == kpitemp_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(city_alias.id == city.id)
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpisecondhandcustomers_alias).\
+            join(kpisecondhandcustomers_alias, kpi_alias.id == kpisecondhandcustomers_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(city_alias.id == city.id)
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpimoney_alias).\
+            join(kpimoney_alias, kpi_alias.id == kpimoney_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(city_alias.id == city.id)
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpitraffic_alias).\
+            join(kpitraffic_alias, kpi_alias.id == kpitraffic_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(city_alias.id == city.id)
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpitotalrenewableenergy_alias).\
+            join(kpitotalrenewableenergy_alias, kpi_alias.id == kpitotalrenewableenergy_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(city_alias.id == city.id)
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpicollectedwaste_alias).\
+            join(kpicollectedwaste_alias, kpi_alias.id == kpicollectedwaste_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(city_alias.id == city.id)
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpitextilewasteperperson_alias).\
+            join(kpitextilewasteperperson_alias, kpi_alias.id == kpitextilewasteperperson_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(city_alias.id == city.id)
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpinumberhouseholdrenewableenergy_alias).\
+            join(kpinumberhouseholdrenewableenergy_alias, kpi_alias.id == kpinumberhouseholdrenewableenergy_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(city_alias.id == city.id)
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpiwastesorted_alias).\
+            join(kpiwastesorted_alias, kpi_alias.id == kpiwastesorted_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(city_alias.id == city.id)
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpico2avoided_alias).\
+            join(kpico2avoided_alias, kpi_alias.id == kpico2avoided_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(city_alias.id == city.id)
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpipeaksolarenergy_alias).\
+            join(kpipeaksolarenergy_alias, kpi_alias.id == kpipeaksolarenergy_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(city_alias.id == city.id)
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpiparticipants_alias).\
+            join(kpiparticipants_alias, kpi_alias.id == kpiparticipants_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(city_alias.id == city.id)
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpiwasteavoided_alias).\
+            join(kpiwasteavoided_alias, kpi_alias.id == kpiwasteavoided_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(city_alias.id == city.id)
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                
+        return results_list
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+
 # Visualisations
 
+
             
-@app.post("/torino/visualization/Table/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
-async def add_or_update_Table_torino(id: int, chart: Table= Body(..., description="Chart object to add")):
-    db_entry = TableDB(**chart.dict())
-    existing_chart = session.query(TableDB).filter(TableDB.i == db_entry.i).first()
+            
+            
+            
+            
+            
+            
+            
+                        
+@app.post("/ioannina/visualization/LineChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_LineChart_ioannina(id: int, chart: LineChart= Body(..., description="Chart object to add")):
+    db_entry = LineChartDB(**chart.dict())
+    existing_chart = session.query(LineChartDB).filter(LineChartDB.i == db_entry.i).first()
     if existing_chart:
         # If the chart already exists, update it with the new data
         existing_chart_data = chart.dict(exclude_unset=True)
@@ -815,8 +1169,8 @@ async def add_or_update_Table_torino(id: int, chart: Table= Body(..., descriptio
         return existing_chart.id
     else:
         # If the chart does not exist, create a new one
-        db_entry = TableDB(**chart.dict())
-        db_entry.consistsOf = dashboard_torino
+        db_entry = LineChartDB(**chart.dict())
+        db_entry.consistsOf = dashboard_ioannina
         db_entry.kpi_id = id
         try:
             session.add(db_entry)
@@ -831,8 +1185,38 @@ async def add_or_update_Table_torino(id: int, chart: Table= Body(..., descriptio
         return db_entry.id
                 
                         
-@app.post("/torino/visualization/PieChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
-async def add_or_update_PieChart_torino(id: int, chart: PieChart= Body(..., description="Chart object to add")):
+@app.post("/ioannina/visualization/BarChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_BarChart_ioannina(id: int, chart: BarChart= Body(..., description="Chart object to add")):
+    db_entry = BarChartDB(**chart.dict())
+    existing_chart = session.query(BarChartDB).filter(BarChartDB.i == db_entry.i).first()
+    if existing_chart:
+        # If the chart already exists, update it with the new data
+        existing_chart_data = chart.dict(exclude_unset=True)
+        for key, value in existing_chart_data.items():
+            setattr(existing_chart, key, value)
+        session.commit()
+        session.refresh(existing_chart)
+        return existing_chart.id
+    else:
+        # If the chart does not exist, create a new one
+        db_entry = BarChartDB(**chart.dict())
+        db_entry.consistsOf = dashboard_ioannina
+        db_entry.kpi_id = id
+        try:
+            session.add(db_entry)
+            session.commit()
+            session.refresh(db_entry)
+        except IntegrityError: 
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error integrity")
+        except:
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error")
+        return db_entry.id
+                
+                        
+@app.post("/ioannina/visualization/PieChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_PieChart_ioannina(id: int, chart: PieChart= Body(..., description="Chart object to add")):
     db_entry = PieChartDB(**chart.dict())
     existing_chart = session.query(PieChartDB).filter(PieChartDB.i == db_entry.i).first()
     if existing_chart:
@@ -846,6 +1230,842 @@ async def add_or_update_PieChart_torino(id: int, chart: PieChart= Body(..., desc
     else:
         # If the chart does not exist, create a new one
         db_entry = PieChartDB(**chart.dict())
+        db_entry.consistsOf = dashboard_ioannina
+        db_entry.kpi_id = id
+        try:
+            session.add(db_entry)
+            session.commit()
+            session.refresh(db_entry)
+        except IntegrityError: 
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error integrity")
+        except:
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error")
+        return db_entry.id
+                
+                        
+@app.post("/ioannina/visualization/StatChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_StatChart_ioannina(id: int, chart: StatChart= Body(..., description="Chart object to add")):
+    db_entry = StatChartDB(**chart.dict())
+    existing_chart = session.query(StatChartDB).filter(StatChartDB.i == db_entry.i).first()
+    if existing_chart:
+        # If the chart already exists, update it with the new data
+        existing_chart_data = chart.dict(exclude_unset=True)
+        for key, value in existing_chart_data.items():
+            setattr(existing_chart, key, value)
+        session.commit()
+        session.refresh(existing_chart)
+        return existing_chart.id
+    else:
+        # If the chart does not exist, create a new one
+        db_entry = StatChartDB(**chart.dict())
+        db_entry.consistsOf = dashboard_ioannina
+        db_entry.kpi_id = id
+        try:
+            session.add(db_entry)
+            session.commit()
+            session.refresh(db_entry)
+        except IntegrityError: 
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error integrity")
+        except:
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error")
+        return db_entry.id
+                
+            
+                        
+@app.post("/ioannina/visualization/Table/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_Table_ioannina(id: int, chart: Table= Body(..., description="Chart object to add")):
+    db_entry = TableDB(**chart.dict())
+    existing_chart = session.query(TableDB).filter(TableDB.i == db_entry.i).first()
+    if existing_chart:
+        # If the chart already exists, update it with the new data
+        existing_chart_data = chart.dict(exclude_unset=True)
+        for key, value in existing_chart_data.items():
+            setattr(existing_chart, key, value)
+        session.commit()
+        session.refresh(existing_chart)
+        return existing_chart.id
+    else:
+        # If the chart does not exist, create a new one
+        db_entry = TableDB(**chart.dict())
+        db_entry.consistsOf = dashboard_ioannina
+        db_entry.kpi_id = id
+        try:
+            session.add(db_entry)
+            session.commit()
+            session.refresh(db_entry)
+        except IntegrityError: 
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error integrity")
+        except:
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error")
+        return db_entry.id
+                
+            
+            
+            
+            
+            
+            
+                        
+@app.post("/ioannina/visualization/Map/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_Map_ioannina(id: int, chart: Map= Body(..., description="Chart object to add")):
+    db_entry = MapDB(**chart.dict())
+    existing_chart = session.query(MapDB).filter(MapDB.i == db_entry.i).first()
+    if existing_chart:
+        # If the chart already exists, update it with the new data
+        existing_chart_data = chart.dict(exclude_unset=True)
+        for key, value in existing_chart_data.items():
+            setattr(existing_chart, key, value)
+        session.commit()
+        session.refresh(existing_chart)
+        return existing_chart.id
+    else:
+        # If the chart does not exist, create a new one
+        db_entry = MapDB(**chart.dict())
+        db_entry.consistsOf = dashboard_ioannina
+        db_entry.kpi_id = id
+        try:
+            session.add(db_entry)
+            session.commit()
+            session.refresh(db_entry)
+        except IntegrityError: 
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error integrity")
+        except:
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error")
+        return db_entry.id
+                
+            
+            
+            
+            
+            
+        
+@app.delete("/ioannina/visualizations")
+async def delete_visualizations_ioannina(ids: List[int], dependencies=[Depends(JWTBearer())], tags = ["Visualisation"]):
+    # Create a session
+    try:
+        # Delete rows using ORM
+        rows_to_delete = session.query(VisualisationDB).filter(~VisualisationDB.id.in_(ids)).all()
+        for row in rows_to_delete:
+            
+            if (row.consistsOf.code == "ioannina"):
+                session.delete(row)    
+        # Delete the row
+        session.commit()
+        return {"message": "Records deleted successfully"}
+    except Exception as e:
+        # Rollback in case of error
+        session.rollback()
+        raise HTTPException(
+            status_code=500, detail=f"An error occurred: {str(e)}")
+    finally:
+        # Close the session
+        print("COOL")
+
+    
+            
+            
+            
+            
+            
+            
+            
+            
+                        
+@app.post("/maribor/visualization/LineChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_LineChart_maribor(id: int, chart: LineChart= Body(..., description="Chart object to add")):
+    db_entry = LineChartDB(**chart.dict())
+    existing_chart = session.query(LineChartDB).filter(LineChartDB.i == db_entry.i).first()
+    if existing_chart:
+        # If the chart already exists, update it with the new data
+        existing_chart_data = chart.dict(exclude_unset=True)
+        for key, value in existing_chart_data.items():
+            setattr(existing_chart, key, value)
+        session.commit()
+        session.refresh(existing_chart)
+        return existing_chart.id
+    else:
+        # If the chart does not exist, create a new one
+        db_entry = LineChartDB(**chart.dict())
+        db_entry.consistsOf = dashboard_maribor
+        db_entry.kpi_id = id
+        try:
+            session.add(db_entry)
+            session.commit()
+            session.refresh(db_entry)
+        except IntegrityError: 
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error integrity")
+        except:
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error")
+        return db_entry.id
+                
+                        
+@app.post("/maribor/visualization/BarChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_BarChart_maribor(id: int, chart: BarChart= Body(..., description="Chart object to add")):
+    db_entry = BarChartDB(**chart.dict())
+    existing_chart = session.query(BarChartDB).filter(BarChartDB.i == db_entry.i).first()
+    if existing_chart:
+        # If the chart already exists, update it with the new data
+        existing_chart_data = chart.dict(exclude_unset=True)
+        for key, value in existing_chart_data.items():
+            setattr(existing_chart, key, value)
+        session.commit()
+        session.refresh(existing_chart)
+        return existing_chart.id
+    else:
+        # If the chart does not exist, create a new one
+        db_entry = BarChartDB(**chart.dict())
+        db_entry.consistsOf = dashboard_maribor
+        db_entry.kpi_id = id
+        try:
+            session.add(db_entry)
+            session.commit()
+            session.refresh(db_entry)
+        except IntegrityError: 
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error integrity")
+        except:
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error")
+        return db_entry.id
+                
+                        
+@app.post("/maribor/visualization/PieChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_PieChart_maribor(id: int, chart: PieChart= Body(..., description="Chart object to add")):
+    db_entry = PieChartDB(**chart.dict())
+    existing_chart = session.query(PieChartDB).filter(PieChartDB.i == db_entry.i).first()
+    if existing_chart:
+        # If the chart already exists, update it with the new data
+        existing_chart_data = chart.dict(exclude_unset=True)
+        for key, value in existing_chart_data.items():
+            setattr(existing_chart, key, value)
+        session.commit()
+        session.refresh(existing_chart)
+        return existing_chart.id
+    else:
+        # If the chart does not exist, create a new one
+        db_entry = PieChartDB(**chart.dict())
+        db_entry.consistsOf = dashboard_maribor
+        db_entry.kpi_id = id
+        try:
+            session.add(db_entry)
+            session.commit()
+            session.refresh(db_entry)
+        except IntegrityError: 
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error integrity")
+        except:
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error")
+        return db_entry.id
+                
+                        
+@app.post("/maribor/visualization/StatChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_StatChart_maribor(id: int, chart: StatChart= Body(..., description="Chart object to add")):
+    db_entry = StatChartDB(**chart.dict())
+    existing_chart = session.query(StatChartDB).filter(StatChartDB.i == db_entry.i).first()
+    if existing_chart:
+        # If the chart already exists, update it with the new data
+        existing_chart_data = chart.dict(exclude_unset=True)
+        for key, value in existing_chart_data.items():
+            setattr(existing_chart, key, value)
+        session.commit()
+        session.refresh(existing_chart)
+        return existing_chart.id
+    else:
+        # If the chart does not exist, create a new one
+        db_entry = StatChartDB(**chart.dict())
+        db_entry.consistsOf = dashboard_maribor
+        db_entry.kpi_id = id
+        try:
+            session.add(db_entry)
+            session.commit()
+            session.refresh(db_entry)
+        except IntegrityError: 
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error integrity")
+        except:
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error")
+        return db_entry.id
+                
+            
+                        
+@app.post("/maribor/visualization/Table/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_Table_maribor(id: int, chart: Table= Body(..., description="Chart object to add")):
+    db_entry = TableDB(**chart.dict())
+    existing_chart = session.query(TableDB).filter(TableDB.i == db_entry.i).first()
+    if existing_chart:
+        # If the chart already exists, update it with the new data
+        existing_chart_data = chart.dict(exclude_unset=True)
+        for key, value in existing_chart_data.items():
+            setattr(existing_chart, key, value)
+        session.commit()
+        session.refresh(existing_chart)
+        return existing_chart.id
+    else:
+        # If the chart does not exist, create a new one
+        db_entry = TableDB(**chart.dict())
+        db_entry.consistsOf = dashboard_maribor
+        db_entry.kpi_id = id
+        try:
+            session.add(db_entry)
+            session.commit()
+            session.refresh(db_entry)
+        except IntegrityError: 
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error integrity")
+        except:
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error")
+        return db_entry.id
+                
+            
+            
+            
+            
+            
+            
+                        
+@app.post("/maribor/visualization/Map/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_Map_maribor(id: int, chart: Map= Body(..., description="Chart object to add")):
+    db_entry = MapDB(**chart.dict())
+    existing_chart = session.query(MapDB).filter(MapDB.i == db_entry.i).first()
+    if existing_chart:
+        # If the chart already exists, update it with the new data
+        existing_chart_data = chart.dict(exclude_unset=True)
+        for key, value in existing_chart_data.items():
+            setattr(existing_chart, key, value)
+        session.commit()
+        session.refresh(existing_chart)
+        return existing_chart.id
+    else:
+        # If the chart does not exist, create a new one
+        db_entry = MapDB(**chart.dict())
+        db_entry.consistsOf = dashboard_maribor
+        db_entry.kpi_id = id
+        try:
+            session.add(db_entry)
+            session.commit()
+            session.refresh(db_entry)
+        except IntegrityError: 
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error integrity")
+        except:
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error")
+        return db_entry.id
+                
+            
+            
+            
+            
+            
+        
+@app.delete("/maribor/visualizations")
+async def delete_visualizations_maribor(ids: List[int], dependencies=[Depends(JWTBearer())], tags = ["Visualisation"]):
+    # Create a session
+    try:
+        # Delete rows using ORM
+        rows_to_delete = session.query(VisualisationDB).filter(~VisualisationDB.id.in_(ids)).all()
+        for row in rows_to_delete:
+            
+            if (row.consistsOf.code == "maribor"):
+                session.delete(row)    
+        # Delete the row
+        session.commit()
+        return {"message": "Records deleted successfully"}
+    except Exception as e:
+        # Rollback in case of error
+        session.rollback()
+        raise HTTPException(
+            status_code=500, detail=f"An error occurred: {str(e)}")
+    finally:
+        # Close the session
+        print("COOL")
+
+    
+            
+            
+            
+            
+            
+            
+            
+            
+                        
+@app.post("/grenoble/visualization/LineChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_LineChart_grenoble(id: int, chart: LineChart= Body(..., description="Chart object to add")):
+    db_entry = LineChartDB(**chart.dict())
+    existing_chart = session.query(LineChartDB).filter(LineChartDB.i == db_entry.i).first()
+    if existing_chart:
+        # If the chart already exists, update it with the new data
+        existing_chart_data = chart.dict(exclude_unset=True)
+        for key, value in existing_chart_data.items():
+            setattr(existing_chart, key, value)
+        session.commit()
+        session.refresh(existing_chart)
+        return existing_chart.id
+    else:
+        # If the chart does not exist, create a new one
+        db_entry = LineChartDB(**chart.dict())
+        db_entry.consistsOf = dashboard_grenoble
+        db_entry.kpi_id = id
+        try:
+            session.add(db_entry)
+            session.commit()
+            session.refresh(db_entry)
+        except IntegrityError: 
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error integrity")
+        except:
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error")
+        return db_entry.id
+                
+                        
+@app.post("/grenoble/visualization/BarChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_BarChart_grenoble(id: int, chart: BarChart= Body(..., description="Chart object to add")):
+    db_entry = BarChartDB(**chart.dict())
+    existing_chart = session.query(BarChartDB).filter(BarChartDB.i == db_entry.i).first()
+    if existing_chart:
+        # If the chart already exists, update it with the new data
+        existing_chart_data = chart.dict(exclude_unset=True)
+        for key, value in existing_chart_data.items():
+            setattr(existing_chart, key, value)
+        session.commit()
+        session.refresh(existing_chart)
+        return existing_chart.id
+    else:
+        # If the chart does not exist, create a new one
+        db_entry = BarChartDB(**chart.dict())
+        db_entry.consistsOf = dashboard_grenoble
+        db_entry.kpi_id = id
+        try:
+            session.add(db_entry)
+            session.commit()
+            session.refresh(db_entry)
+        except IntegrityError: 
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error integrity")
+        except:
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error")
+        return db_entry.id
+                
+                        
+@app.post("/grenoble/visualization/PieChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_PieChart_grenoble(id: int, chart: PieChart= Body(..., description="Chart object to add")):
+    db_entry = PieChartDB(**chart.dict())
+    existing_chart = session.query(PieChartDB).filter(PieChartDB.i == db_entry.i).first()
+    if existing_chart:
+        # If the chart already exists, update it with the new data
+        existing_chart_data = chart.dict(exclude_unset=True)
+        for key, value in existing_chart_data.items():
+            setattr(existing_chart, key, value)
+        session.commit()
+        session.refresh(existing_chart)
+        return existing_chart.id
+    else:
+        # If the chart does not exist, create a new one
+        db_entry = PieChartDB(**chart.dict())
+        db_entry.consistsOf = dashboard_grenoble
+        db_entry.kpi_id = id
+        try:
+            session.add(db_entry)
+            session.commit()
+            session.refresh(db_entry)
+        except IntegrityError: 
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error integrity")
+        except:
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error")
+        return db_entry.id
+                
+                        
+@app.post("/grenoble/visualization/StatChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_StatChart_grenoble(id: int, chart: StatChart= Body(..., description="Chart object to add")):
+    db_entry = StatChartDB(**chart.dict())
+    existing_chart = session.query(StatChartDB).filter(StatChartDB.i == db_entry.i).first()
+    if existing_chart:
+        # If the chart already exists, update it with the new data
+        existing_chart_data = chart.dict(exclude_unset=True)
+        for key, value in existing_chart_data.items():
+            setattr(existing_chart, key, value)
+        session.commit()
+        session.refresh(existing_chart)
+        return existing_chart.id
+    else:
+        # If the chart does not exist, create a new one
+        db_entry = StatChartDB(**chart.dict())
+        db_entry.consistsOf = dashboard_grenoble
+        db_entry.kpi_id = id
+        try:
+            session.add(db_entry)
+            session.commit()
+            session.refresh(db_entry)
+        except IntegrityError: 
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error integrity")
+        except:
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error")
+        return db_entry.id
+                
+            
+                        
+@app.post("/grenoble/visualization/Table/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_Table_grenoble(id: int, chart: Table= Body(..., description="Chart object to add")):
+    db_entry = TableDB(**chart.dict())
+    existing_chart = session.query(TableDB).filter(TableDB.i == db_entry.i).first()
+    if existing_chart:
+        # If the chart already exists, update it with the new data
+        existing_chart_data = chart.dict(exclude_unset=True)
+        for key, value in existing_chart_data.items():
+            setattr(existing_chart, key, value)
+        session.commit()
+        session.refresh(existing_chart)
+        return existing_chart.id
+    else:
+        # If the chart does not exist, create a new one
+        db_entry = TableDB(**chart.dict())
+        db_entry.consistsOf = dashboard_grenoble
+        db_entry.kpi_id = id
+        try:
+            session.add(db_entry)
+            session.commit()
+            session.refresh(db_entry)
+        except IntegrityError: 
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error integrity")
+        except:
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error")
+        return db_entry.id
+                
+            
+            
+            
+            
+            
+            
+                        
+@app.post("/grenoble/visualization/Map/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_Map_grenoble(id: int, chart: Map= Body(..., description="Chart object to add")):
+    db_entry = MapDB(**chart.dict())
+    existing_chart = session.query(MapDB).filter(MapDB.i == db_entry.i).first()
+    if existing_chart:
+        # If the chart already exists, update it with the new data
+        existing_chart_data = chart.dict(exclude_unset=True)
+        for key, value in existing_chart_data.items():
+            setattr(existing_chart, key, value)
+        session.commit()
+        session.refresh(existing_chart)
+        return existing_chart.id
+    else:
+        # If the chart does not exist, create a new one
+        db_entry = MapDB(**chart.dict())
+        db_entry.consistsOf = dashboard_grenoble
+        db_entry.kpi_id = id
+        try:
+            session.add(db_entry)
+            session.commit()
+            session.refresh(db_entry)
+        except IntegrityError: 
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error integrity")
+        except:
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error")
+        return db_entry.id
+                
+            
+            
+            
+            
+            
+        
+@app.delete("/grenoble/visualizations")
+async def delete_visualizations_grenoble(ids: List[int], dependencies=[Depends(JWTBearer())], tags = ["Visualisation"]):
+    # Create a session
+    try:
+        # Delete rows using ORM
+        rows_to_delete = session.query(VisualisationDB).filter(~VisualisationDB.id.in_(ids)).all()
+        for row in rows_to_delete:
+            
+            if (row.consistsOf.code == "grenoble"):
+                session.delete(row)    
+        # Delete the row
+        session.commit()
+        return {"message": "Records deleted successfully"}
+    except Exception as e:
+        # Rollback in case of error
+        session.rollback()
+        raise HTTPException(
+            status_code=500, detail=f"An error occurred: {str(e)}")
+    finally:
+        # Close the session
+        print("COOL")
+
+    
+            
+            
+            
+            
+            
+            
+            
+            
+                        
+@app.post("/athens/visualization/LineChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_LineChart_athens(id: int, chart: LineChart= Body(..., description="Chart object to add")):
+    db_entry = LineChartDB(**chart.dict())
+    existing_chart = session.query(LineChartDB).filter(LineChartDB.i == db_entry.i).first()
+    if existing_chart:
+        # If the chart already exists, update it with the new data
+        existing_chart_data = chart.dict(exclude_unset=True)
+        for key, value in existing_chart_data.items():
+            setattr(existing_chart, key, value)
+        session.commit()
+        session.refresh(existing_chart)
+        return existing_chart.id
+    else:
+        # If the chart does not exist, create a new one
+        db_entry = LineChartDB(**chart.dict())
+        db_entry.consistsOf = dashboard_athens
+        db_entry.kpi_id = id
+        try:
+            session.add(db_entry)
+            session.commit()
+            session.refresh(db_entry)
+        except IntegrityError: 
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error integrity")
+        except:
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error")
+        return db_entry.id
+                
+                        
+@app.post("/athens/visualization/BarChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_BarChart_athens(id: int, chart: BarChart= Body(..., description="Chart object to add")):
+    db_entry = BarChartDB(**chart.dict())
+    existing_chart = session.query(BarChartDB).filter(BarChartDB.i == db_entry.i).first()
+    if existing_chart:
+        # If the chart already exists, update it with the new data
+        existing_chart_data = chart.dict(exclude_unset=True)
+        for key, value in existing_chart_data.items():
+            setattr(existing_chart, key, value)
+        session.commit()
+        session.refresh(existing_chart)
+        return existing_chart.id
+    else:
+        # If the chart does not exist, create a new one
+        db_entry = BarChartDB(**chart.dict())
+        db_entry.consistsOf = dashboard_athens
+        db_entry.kpi_id = id
+        try:
+            session.add(db_entry)
+            session.commit()
+            session.refresh(db_entry)
+        except IntegrityError: 
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error integrity")
+        except:
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error")
+        return db_entry.id
+                
+                        
+@app.post("/athens/visualization/PieChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_PieChart_athens(id: int, chart: PieChart= Body(..., description="Chart object to add")):
+    db_entry = PieChartDB(**chart.dict())
+    existing_chart = session.query(PieChartDB).filter(PieChartDB.i == db_entry.i).first()
+    if existing_chart:
+        # If the chart already exists, update it with the new data
+        existing_chart_data = chart.dict(exclude_unset=True)
+        for key, value in existing_chart_data.items():
+            setattr(existing_chart, key, value)
+        session.commit()
+        session.refresh(existing_chart)
+        return existing_chart.id
+    else:
+        # If the chart does not exist, create a new one
+        db_entry = PieChartDB(**chart.dict())
+        db_entry.consistsOf = dashboard_athens
+        db_entry.kpi_id = id
+        try:
+            session.add(db_entry)
+            session.commit()
+            session.refresh(db_entry)
+        except IntegrityError: 
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error integrity")
+        except:
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error")
+        return db_entry.id
+                
+                        
+@app.post("/athens/visualization/StatChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_StatChart_athens(id: int, chart: StatChart= Body(..., description="Chart object to add")):
+    db_entry = StatChartDB(**chart.dict())
+    existing_chart = session.query(StatChartDB).filter(StatChartDB.i == db_entry.i).first()
+    if existing_chart:
+        # If the chart already exists, update it with the new data
+        existing_chart_data = chart.dict(exclude_unset=True)
+        for key, value in existing_chart_data.items():
+            setattr(existing_chart, key, value)
+        session.commit()
+        session.refresh(existing_chart)
+        return existing_chart.id
+    else:
+        # If the chart does not exist, create a new one
+        db_entry = StatChartDB(**chart.dict())
+        db_entry.consistsOf = dashboard_athens
+        db_entry.kpi_id = id
+        try:
+            session.add(db_entry)
+            session.commit()
+            session.refresh(db_entry)
+        except IntegrityError: 
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error integrity")
+        except:
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error")
+        return db_entry.id
+                
+            
+                        
+@app.post("/athens/visualization/Table/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_Table_athens(id: int, chart: Table= Body(..., description="Chart object to add")):
+    db_entry = TableDB(**chart.dict())
+    existing_chart = session.query(TableDB).filter(TableDB.i == db_entry.i).first()
+    if existing_chart:
+        # If the chart already exists, update it with the new data
+        existing_chart_data = chart.dict(exclude_unset=True)
+        for key, value in existing_chart_data.items():
+            setattr(existing_chart, key, value)
+        session.commit()
+        session.refresh(existing_chart)
+        return existing_chart.id
+    else:
+        # If the chart does not exist, create a new one
+        db_entry = TableDB(**chart.dict())
+        db_entry.consistsOf = dashboard_athens
+        db_entry.kpi_id = id
+        try:
+            session.add(db_entry)
+            session.commit()
+            session.refresh(db_entry)
+        except IntegrityError: 
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error integrity")
+        except:
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error")
+        return db_entry.id
+                
+            
+            
+            
+            
+            
+            
+                        
+@app.post("/athens/visualization/Map/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_Map_athens(id: int, chart: Map= Body(..., description="Chart object to add")):
+    db_entry = MapDB(**chart.dict())
+    existing_chart = session.query(MapDB).filter(MapDB.i == db_entry.i).first()
+    if existing_chart:
+        # If the chart already exists, update it with the new data
+        existing_chart_data = chart.dict(exclude_unset=True)
+        for key, value in existing_chart_data.items():
+            setattr(existing_chart, key, value)
+        session.commit()
+        session.refresh(existing_chart)
+        return existing_chart.id
+    else:
+        # If the chart does not exist, create a new one
+        db_entry = MapDB(**chart.dict())
+        db_entry.consistsOf = dashboard_athens
+        db_entry.kpi_id = id
+        try:
+            session.add(db_entry)
+            session.commit()
+            session.refresh(db_entry)
+        except IntegrityError: 
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error integrity")
+        except:
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error")
+        return db_entry.id
+                
+            
+            
+            
+            
+            
+        
+@app.delete("/athens/visualizations")
+async def delete_visualizations_athens(ids: List[int], dependencies=[Depends(JWTBearer())], tags = ["Visualisation"]):
+    # Create a session
+    try:
+        # Delete rows using ORM
+        rows_to_delete = session.query(VisualisationDB).filter(~VisualisationDB.id.in_(ids)).all()
+        for row in rows_to_delete:
+            
+            if (row.consistsOf.code == "athens"):
+                session.delete(row)    
+        # Delete the row
+        session.commit()
+        return {"message": "Records deleted successfully"}
+    except Exception as e:
+        # Rollback in case of error
+        session.rollback()
+        raise HTTPException(
+            status_code=500, detail=f"An error occurred: {str(e)}")
+    finally:
+        # Close the session
+        print("COOL")
+
+    
+            
+            
+            
+            
+            
+            
+            
+            
+                        
+@app.post("/torino/visualization/LineChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_LineChart_torino(id: int, chart: LineChart= Body(..., description="Chart object to add")):
+    db_entry = LineChartDB(**chart.dict())
+    existing_chart = session.query(LineChartDB).filter(LineChartDB.i == db_entry.i).first()
+    if existing_chart:
+        # If the chart already exists, update it with the new data
+        existing_chart_data = chart.dict(exclude_unset=True)
+        for key, value in existing_chart_data.items():
+            setattr(existing_chart, key, value)
+        session.commit()
+        session.refresh(existing_chart)
+        return existing_chart.id
+    else:
+        # If the chart does not exist, create a new one
+        db_entry = LineChartDB(**chart.dict())
         db_entry.consistsOf = dashboard_torino
         db_entry.kpi_id = id
         try:
@@ -891,6 +2111,36 @@ async def add_or_update_BarChart_torino(id: int, chart: BarChart= Body(..., desc
         return db_entry.id
                 
                         
+@app.post("/torino/visualization/PieChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_PieChart_torino(id: int, chart: PieChart= Body(..., description="Chart object to add")):
+    db_entry = PieChartDB(**chart.dict())
+    existing_chart = session.query(PieChartDB).filter(PieChartDB.i == db_entry.i).first()
+    if existing_chart:
+        # If the chart already exists, update it with the new data
+        existing_chart_data = chart.dict(exclude_unset=True)
+        for key, value in existing_chart_data.items():
+            setattr(existing_chart, key, value)
+        session.commit()
+        session.refresh(existing_chart)
+        return existing_chart.id
+    else:
+        # If the chart does not exist, create a new one
+        db_entry = PieChartDB(**chart.dict())
+        db_entry.consistsOf = dashboard_torino
+        db_entry.kpi_id = id
+        try:
+            session.add(db_entry)
+            session.commit()
+            session.refresh(db_entry)
+        except IntegrityError: 
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error integrity")
+        except:
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error")
+        return db_entry.id
+                
+                        
 @app.post("/torino/visualization/StatChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
 async def add_or_update_StatChart_torino(id: int, chart: StatChart= Body(..., description="Chart object to add")):
     db_entry = StatChartDB(**chart.dict())
@@ -920,11 +2170,12 @@ async def add_or_update_StatChart_torino(id: int, chart: StatChart= Body(..., de
             raise HTTPException(status_code=400, detail="Error")
         return db_entry.id
                 
+            
                         
-@app.post("/torino/visualization/LineChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
-async def add_or_update_LineChart_torino(id: int, chart: LineChart= Body(..., description="Chart object to add")):
-    db_entry = LineChartDB(**chart.dict())
-    existing_chart = session.query(LineChartDB).filter(LineChartDB.i == db_entry.i).first()
+@app.post("/torino/visualization/Table/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_Table_torino(id: int, chart: Table= Body(..., description="Chart object to add")):
+    db_entry = TableDB(**chart.dict())
+    existing_chart = session.query(TableDB).filter(TableDB.i == db_entry.i).first()
     if existing_chart:
         # If the chart already exists, update it with the new data
         existing_chart_data = chart.dict(exclude_unset=True)
@@ -935,7 +2186,7 @@ async def add_or_update_LineChart_torino(id: int, chart: LineChart= Body(..., de
         return existing_chart.id
     else:
         # If the chart does not exist, create a new one
-        db_entry = LineChartDB(**chart.dict())
+        db_entry = TableDB(**chart.dict())
         db_entry.consistsOf = dashboard_torino
         db_entry.kpi_id = id
         try:
@@ -950,6 +2201,12 @@ async def add_or_update_LineChart_torino(id: int, chart: LineChart= Body(..., de
             raise HTTPException(status_code=400, detail="Error")
         return db_entry.id
                 
+            
+            
+            
+            
+            
+            
                         
 @app.post("/torino/visualization/Map/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
 async def add_or_update_Map_torino(id: int, chart: Map= Body(..., description="Chart object to add")):
@@ -985,22 +2242,6 @@ async def add_or_update_Map_torino(id: int, chart: Map= Body(..., description="C
             
             
             
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
         
 @app.delete("/torino/visualizations")
 async def delete_visualizations_torino(ids: List[int], dependencies=[Depends(JWTBearer())], tags = ["Visualisation"]):
@@ -1024,41 +2265,20 @@ async def delete_visualizations_torino(ids: List[int], dependencies=[Depends(JWT
         # Close the session
         print("COOL")
 
-                
-@app.post("/cascais/visualization/Table/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
-async def add_or_update_Table_cascais(id: int, chart: Table= Body(..., description="Chart object to add")):
-    db_entry = TableDB(**chart.dict())
-    existing_chart = session.query(TableDB).filter(TableDB.i == db_entry.i).first()
-    if existing_chart:
-        # If the chart already exists, update it with the new data
-        existing_chart_data = chart.dict(exclude_unset=True)
-        for key, value in existing_chart_data.items():
-            setattr(existing_chart, key, value)
-        session.commit()
-        session.refresh(existing_chart)
-        return existing_chart.id
-    else:
-        # If the chart does not exist, create a new one
-        db_entry = TableDB(**chart.dict())
-        db_entry.consistsOf = dashboard_cascais
-        db_entry.kpi_id = id
-        try:
-            session.add(db_entry)
-            session.commit()
-            session.refresh(db_entry)
-        except IntegrityError: 
-            session.rollback()
-            raise HTTPException(status_code=400, detail="Error integrity")
-        except:
-            session.rollback()
-            raise HTTPException(status_code=400, detail="Error")
-        return db_entry.id
-                
+    
+            
+            
+            
+            
+            
+            
+            
+            
                         
-@app.post("/cascais/visualization/PieChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
-async def add_or_update_PieChart_cascais(id: int, chart: PieChart= Body(..., description="Chart object to add")):
-    db_entry = PieChartDB(**chart.dict())
-    existing_chart = session.query(PieChartDB).filter(PieChartDB.i == db_entry.i).first()
+@app.post("/cascais/visualization/LineChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_LineChart_cascais(id: int, chart: LineChart= Body(..., description="Chart object to add")):
+    db_entry = LineChartDB(**chart.dict())
+    existing_chart = session.query(LineChartDB).filter(LineChartDB.i == db_entry.i).first()
     if existing_chart:
         # If the chart already exists, update it with the new data
         existing_chart_data = chart.dict(exclude_unset=True)
@@ -1069,7 +2289,7 @@ async def add_or_update_PieChart_cascais(id: int, chart: PieChart= Body(..., des
         return existing_chart.id
     else:
         # If the chart does not exist, create a new one
-        db_entry = PieChartDB(**chart.dict())
+        db_entry = LineChartDB(**chart.dict())
         db_entry.consistsOf = dashboard_cascais
         db_entry.kpi_id = id
         try:
@@ -1115,6 +2335,36 @@ async def add_or_update_BarChart_cascais(id: int, chart: BarChart= Body(..., des
         return db_entry.id
                 
                         
+@app.post("/cascais/visualization/PieChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_PieChart_cascais(id: int, chart: PieChart= Body(..., description="Chart object to add")):
+    db_entry = PieChartDB(**chart.dict())
+    existing_chart = session.query(PieChartDB).filter(PieChartDB.i == db_entry.i).first()
+    if existing_chart:
+        # If the chart already exists, update it with the new data
+        existing_chart_data = chart.dict(exclude_unset=True)
+        for key, value in existing_chart_data.items():
+            setattr(existing_chart, key, value)
+        session.commit()
+        session.refresh(existing_chart)
+        return existing_chart.id
+    else:
+        # If the chart does not exist, create a new one
+        db_entry = PieChartDB(**chart.dict())
+        db_entry.consistsOf = dashboard_cascais
+        db_entry.kpi_id = id
+        try:
+            session.add(db_entry)
+            session.commit()
+            session.refresh(db_entry)
+        except IntegrityError: 
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error integrity")
+        except:
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error")
+        return db_entry.id
+                
+                        
 @app.post("/cascais/visualization/StatChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
 async def add_or_update_StatChart_cascais(id: int, chart: StatChart= Body(..., description="Chart object to add")):
     db_entry = StatChartDB(**chart.dict())
@@ -1144,11 +2394,12 @@ async def add_or_update_StatChart_cascais(id: int, chart: StatChart= Body(..., d
             raise HTTPException(status_code=400, detail="Error")
         return db_entry.id
                 
+            
                         
-@app.post("/cascais/visualization/LineChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
-async def add_or_update_LineChart_cascais(id: int, chart: LineChart= Body(..., description="Chart object to add")):
-    db_entry = LineChartDB(**chart.dict())
-    existing_chart = session.query(LineChartDB).filter(LineChartDB.i == db_entry.i).first()
+@app.post("/cascais/visualization/Table/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_Table_cascais(id: int, chart: Table= Body(..., description="Chart object to add")):
+    db_entry = TableDB(**chart.dict())
+    existing_chart = session.query(TableDB).filter(TableDB.i == db_entry.i).first()
     if existing_chart:
         # If the chart already exists, update it with the new data
         existing_chart_data = chart.dict(exclude_unset=True)
@@ -1159,7 +2410,7 @@ async def add_or_update_LineChart_cascais(id: int, chart: LineChart= Body(..., d
         return existing_chart.id
     else:
         # If the chart does not exist, create a new one
-        db_entry = LineChartDB(**chart.dict())
+        db_entry = TableDB(**chart.dict())
         db_entry.consistsOf = dashboard_cascais
         db_entry.kpi_id = id
         try:
@@ -1174,6 +2425,12 @@ async def add_or_update_LineChart_cascais(id: int, chart: LineChart= Body(..., d
             raise HTTPException(status_code=400, detail="Error")
         return db_entry.id
                 
+            
+            
+            
+            
+            
+            
                         
 @app.post("/cascais/visualization/Map/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
 async def add_or_update_Map_cascais(id: int, chart: Map= Body(..., description="Chart object to add")):
@@ -1209,22 +2466,6 @@ async def add_or_update_Map_cascais(id: int, chart: Map= Body(..., description="
             
             
             
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
         
 @app.delete("/cascais/visualizations")
 async def delete_visualizations_cascais(ids: List[int], dependencies=[Depends(JWTBearer())], tags = ["Visualisation"]):
@@ -1248,41 +2489,20 @@ async def delete_visualizations_cascais(ids: List[int], dependencies=[Depends(JW
         # Close the session
         print("COOL")
 
-                
-@app.post("/differdange/visualization/Table/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
-async def add_or_update_Table_differdange(id: int, chart: Table= Body(..., description="Chart object to add")):
-    db_entry = TableDB(**chart.dict())
-    existing_chart = session.query(TableDB).filter(TableDB.i == db_entry.i).first()
-    if existing_chart:
-        # If the chart already exists, update it with the new data
-        existing_chart_data = chart.dict(exclude_unset=True)
-        for key, value in existing_chart_data.items():
-            setattr(existing_chart, key, value)
-        session.commit()
-        session.refresh(existing_chart)
-        return existing_chart.id
-    else:
-        # If the chart does not exist, create a new one
-        db_entry = TableDB(**chart.dict())
-        db_entry.consistsOf = dashboard_differdange
-        db_entry.kpi_id = id
-        try:
-            session.add(db_entry)
-            session.commit()
-            session.refresh(db_entry)
-        except IntegrityError: 
-            session.rollback()
-            raise HTTPException(status_code=400, detail="Error integrity")
-        except:
-            session.rollback()
-            raise HTTPException(status_code=400, detail="Error")
-        return db_entry.id
-                
+    
+            
+            
+            
+            
+            
+            
+            
+            
                         
-@app.post("/differdange/visualization/PieChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
-async def add_or_update_PieChart_differdange(id: int, chart: PieChart= Body(..., description="Chart object to add")):
-    db_entry = PieChartDB(**chart.dict())
-    existing_chart = session.query(PieChartDB).filter(PieChartDB.i == db_entry.i).first()
+@app.post("/differdange/visualization/LineChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_LineChart_differdange(id: int, chart: LineChart= Body(..., description="Chart object to add")):
+    db_entry = LineChartDB(**chart.dict())
+    existing_chart = session.query(LineChartDB).filter(LineChartDB.i == db_entry.i).first()
     if existing_chart:
         # If the chart already exists, update it with the new data
         existing_chart_data = chart.dict(exclude_unset=True)
@@ -1293,7 +2513,7 @@ async def add_or_update_PieChart_differdange(id: int, chart: PieChart= Body(...,
         return existing_chart.id
     else:
         # If the chart does not exist, create a new one
-        db_entry = PieChartDB(**chart.dict())
+        db_entry = LineChartDB(**chart.dict())
         db_entry.consistsOf = dashboard_differdange
         db_entry.kpi_id = id
         try:
@@ -1339,6 +2559,36 @@ async def add_or_update_BarChart_differdange(id: int, chart: BarChart= Body(...,
         return db_entry.id
                 
                         
+@app.post("/differdange/visualization/PieChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_PieChart_differdange(id: int, chart: PieChart= Body(..., description="Chart object to add")):
+    db_entry = PieChartDB(**chart.dict())
+    existing_chart = session.query(PieChartDB).filter(PieChartDB.i == db_entry.i).first()
+    if existing_chart:
+        # If the chart already exists, update it with the new data
+        existing_chart_data = chart.dict(exclude_unset=True)
+        for key, value in existing_chart_data.items():
+            setattr(existing_chart, key, value)
+        session.commit()
+        session.refresh(existing_chart)
+        return existing_chart.id
+    else:
+        # If the chart does not exist, create a new one
+        db_entry = PieChartDB(**chart.dict())
+        db_entry.consistsOf = dashboard_differdange
+        db_entry.kpi_id = id
+        try:
+            session.add(db_entry)
+            session.commit()
+            session.refresh(db_entry)
+        except IntegrityError: 
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error integrity")
+        except:
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error")
+        return db_entry.id
+                
+                        
 @app.post("/differdange/visualization/StatChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
 async def add_or_update_StatChart_differdange(id: int, chart: StatChart= Body(..., description="Chart object to add")):
     db_entry = StatChartDB(**chart.dict())
@@ -1368,11 +2618,12 @@ async def add_or_update_StatChart_differdange(id: int, chart: StatChart= Body(..
             raise HTTPException(status_code=400, detail="Error")
         return db_entry.id
                 
+            
                         
-@app.post("/differdange/visualization/LineChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
-async def add_or_update_LineChart_differdange(id: int, chart: LineChart= Body(..., description="Chart object to add")):
-    db_entry = LineChartDB(**chart.dict())
-    existing_chart = session.query(LineChartDB).filter(LineChartDB.i == db_entry.i).first()
+@app.post("/differdange/visualization/Table/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_Table_differdange(id: int, chart: Table= Body(..., description="Chart object to add")):
+    db_entry = TableDB(**chart.dict())
+    existing_chart = session.query(TableDB).filter(TableDB.i == db_entry.i).first()
     if existing_chart:
         # If the chart already exists, update it with the new data
         existing_chart_data = chart.dict(exclude_unset=True)
@@ -1383,7 +2634,7 @@ async def add_or_update_LineChart_differdange(id: int, chart: LineChart= Body(..
         return existing_chart.id
     else:
         # If the chart does not exist, create a new one
-        db_entry = LineChartDB(**chart.dict())
+        db_entry = TableDB(**chart.dict())
         db_entry.consistsOf = dashboard_differdange
         db_entry.kpi_id = id
         try:
@@ -1398,6 +2649,12 @@ async def add_or_update_LineChart_differdange(id: int, chart: LineChart= Body(..
             raise HTTPException(status_code=400, detail="Error")
         return db_entry.id
                 
+            
+            
+            
+            
+            
+            
                         
 @app.post("/differdange/visualization/Map/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
 async def add_or_update_Map_differdange(id: int, chart: Map= Body(..., description="Chart object to add")):
@@ -1433,22 +2690,6 @@ async def add_or_update_Map_differdange(id: int, chart: Map= Body(..., descripti
             
             
             
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
         
 @app.delete("/differdange/visualizations")
 async def delete_visualizations_differdange(ids: List[int], dependencies=[Depends(JWTBearer())], tags = ["Visualisation"]):
@@ -1472,41 +2713,20 @@ async def delete_visualizations_differdange(ids: List[int], dependencies=[Depend
         # Close the session
         print("COOL")
 
-                
-@app.post("/sofia/visualization/Table/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
-async def add_or_update_Table_sofia(id: int, chart: Table= Body(..., description="Chart object to add")):
-    db_entry = TableDB(**chart.dict())
-    existing_chart = session.query(TableDB).filter(TableDB.i == db_entry.i).first()
-    if existing_chart:
-        # If the chart already exists, update it with the new data
-        existing_chart_data = chart.dict(exclude_unset=True)
-        for key, value in existing_chart_data.items():
-            setattr(existing_chart, key, value)
-        session.commit()
-        session.refresh(existing_chart)
-        return existing_chart.id
-    else:
-        # If the chart does not exist, create a new one
-        db_entry = TableDB(**chart.dict())
-        db_entry.consistsOf = dashboard_sofia
-        db_entry.kpi_id = id
-        try:
-            session.add(db_entry)
-            session.commit()
-            session.refresh(db_entry)
-        except IntegrityError: 
-            session.rollback()
-            raise HTTPException(status_code=400, detail="Error integrity")
-        except:
-            session.rollback()
-            raise HTTPException(status_code=400, detail="Error")
-        return db_entry.id
-                
+    
+            
+            
+            
+            
+            
+            
+            
+            
                         
-@app.post("/sofia/visualization/PieChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
-async def add_or_update_PieChart_sofia(id: int, chart: PieChart= Body(..., description="Chart object to add")):
-    db_entry = PieChartDB(**chart.dict())
-    existing_chart = session.query(PieChartDB).filter(PieChartDB.i == db_entry.i).first()
+@app.post("/sofia/visualization/LineChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_LineChart_sofia(id: int, chart: LineChart= Body(..., description="Chart object to add")):
+    db_entry = LineChartDB(**chart.dict())
+    existing_chart = session.query(LineChartDB).filter(LineChartDB.i == db_entry.i).first()
     if existing_chart:
         # If the chart already exists, update it with the new data
         existing_chart_data = chart.dict(exclude_unset=True)
@@ -1517,7 +2737,7 @@ async def add_or_update_PieChart_sofia(id: int, chart: PieChart= Body(..., descr
         return existing_chart.id
     else:
         # If the chart does not exist, create a new one
-        db_entry = PieChartDB(**chart.dict())
+        db_entry = LineChartDB(**chart.dict())
         db_entry.consistsOf = dashboard_sofia
         db_entry.kpi_id = id
         try:
@@ -1563,6 +2783,36 @@ async def add_or_update_BarChart_sofia(id: int, chart: BarChart= Body(..., descr
         return db_entry.id
                 
                         
+@app.post("/sofia/visualization/PieChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_PieChart_sofia(id: int, chart: PieChart= Body(..., description="Chart object to add")):
+    db_entry = PieChartDB(**chart.dict())
+    existing_chart = session.query(PieChartDB).filter(PieChartDB.i == db_entry.i).first()
+    if existing_chart:
+        # If the chart already exists, update it with the new data
+        existing_chart_data = chart.dict(exclude_unset=True)
+        for key, value in existing_chart_data.items():
+            setattr(existing_chart, key, value)
+        session.commit()
+        session.refresh(existing_chart)
+        return existing_chart.id
+    else:
+        # If the chart does not exist, create a new one
+        db_entry = PieChartDB(**chart.dict())
+        db_entry.consistsOf = dashboard_sofia
+        db_entry.kpi_id = id
+        try:
+            session.add(db_entry)
+            session.commit()
+            session.refresh(db_entry)
+        except IntegrityError: 
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error integrity")
+        except:
+            session.rollback()
+            raise HTTPException(status_code=400, detail="Error")
+        return db_entry.id
+                
+                        
 @app.post("/sofia/visualization/StatChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
 async def add_or_update_StatChart_sofia(id: int, chart: StatChart= Body(..., description="Chart object to add")):
     db_entry = StatChartDB(**chart.dict())
@@ -1592,11 +2842,12 @@ async def add_or_update_StatChart_sofia(id: int, chart: StatChart= Body(..., des
             raise HTTPException(status_code=400, detail="Error")
         return db_entry.id
                 
+            
                         
-@app.post("/sofia/visualization/LineChart/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
-async def add_or_update_LineChart_sofia(id: int, chart: LineChart= Body(..., description="Chart object to add")):
-    db_entry = LineChartDB(**chart.dict())
-    existing_chart = session.query(LineChartDB).filter(LineChartDB.i == db_entry.i).first()
+@app.post("/sofia/visualization/Table/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+async def add_or_update_Table_sofia(id: int, chart: Table= Body(..., description="Chart object to add")):
+    db_entry = TableDB(**chart.dict())
+    existing_chart = session.query(TableDB).filter(TableDB.i == db_entry.i).first()
     if existing_chart:
         # If the chart already exists, update it with the new data
         existing_chart_data = chart.dict(exclude_unset=True)
@@ -1607,7 +2858,7 @@ async def add_or_update_LineChart_sofia(id: int, chart: LineChart= Body(..., des
         return existing_chart.id
     else:
         # If the chart does not exist, create a new one
-        db_entry = LineChartDB(**chart.dict())
+        db_entry = TableDB(**chart.dict())
         db_entry.consistsOf = dashboard_sofia
         db_entry.kpi_id = id
         try:
@@ -1622,6 +2873,12 @@ async def add_or_update_LineChart_sofia(id: int, chart: LineChart= Body(..., des
             raise HTTPException(status_code=400, detail="Error")
         return db_entry.id
                 
+            
+            
+            
+            
+            
+            
                         
 @app.post("/sofia/visualization/Map/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
 async def add_or_update_Map_sofia(id: int, chart: Map= Body(..., description="Chart object to add")):
@@ -1657,22 +2914,6 @@ async def add_or_update_Map_sofia(id: int, chart: Map= Body(..., description="Ch
             
             
             
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
         
 @app.delete("/sofia/visualizations")
 async def delete_visualizations_sofia(ids: List[int], dependencies=[Depends(JWTBearer())], tags = ["Visualisation"]):
@@ -1700,15 +2941,47 @@ async def delete_visualizations_sofia(ids: List[int], dependencies=[Depends(JWTB
 
 
      
-@app.get("/torino/kpis", response_model=list[object], summary="get all KPI object",  tags=["KPI"])
-async def get_kpis_torino():
+@app.get("/ioannina/kpis", response_model=list[object], summary="get all KPI object",  tags=["KPI"])
+async def get_kpis_ioannina():
     try:
         results_list = []
                     
         query = session.query(kpi_alias, kpitemp_alias).\
             join(kpitemp_alias, kpi_alias.id == kpitemp_alias.id).\
             join(city_alias, city_alias.id == kpi_alias.city_id).\
-            filter(func.lower(city_alias.name) == func.lower("torino"))
+            filter(func.lower(city_alias.name) == func.lower("ioannina"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpisecondhandcustomers_alias).\
+            join(kpisecondhandcustomers_alias, kpi_alias.id == kpisecondhandcustomers_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("ioannina"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpimoney_alias).\
+            join(kpimoney_alias, kpi_alias.id == kpimoney_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("ioannina"))
 
         # Execute the query to get the results
         results = query.all()
@@ -1724,7 +2997,23 @@ async def get_kpis_torino():
         query = session.query(kpi_alias, kpitraffic_alias).\
             join(kpitraffic_alias, kpi_alias.id == kpitraffic_alias.id).\
             join(city_alias, city_alias.id == kpi_alias.city_id).\
-            filter(func.lower(city_alias.name) == func.lower("torino"))
+            filter(func.lower(city_alias.name) == func.lower("ioannina"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpitotalrenewableenergy_alias).\
+            join(kpitotalrenewableenergy_alias, kpi_alias.id == kpitotalrenewableenergy_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("ioannina"))
 
         # Execute the query to get the results
         results = query.all()
@@ -1739,6 +3028,1594 @@ async def get_kpis_torino():
                             
         query = session.query(kpi_alias, kpicollectedwaste_alias).\
             join(kpicollectedwaste_alias, kpi_alias.id == kpicollectedwaste_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("ioannina"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpitextilewasteperperson_alias).\
+            join(kpitextilewasteperperson_alias, kpi_alias.id == kpitextilewasteperperson_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("ioannina"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpinumberhouseholdrenewableenergy_alias).\
+            join(kpinumberhouseholdrenewableenergy_alias, kpi_alias.id == kpinumberhouseholdrenewableenergy_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("ioannina"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpiwastesorted_alias).\
+            join(kpiwastesorted_alias, kpi_alias.id == kpiwastesorted_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("ioannina"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpico2avoided_alias).\
+            join(kpico2avoided_alias, kpi_alias.id == kpico2avoided_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("ioannina"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpipeaksolarenergy_alias).\
+            join(kpipeaksolarenergy_alias, kpi_alias.id == kpipeaksolarenergy_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("ioannina"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpiparticipants_alias).\
+            join(kpiparticipants_alias, kpi_alias.id == kpiparticipants_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("ioannina"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpiwasteavoided_alias).\
+            join(kpiwasteavoided_alias, kpi_alias.id == kpiwasteavoided_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("ioannina"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                
+        return results_list
+    except Exception as e:
+        return [e]
+    
+@app.post("/ioannina/geojson/")
+async def upload_geojson_ioannina(title: str = Query(..., description="Title of the GeoJSON data"), dependencies=[Depends(JWTBearer())], geojson_data: dict = Body(..., description="GeoJSON data")):
+    try:
+        # Create a new GeoJson entry
+        new_data = GeoJsonDB(
+            title=title,
+            data=json.dumps(geojson_data),
+            hasMapData=ioannina
+        )
+        session.add(new_data)
+        session.commit()
+        
+        return {"status": "success", "message": "GeoJSON file processed and data stored in the database."}
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+
+@app.get("/ioannina/geojson/")
+async def get_geojson_for_ioannina():
+    results = []
+    try:
+        # Query the database for geospatial data for the given city
+        geojson_data = session.query(GeoJsonDB).filter(GeoJsonDB.city_id == ioannina.id).all()
+
+        # Check if data exists for the city
+        if not geojson_data:
+            raise HTTPException(status_code=404, detail=f"No geospatial data found for city: torino")
+        for result in geojson_data: 
+            results.append(result)
+        return results
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+    
+@app.post("/ioannina/wms/")
+async def upload_wms_ioannina(title: str = Query(..., description="Title of the WMS data"), url: str = Query(..., description="URL of the WMS data"), dependencies=[Depends(JWTBearer())], name: str = Query(..., description="Name of the wms artifact")):
+    try:
+        
+        # Create a new GeoJson entry
+        new_data = WMSDB(
+            title=title,
+            url=url,
+            name=name,
+            hasMapData=ioannina
+        )
+        session.add(new_data)
+        session.commit()
+        
+        return {"status": "success", "message": "GeoJSON file processed and data stored in the database."}
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+@app.get("/ioannina/wms/")
+async def get_wms_for_ioannina():
+    results = []
+    try:
+        # Query the database for geospatial data for the given city
+        wms_data = session.query(WMSDB).filter(WMSDB.city_id == ioannina.id).all()
+
+        # Check if data exists for the city
+        if not wms_data:
+            raise HTTPException(status_code=404, detail=f"No geospatial data found for city: torino")
+        for result in wms_data: 
+            results.append(result)
+        return results
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+    
+@app.get("/ioannina/mapdata/")    
+async def get_mapdata_for_ioannina():
+    results = []
+    try:
+        # Query the database for geospatial data for the given city
+        wms_data = session.query(WMSDB).filter(WMSDB.city_id == ioannina.id).all()
+
+        # Check if data exists for the city
+        if not wms_data:
+            print("sucks")
+        for result in wms_data: 
+            results.append(result)
+        geojson_data = session.query(GeoJsonDB).filter(GeoJsonDB.city_id == ioannina.id).all()
+
+        # Check if data exists for the city
+        if not geojson_data:
+            print("sucks")
+        for result in geojson_data: 
+            results.append(result)
+        return results            
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")     
+        
+@app.get("/ioannina/visualizations", response_model=list[object], summary="get a KPI object", tags = ["Visualisation"])
+async def get_visualizations_ioannina():
+    try:
+        results_list = []
+                    
+        query = session.query(visualisation_alias, linechart_alias).\
+            join(linechart_alias, visualisation_alias.id == linechart_alias.id).\
+            join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
+            filter(func.lower(dashboard_alias.code) == func.lower("ioannina"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(visualisation_alias, barchart_alias).\
+            join(barchart_alias, visualisation_alias.id == barchart_alias.id).\
+            join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
+            filter(func.lower(dashboard_alias.code) == func.lower("ioannina"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(visualisation_alias, piechart_alias).\
+            join(piechart_alias, visualisation_alias.id == piechart_alias.id).\
+            join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
+            filter(func.lower(dashboard_alias.code) == func.lower("ioannina"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(visualisation_alias, statchart_alias).\
+            join(statchart_alias, visualisation_alias.id == statchart_alias.id).\
+            join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
+            filter(func.lower(dashboard_alias.code) == func.lower("ioannina"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(visualisation_alias, table_alias).\
+            join(table_alias, visualisation_alias.id == table_alias.id).\
+            join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
+            filter(func.lower(dashboard_alias.code) == func.lower("ioannina"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(visualisation_alias, map_alias).\
+            join(map_alias, visualisation_alias.id == map_alias.id).\
+            join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
+            filter(func.lower(dashboard_alias.code) == func.lower("ioannina"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                
+        return results_list
+    except Exception as e:
+        session.rollback()
+        return [{"error": str(e)}]
+    
+     
+@app.get("/maribor/kpis", response_model=list[object], summary="get all KPI object",  tags=["KPI"])
+async def get_kpis_maribor():
+    try:
+        results_list = []
+                    
+        query = session.query(kpi_alias, kpitemp_alias).\
+            join(kpitemp_alias, kpi_alias.id == kpitemp_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("maribor"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpisecondhandcustomers_alias).\
+            join(kpisecondhandcustomers_alias, kpi_alias.id == kpisecondhandcustomers_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("maribor"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpimoney_alias).\
+            join(kpimoney_alias, kpi_alias.id == kpimoney_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("maribor"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpitraffic_alias).\
+            join(kpitraffic_alias, kpi_alias.id == kpitraffic_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("maribor"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpitotalrenewableenergy_alias).\
+            join(kpitotalrenewableenergy_alias, kpi_alias.id == kpitotalrenewableenergy_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("maribor"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpicollectedwaste_alias).\
+            join(kpicollectedwaste_alias, kpi_alias.id == kpicollectedwaste_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("maribor"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpitextilewasteperperson_alias).\
+            join(kpitextilewasteperperson_alias, kpi_alias.id == kpitextilewasteperperson_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("maribor"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpinumberhouseholdrenewableenergy_alias).\
+            join(kpinumberhouseholdrenewableenergy_alias, kpi_alias.id == kpinumberhouseholdrenewableenergy_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("maribor"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpiwastesorted_alias).\
+            join(kpiwastesorted_alias, kpi_alias.id == kpiwastesorted_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("maribor"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpico2avoided_alias).\
+            join(kpico2avoided_alias, kpi_alias.id == kpico2avoided_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("maribor"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpipeaksolarenergy_alias).\
+            join(kpipeaksolarenergy_alias, kpi_alias.id == kpipeaksolarenergy_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("maribor"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpiparticipants_alias).\
+            join(kpiparticipants_alias, kpi_alias.id == kpiparticipants_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("maribor"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpiwasteavoided_alias).\
+            join(kpiwasteavoided_alias, kpi_alias.id == kpiwasteavoided_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("maribor"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                
+        return results_list
+    except Exception as e:
+        return [e]
+    
+@app.post("/maribor/geojson/")
+async def upload_geojson_maribor(title: str = Query(..., description="Title of the GeoJSON data"), dependencies=[Depends(JWTBearer())], geojson_data: dict = Body(..., description="GeoJSON data")):
+    try:
+        # Create a new GeoJson entry
+        new_data = GeoJsonDB(
+            title=title,
+            data=json.dumps(geojson_data),
+            hasMapData=maribor
+        )
+        session.add(new_data)
+        session.commit()
+        
+        return {"status": "success", "message": "GeoJSON file processed and data stored in the database."}
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+
+@app.get("/maribor/geojson/")
+async def get_geojson_for_maribor():
+    results = []
+    try:
+        # Query the database for geospatial data for the given city
+        geojson_data = session.query(GeoJsonDB).filter(GeoJsonDB.city_id == maribor.id).all()
+
+        # Check if data exists for the city
+        if not geojson_data:
+            raise HTTPException(status_code=404, detail=f"No geospatial data found for city: torino")
+        for result in geojson_data: 
+            results.append(result)
+        return results
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+    
+@app.post("/maribor/wms/")
+async def upload_wms_maribor(title: str = Query(..., description="Title of the WMS data"), url: str = Query(..., description="URL of the WMS data"), dependencies=[Depends(JWTBearer())], name: str = Query(..., description="Name of the wms artifact")):
+    try:
+        
+        # Create a new GeoJson entry
+        new_data = WMSDB(
+            title=title,
+            url=url,
+            name=name,
+            hasMapData=maribor
+        )
+        session.add(new_data)
+        session.commit()
+        
+        return {"status": "success", "message": "GeoJSON file processed and data stored in the database."}
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+@app.get("/maribor/wms/")
+async def get_wms_for_maribor():
+    results = []
+    try:
+        # Query the database for geospatial data for the given city
+        wms_data = session.query(WMSDB).filter(WMSDB.city_id == maribor.id).all()
+
+        # Check if data exists for the city
+        if not wms_data:
+            raise HTTPException(status_code=404, detail=f"No geospatial data found for city: torino")
+        for result in wms_data: 
+            results.append(result)
+        return results
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+    
+@app.get("/maribor/mapdata/")    
+async def get_mapdata_for_maribor():
+    results = []
+    try:
+        # Query the database for geospatial data for the given city
+        wms_data = session.query(WMSDB).filter(WMSDB.city_id == maribor.id).all()
+
+        # Check if data exists for the city
+        if not wms_data:
+            print("sucks")
+        for result in wms_data: 
+            results.append(result)
+        geojson_data = session.query(GeoJsonDB).filter(GeoJsonDB.city_id == maribor.id).all()
+
+        # Check if data exists for the city
+        if not geojson_data:
+            print("sucks")
+        for result in geojson_data: 
+            results.append(result)
+        return results            
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")     
+        
+@app.get("/maribor/visualizations", response_model=list[object], summary="get a KPI object", tags = ["Visualisation"])
+async def get_visualizations_maribor():
+    try:
+        results_list = []
+                    
+        query = session.query(visualisation_alias, linechart_alias).\
+            join(linechart_alias, visualisation_alias.id == linechart_alias.id).\
+            join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
+            filter(func.lower(dashboard_alias.code) == func.lower("maribor"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(visualisation_alias, barchart_alias).\
+            join(barchart_alias, visualisation_alias.id == barchart_alias.id).\
+            join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
+            filter(func.lower(dashboard_alias.code) == func.lower("maribor"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(visualisation_alias, piechart_alias).\
+            join(piechart_alias, visualisation_alias.id == piechart_alias.id).\
+            join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
+            filter(func.lower(dashboard_alias.code) == func.lower("maribor"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(visualisation_alias, statchart_alias).\
+            join(statchart_alias, visualisation_alias.id == statchart_alias.id).\
+            join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
+            filter(func.lower(dashboard_alias.code) == func.lower("maribor"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(visualisation_alias, table_alias).\
+            join(table_alias, visualisation_alias.id == table_alias.id).\
+            join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
+            filter(func.lower(dashboard_alias.code) == func.lower("maribor"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(visualisation_alias, map_alias).\
+            join(map_alias, visualisation_alias.id == map_alias.id).\
+            join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
+            filter(func.lower(dashboard_alias.code) == func.lower("maribor"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                
+        return results_list
+    except Exception as e:
+        session.rollback()
+        return [{"error": str(e)}]
+    
+     
+@app.get("/grenoble/kpis", response_model=list[object], summary="get all KPI object",  tags=["KPI"])
+async def get_kpis_grenoble():
+    try:
+        results_list = []
+                    
+        query = session.query(kpi_alias, kpitemp_alias).\
+            join(kpitemp_alias, kpi_alias.id == kpitemp_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("grenoble"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpisecondhandcustomers_alias).\
+            join(kpisecondhandcustomers_alias, kpi_alias.id == kpisecondhandcustomers_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("grenoble"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpimoney_alias).\
+            join(kpimoney_alias, kpi_alias.id == kpimoney_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("grenoble"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpitraffic_alias).\
+            join(kpitraffic_alias, kpi_alias.id == kpitraffic_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("grenoble"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpitotalrenewableenergy_alias).\
+            join(kpitotalrenewableenergy_alias, kpi_alias.id == kpitotalrenewableenergy_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("grenoble"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpicollectedwaste_alias).\
+            join(kpicollectedwaste_alias, kpi_alias.id == kpicollectedwaste_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("grenoble"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpitextilewasteperperson_alias).\
+            join(kpitextilewasteperperson_alias, kpi_alias.id == kpitextilewasteperperson_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("grenoble"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpinumberhouseholdrenewableenergy_alias).\
+            join(kpinumberhouseholdrenewableenergy_alias, kpi_alias.id == kpinumberhouseholdrenewableenergy_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("grenoble"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpiwastesorted_alias).\
+            join(kpiwastesorted_alias, kpi_alias.id == kpiwastesorted_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("grenoble"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpico2avoided_alias).\
+            join(kpico2avoided_alias, kpi_alias.id == kpico2avoided_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("grenoble"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpipeaksolarenergy_alias).\
+            join(kpipeaksolarenergy_alias, kpi_alias.id == kpipeaksolarenergy_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("grenoble"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpiparticipants_alias).\
+            join(kpiparticipants_alias, kpi_alias.id == kpiparticipants_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("grenoble"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpiwasteavoided_alias).\
+            join(kpiwasteavoided_alias, kpi_alias.id == kpiwasteavoided_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("grenoble"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                
+        return results_list
+    except Exception as e:
+        return [e]
+    
+@app.post("/grenoble/geojson/")
+async def upload_geojson_grenoble(title: str = Query(..., description="Title of the GeoJSON data"), dependencies=[Depends(JWTBearer())], geojson_data: dict = Body(..., description="GeoJSON data")):
+    try:
+        # Create a new GeoJson entry
+        new_data = GeoJsonDB(
+            title=title,
+            data=json.dumps(geojson_data),
+            hasMapData=grenoble
+        )
+        session.add(new_data)
+        session.commit()
+        
+        return {"status": "success", "message": "GeoJSON file processed and data stored in the database."}
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+
+@app.get("/grenoble/geojson/")
+async def get_geojson_for_grenoble():
+    results = []
+    try:
+        # Query the database for geospatial data for the given city
+        geojson_data = session.query(GeoJsonDB).filter(GeoJsonDB.city_id == grenoble.id).all()
+
+        # Check if data exists for the city
+        if not geojson_data:
+            raise HTTPException(status_code=404, detail=f"No geospatial data found for city: torino")
+        for result in geojson_data: 
+            results.append(result)
+        return results
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+    
+@app.post("/grenoble/wms/")
+async def upload_wms_grenoble(title: str = Query(..., description="Title of the WMS data"), url: str = Query(..., description="URL of the WMS data"), dependencies=[Depends(JWTBearer())], name: str = Query(..., description="Name of the wms artifact")):
+    try:
+        
+        # Create a new GeoJson entry
+        new_data = WMSDB(
+            title=title,
+            url=url,
+            name=name,
+            hasMapData=grenoble
+        )
+        session.add(new_data)
+        session.commit()
+        
+        return {"status": "success", "message": "GeoJSON file processed and data stored in the database."}
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+@app.get("/grenoble/wms/")
+async def get_wms_for_grenoble():
+    results = []
+    try:
+        # Query the database for geospatial data for the given city
+        wms_data = session.query(WMSDB).filter(WMSDB.city_id == grenoble.id).all()
+
+        # Check if data exists for the city
+        if not wms_data:
+            raise HTTPException(status_code=404, detail=f"No geospatial data found for city: torino")
+        for result in wms_data: 
+            results.append(result)
+        return results
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+    
+@app.get("/grenoble/mapdata/")    
+async def get_mapdata_for_grenoble():
+    results = []
+    try:
+        # Query the database for geospatial data for the given city
+        wms_data = session.query(WMSDB).filter(WMSDB.city_id == grenoble.id).all()
+
+        # Check if data exists for the city
+        if not wms_data:
+            print("sucks")
+        for result in wms_data: 
+            results.append(result)
+        geojson_data = session.query(GeoJsonDB).filter(GeoJsonDB.city_id == grenoble.id).all()
+
+        # Check if data exists for the city
+        if not geojson_data:
+            print("sucks")
+        for result in geojson_data: 
+            results.append(result)
+        return results            
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")     
+        
+@app.get("/grenoble/visualizations", response_model=list[object], summary="get a KPI object", tags = ["Visualisation"])
+async def get_visualizations_grenoble():
+    try:
+        results_list = []
+                    
+        query = session.query(visualisation_alias, linechart_alias).\
+            join(linechart_alias, visualisation_alias.id == linechart_alias.id).\
+            join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
+            filter(func.lower(dashboard_alias.code) == func.lower("grenoble"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(visualisation_alias, barchart_alias).\
+            join(barchart_alias, visualisation_alias.id == barchart_alias.id).\
+            join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
+            filter(func.lower(dashboard_alias.code) == func.lower("grenoble"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(visualisation_alias, piechart_alias).\
+            join(piechart_alias, visualisation_alias.id == piechart_alias.id).\
+            join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
+            filter(func.lower(dashboard_alias.code) == func.lower("grenoble"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(visualisation_alias, statchart_alias).\
+            join(statchart_alias, visualisation_alias.id == statchart_alias.id).\
+            join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
+            filter(func.lower(dashboard_alias.code) == func.lower("grenoble"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(visualisation_alias, table_alias).\
+            join(table_alias, visualisation_alias.id == table_alias.id).\
+            join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
+            filter(func.lower(dashboard_alias.code) == func.lower("grenoble"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(visualisation_alias, map_alias).\
+            join(map_alias, visualisation_alias.id == map_alias.id).\
+            join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
+            filter(func.lower(dashboard_alias.code) == func.lower("grenoble"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                
+        return results_list
+    except Exception as e:
+        session.rollback()
+        return [{"error": str(e)}]
+    
+     
+@app.get("/athens/kpis", response_model=list[object], summary="get all KPI object",  tags=["KPI"])
+async def get_kpis_athens():
+    try:
+        results_list = []
+                    
+        query = session.query(kpi_alias, kpitemp_alias).\
+            join(kpitemp_alias, kpi_alias.id == kpitemp_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("athens"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpisecondhandcustomers_alias).\
+            join(kpisecondhandcustomers_alias, kpi_alias.id == kpisecondhandcustomers_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("athens"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpimoney_alias).\
+            join(kpimoney_alias, kpi_alias.id == kpimoney_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("athens"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpitraffic_alias).\
+            join(kpitraffic_alias, kpi_alias.id == kpitraffic_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("athens"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpitotalrenewableenergy_alias).\
+            join(kpitotalrenewableenergy_alias, kpi_alias.id == kpitotalrenewableenergy_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("athens"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpicollectedwaste_alias).\
+            join(kpicollectedwaste_alias, kpi_alias.id == kpicollectedwaste_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("athens"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpitextilewasteperperson_alias).\
+            join(kpitextilewasteperperson_alias, kpi_alias.id == kpitextilewasteperperson_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("athens"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpinumberhouseholdrenewableenergy_alias).\
+            join(kpinumberhouseholdrenewableenergy_alias, kpi_alias.id == kpinumberhouseholdrenewableenergy_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("athens"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpiwastesorted_alias).\
+            join(kpiwastesorted_alias, kpi_alias.id == kpiwastesorted_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("athens"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpico2avoided_alias).\
+            join(kpico2avoided_alias, kpi_alias.id == kpico2avoided_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("athens"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpipeaksolarenergy_alias).\
+            join(kpipeaksolarenergy_alias, kpi_alias.id == kpipeaksolarenergy_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("athens"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpiparticipants_alias).\
+            join(kpiparticipants_alias, kpi_alias.id == kpiparticipants_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("athens"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpiwasteavoided_alias).\
+            join(kpiwasteavoided_alias, kpi_alias.id == kpiwasteavoided_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("athens"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                
+        return results_list
+    except Exception as e:
+        return [e]
+    
+@app.post("/athens/geojson/")
+async def upload_geojson_athens(title: str = Query(..., description="Title of the GeoJSON data"), dependencies=[Depends(JWTBearer())], geojson_data: dict = Body(..., description="GeoJSON data")):
+    try:
+        # Create a new GeoJson entry
+        new_data = GeoJsonDB(
+            title=title,
+            data=json.dumps(geojson_data),
+            hasMapData=athens
+        )
+        session.add(new_data)
+        session.commit()
+        
+        return {"status": "success", "message": "GeoJSON file processed and data stored in the database."}
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+
+@app.get("/athens/geojson/")
+async def get_geojson_for_athens():
+    results = []
+    try:
+        # Query the database for geospatial data for the given city
+        geojson_data = session.query(GeoJsonDB).filter(GeoJsonDB.city_id == athens.id).all()
+
+        # Check if data exists for the city
+        if not geojson_data:
+            raise HTTPException(status_code=404, detail=f"No geospatial data found for city: torino")
+        for result in geojson_data: 
+            results.append(result)
+        return results
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+    
+@app.post("/athens/wms/")
+async def upload_wms_athens(title: str = Query(..., description="Title of the WMS data"), url: str = Query(..., description="URL of the WMS data"), dependencies=[Depends(JWTBearer())], name: str = Query(..., description="Name of the wms artifact")):
+    try:
+        
+        # Create a new GeoJson entry
+        new_data = WMSDB(
+            title=title,
+            url=url,
+            name=name,
+            hasMapData=athens
+        )
+        session.add(new_data)
+        session.commit()
+        
+        return {"status": "success", "message": "GeoJSON file processed and data stored in the database."}
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+@app.get("/athens/wms/")
+async def get_wms_for_athens():
+    results = []
+    try:
+        # Query the database for geospatial data for the given city
+        wms_data = session.query(WMSDB).filter(WMSDB.city_id == athens.id).all()
+
+        # Check if data exists for the city
+        if not wms_data:
+            raise HTTPException(status_code=404, detail=f"No geospatial data found for city: torino")
+        for result in wms_data: 
+            results.append(result)
+        return results
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+    
+@app.get("/athens/mapdata/")    
+async def get_mapdata_for_athens():
+    results = []
+    try:
+        # Query the database for geospatial data for the given city
+        wms_data = session.query(WMSDB).filter(WMSDB.city_id == athens.id).all()
+
+        # Check if data exists for the city
+        if not wms_data:
+            print("sucks")
+        for result in wms_data: 
+            results.append(result)
+        geojson_data = session.query(GeoJsonDB).filter(GeoJsonDB.city_id == athens.id).all()
+
+        # Check if data exists for the city
+        if not geojson_data:
+            print("sucks")
+        for result in geojson_data: 
+            results.append(result)
+        return results            
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")     
+        
+@app.get("/athens/visualizations", response_model=list[object], summary="get a KPI object", tags = ["Visualisation"])
+async def get_visualizations_athens():
+    try:
+        results_list = []
+                    
+        query = session.query(visualisation_alias, linechart_alias).\
+            join(linechart_alias, visualisation_alias.id == linechart_alias.id).\
+            join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
+            filter(func.lower(dashboard_alias.code) == func.lower("athens"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(visualisation_alias, barchart_alias).\
+            join(barchart_alias, visualisation_alias.id == barchart_alias.id).\
+            join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
+            filter(func.lower(dashboard_alias.code) == func.lower("athens"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(visualisation_alias, piechart_alias).\
+            join(piechart_alias, visualisation_alias.id == piechart_alias.id).\
+            join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
+            filter(func.lower(dashboard_alias.code) == func.lower("athens"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(visualisation_alias, statchart_alias).\
+            join(statchart_alias, visualisation_alias.id == statchart_alias.id).\
+            join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
+            filter(func.lower(dashboard_alias.code) == func.lower("athens"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(visualisation_alias, table_alias).\
+            join(table_alias, visualisation_alias.id == table_alias.id).\
+            join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
+            filter(func.lower(dashboard_alias.code) == func.lower("athens"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(visualisation_alias, map_alias).\
+            join(map_alias, visualisation_alias.id == map_alias.id).\
+            join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
+            filter(func.lower(dashboard_alias.code) == func.lower("athens"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                
+        return results_list
+    except Exception as e:
+        session.rollback()
+        return [{"error": str(e)}]
+    
+     
+@app.get("/torino/kpis", response_model=list[object], summary="get all KPI object",  tags=["KPI"])
+async def get_kpis_torino():
+    try:
+        results_list = []
+                    
+        query = session.query(kpi_alias, kpitemp_alias).\
+            join(kpitemp_alias, kpi_alias.id == kpitemp_alias.id).\
             join(city_alias, city_alias.id == kpi_alias.city_id).\
             filter(func.lower(city_alias.name) == func.lower("torino"))
 
@@ -1785,6 +4662,22 @@ async def get_kpis_torino():
                         result_dict[key] = getattr(table, key)
             results_list.append(result_dict)
                             
+        query = session.query(kpi_alias, kpitraffic_alias).\
+            join(kpitraffic_alias, kpi_alias.id == kpitraffic_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("torino"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
         query = session.query(kpi_alias, kpitotalrenewableenergy_alias).\
             join(kpitotalrenewableenergy_alias, kpi_alias.id == kpitotalrenewableenergy_alias.id).\
             join(city_alias, city_alias.id == kpi_alias.city_id).\
@@ -1801,8 +4694,72 @@ async def get_kpis_torino():
                         result_dict[key] = getattr(table, key)
             results_list.append(result_dict)
                             
+        query = session.query(kpi_alias, kpicollectedwaste_alias).\
+            join(kpicollectedwaste_alias, kpi_alias.id == kpicollectedwaste_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("torino"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpitextilewasteperperson_alias).\
+            join(kpitextilewasteperperson_alias, kpi_alias.id == kpitextilewasteperperson_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("torino"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
         query = session.query(kpi_alias, kpinumberhouseholdrenewableenergy_alias).\
             join(kpinumberhouseholdrenewableenergy_alias, kpi_alias.id == kpinumberhouseholdrenewableenergy_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("torino"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpiwastesorted_alias).\
+            join(kpiwastesorted_alias, kpi_alias.id == kpiwastesorted_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("torino"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpico2avoided_alias).\
+            join(kpico2avoided_alias, kpi_alias.id == kpico2avoided_alias.id).\
             join(city_alias, city_alias.id == kpi_alias.city_id).\
             filter(func.lower(city_alias.name) == func.lower("torino"))
 
@@ -1851,54 +4808,6 @@ async def get_kpis_torino():
                             
         query = session.query(kpi_alias, kpiwasteavoided_alias).\
             join(kpiwasteavoided_alias, kpi_alias.id == kpiwasteavoided_alias.id).\
-            join(city_alias, city_alias.id == kpi_alias.city_id).\
-            filter(func.lower(city_alias.name) == func.lower("torino"))
-
-        # Execute the query to get the results
-        results = query.all()
-        # Convert SQLAlchemy objects to dictionaries
-        for result in results:
-            result_dict = {}
-            for table in result: 
-                for key in table.__dict__.keys():
-                    if not key.startswith('_'):
-                        result_dict[key] = getattr(table, key)
-            results_list.append(result_dict)
-                            
-        query = session.query(kpi_alias, kpico2avoided_alias).\
-            join(kpico2avoided_alias, kpi_alias.id == kpico2avoided_alias.id).\
-            join(city_alias, city_alias.id == kpi_alias.city_id).\
-            filter(func.lower(city_alias.name) == func.lower("torino"))
-
-        # Execute the query to get the results
-        results = query.all()
-        # Convert SQLAlchemy objects to dictionaries
-        for result in results:
-            result_dict = {}
-            for table in result: 
-                for key in table.__dict__.keys():
-                    if not key.startswith('_'):
-                        result_dict[key] = getattr(table, key)
-            results_list.append(result_dict)
-                            
-        query = session.query(kpi_alias, kpiwastesorted_alias).\
-            join(kpiwastesorted_alias, kpi_alias.id == kpiwastesorted_alias.id).\
-            join(city_alias, city_alias.id == kpi_alias.city_id).\
-            filter(func.lower(city_alias.name) == func.lower("torino"))
-
-        # Execute the query to get the results
-        results = query.all()
-        # Convert SQLAlchemy objects to dictionaries
-        for result in results:
-            result_dict = {}
-            for table in result: 
-                for key in table.__dict__.keys():
-                    if not key.startswith('_'):
-                        result_dict[key] = getattr(table, key)
-            results_list.append(result_dict)
-                            
-        query = session.query(kpi_alias, kpitextilewasteperperson_alias).\
-            join(kpitextilewasteperperson_alias, kpi_alias.id == kpitextilewasteperperson_alias.id).\
             join(city_alias, city_alias.id == kpi_alias.city_id).\
             filter(func.lower(city_alias.name) == func.lower("torino"))
 
@@ -2015,24 +4924,8 @@ async def get_visualizations_torino():
     try:
         results_list = []
                     
-        query = session.query(visualisation_alias, table_alias).\
-            join(table_alias, visualisation_alias.id == table_alias.id).\
-            join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
-            filter(func.lower(dashboard_alias.code) == func.lower("torino"))
-
-        # Execute the query to get the results
-        results = query.all()
-        # Convert SQLAlchemy objects to dictionaries
-        for result in results:
-            result_dict = {}
-            for table in result: 
-                for key in table.__dict__.keys():
-                    if not key.startswith('_'):
-                        result_dict[key] = getattr(table, key)
-            results_list.append(result_dict)
-                            
-        query = session.query(visualisation_alias, piechart_alias).\
-            join(piechart_alias, visualisation_alias.id == piechart_alias.id).\
+        query = session.query(visualisation_alias, linechart_alias).\
+            join(linechart_alias, visualisation_alias.id == linechart_alias.id).\
             join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
             filter(func.lower(dashboard_alias.code) == func.lower("torino"))
 
@@ -2063,6 +4956,22 @@ async def get_visualizations_torino():
                         result_dict[key] = getattr(table, key)
             results_list.append(result_dict)
                             
+        query = session.query(visualisation_alias, piechart_alias).\
+            join(piechart_alias, visualisation_alias.id == piechart_alias.id).\
+            join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
+            filter(func.lower(dashboard_alias.code) == func.lower("torino"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
         query = session.query(visualisation_alias, statchart_alias).\
             join(statchart_alias, visualisation_alias.id == statchart_alias.id).\
             join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
@@ -2079,8 +4988,8 @@ async def get_visualizations_torino():
                         result_dict[key] = getattr(table, key)
             results_list.append(result_dict)
                             
-        query = session.query(visualisation_alias, linechart_alias).\
-            join(linechart_alias, visualisation_alias.id == linechart_alias.id).\
+        query = session.query(visualisation_alias, table_alias).\
+            join(table_alias, visualisation_alias.id == table_alias.id).\
             join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
             filter(func.lower(dashboard_alias.code) == func.lower("torino"))
 
@@ -2138,38 +5047,6 @@ async def get_kpis_cascais():
                         result_dict[key] = getattr(table, key)
             results_list.append(result_dict)
                             
-        query = session.query(kpi_alias, kpitraffic_alias).\
-            join(kpitraffic_alias, kpi_alias.id == kpitraffic_alias.id).\
-            join(city_alias, city_alias.id == kpi_alias.city_id).\
-            filter(func.lower(city_alias.name) == func.lower("cascais"))
-
-        # Execute the query to get the results
-        results = query.all()
-        # Convert SQLAlchemy objects to dictionaries
-        for result in results:
-            result_dict = {}
-            for table in result: 
-                for key in table.__dict__.keys():
-                    if not key.startswith('_'):
-                        result_dict[key] = getattr(table, key)
-            results_list.append(result_dict)
-                            
-        query = session.query(kpi_alias, kpicollectedwaste_alias).\
-            join(kpicollectedwaste_alias, kpi_alias.id == kpicollectedwaste_alias.id).\
-            join(city_alias, city_alias.id == kpi_alias.city_id).\
-            filter(func.lower(city_alias.name) == func.lower("cascais"))
-
-        # Execute the query to get the results
-        results = query.all()
-        # Convert SQLAlchemy objects to dictionaries
-        for result in results:
-            result_dict = {}
-            for table in result: 
-                for key in table.__dict__.keys():
-                    if not key.startswith('_'):
-                        result_dict[key] = getattr(table, key)
-            results_list.append(result_dict)
-                            
         query = session.query(kpi_alias, kpisecondhandcustomers_alias).\
             join(kpisecondhandcustomers_alias, kpi_alias.id == kpisecondhandcustomers_alias.id).\
             join(city_alias, city_alias.id == kpi_alias.city_id).\
@@ -2202,6 +5079,22 @@ async def get_kpis_cascais():
                         result_dict[key] = getattr(table, key)
             results_list.append(result_dict)
                             
+        query = session.query(kpi_alias, kpitraffic_alias).\
+            join(kpitraffic_alias, kpi_alias.id == kpitraffic_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("cascais"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
         query = session.query(kpi_alias, kpitotalrenewableenergy_alias).\
             join(kpitotalrenewableenergy_alias, kpi_alias.id == kpitotalrenewableenergy_alias.id).\
             join(city_alias, city_alias.id == kpi_alias.city_id).\
@@ -2218,8 +5111,72 @@ async def get_kpis_cascais():
                         result_dict[key] = getattr(table, key)
             results_list.append(result_dict)
                             
+        query = session.query(kpi_alias, kpicollectedwaste_alias).\
+            join(kpicollectedwaste_alias, kpi_alias.id == kpicollectedwaste_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("cascais"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpitextilewasteperperson_alias).\
+            join(kpitextilewasteperperson_alias, kpi_alias.id == kpitextilewasteperperson_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("cascais"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
         query = session.query(kpi_alias, kpinumberhouseholdrenewableenergy_alias).\
             join(kpinumberhouseholdrenewableenergy_alias, kpi_alias.id == kpinumberhouseholdrenewableenergy_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("cascais"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpiwastesorted_alias).\
+            join(kpiwastesorted_alias, kpi_alias.id == kpiwastesorted_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("cascais"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpico2avoided_alias).\
+            join(kpico2avoided_alias, kpi_alias.id == kpico2avoided_alias.id).\
             join(city_alias, city_alias.id == kpi_alias.city_id).\
             filter(func.lower(city_alias.name) == func.lower("cascais"))
 
@@ -2268,54 +5225,6 @@ async def get_kpis_cascais():
                             
         query = session.query(kpi_alias, kpiwasteavoided_alias).\
             join(kpiwasteavoided_alias, kpi_alias.id == kpiwasteavoided_alias.id).\
-            join(city_alias, city_alias.id == kpi_alias.city_id).\
-            filter(func.lower(city_alias.name) == func.lower("cascais"))
-
-        # Execute the query to get the results
-        results = query.all()
-        # Convert SQLAlchemy objects to dictionaries
-        for result in results:
-            result_dict = {}
-            for table in result: 
-                for key in table.__dict__.keys():
-                    if not key.startswith('_'):
-                        result_dict[key] = getattr(table, key)
-            results_list.append(result_dict)
-                            
-        query = session.query(kpi_alias, kpico2avoided_alias).\
-            join(kpico2avoided_alias, kpi_alias.id == kpico2avoided_alias.id).\
-            join(city_alias, city_alias.id == kpi_alias.city_id).\
-            filter(func.lower(city_alias.name) == func.lower("cascais"))
-
-        # Execute the query to get the results
-        results = query.all()
-        # Convert SQLAlchemy objects to dictionaries
-        for result in results:
-            result_dict = {}
-            for table in result: 
-                for key in table.__dict__.keys():
-                    if not key.startswith('_'):
-                        result_dict[key] = getattr(table, key)
-            results_list.append(result_dict)
-                            
-        query = session.query(kpi_alias, kpiwastesorted_alias).\
-            join(kpiwastesorted_alias, kpi_alias.id == kpiwastesorted_alias.id).\
-            join(city_alias, city_alias.id == kpi_alias.city_id).\
-            filter(func.lower(city_alias.name) == func.lower("cascais"))
-
-        # Execute the query to get the results
-        results = query.all()
-        # Convert SQLAlchemy objects to dictionaries
-        for result in results:
-            result_dict = {}
-            for table in result: 
-                for key in table.__dict__.keys():
-                    if not key.startswith('_'):
-                        result_dict[key] = getattr(table, key)
-            results_list.append(result_dict)
-                            
-        query = session.query(kpi_alias, kpitextilewasteperperson_alias).\
-            join(kpitextilewasteperperson_alias, kpi_alias.id == kpitextilewasteperperson_alias.id).\
             join(city_alias, city_alias.id == kpi_alias.city_id).\
             filter(func.lower(city_alias.name) == func.lower("cascais"))
 
@@ -2432,24 +5341,8 @@ async def get_visualizations_cascais():
     try:
         results_list = []
                     
-        query = session.query(visualisation_alias, table_alias).\
-            join(table_alias, visualisation_alias.id == table_alias.id).\
-            join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
-            filter(func.lower(dashboard_alias.code) == func.lower("cascais"))
-
-        # Execute the query to get the results
-        results = query.all()
-        # Convert SQLAlchemy objects to dictionaries
-        for result in results:
-            result_dict = {}
-            for table in result: 
-                for key in table.__dict__.keys():
-                    if not key.startswith('_'):
-                        result_dict[key] = getattr(table, key)
-            results_list.append(result_dict)
-                            
-        query = session.query(visualisation_alias, piechart_alias).\
-            join(piechart_alias, visualisation_alias.id == piechart_alias.id).\
+        query = session.query(visualisation_alias, linechart_alias).\
+            join(linechart_alias, visualisation_alias.id == linechart_alias.id).\
             join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
             filter(func.lower(dashboard_alias.code) == func.lower("cascais"))
 
@@ -2480,6 +5373,22 @@ async def get_visualizations_cascais():
                         result_dict[key] = getattr(table, key)
             results_list.append(result_dict)
                             
+        query = session.query(visualisation_alias, piechart_alias).\
+            join(piechart_alias, visualisation_alias.id == piechart_alias.id).\
+            join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
+            filter(func.lower(dashboard_alias.code) == func.lower("cascais"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
         query = session.query(visualisation_alias, statchart_alias).\
             join(statchart_alias, visualisation_alias.id == statchart_alias.id).\
             join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
@@ -2496,8 +5405,8 @@ async def get_visualizations_cascais():
                         result_dict[key] = getattr(table, key)
             results_list.append(result_dict)
                             
-        query = session.query(visualisation_alias, linechart_alias).\
-            join(linechart_alias, visualisation_alias.id == linechart_alias.id).\
+        query = session.query(visualisation_alias, table_alias).\
+            join(table_alias, visualisation_alias.id == table_alias.id).\
             join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
             filter(func.lower(dashboard_alias.code) == func.lower("cascais"))
 
@@ -2555,38 +5464,6 @@ async def get_kpis_differdange():
                         result_dict[key] = getattr(table, key)
             results_list.append(result_dict)
                             
-        query = session.query(kpi_alias, kpitraffic_alias).\
-            join(kpitraffic_alias, kpi_alias.id == kpitraffic_alias.id).\
-            join(city_alias, city_alias.id == kpi_alias.city_id).\
-            filter(func.lower(city_alias.name) == func.lower("differdange"))
-
-        # Execute the query to get the results
-        results = query.all()
-        # Convert SQLAlchemy objects to dictionaries
-        for result in results:
-            result_dict = {}
-            for table in result: 
-                for key in table.__dict__.keys():
-                    if not key.startswith('_'):
-                        result_dict[key] = getattr(table, key)
-            results_list.append(result_dict)
-                            
-        query = session.query(kpi_alias, kpicollectedwaste_alias).\
-            join(kpicollectedwaste_alias, kpi_alias.id == kpicollectedwaste_alias.id).\
-            join(city_alias, city_alias.id == kpi_alias.city_id).\
-            filter(func.lower(city_alias.name) == func.lower("differdange"))
-
-        # Execute the query to get the results
-        results = query.all()
-        # Convert SQLAlchemy objects to dictionaries
-        for result in results:
-            result_dict = {}
-            for table in result: 
-                for key in table.__dict__.keys():
-                    if not key.startswith('_'):
-                        result_dict[key] = getattr(table, key)
-            results_list.append(result_dict)
-                            
         query = session.query(kpi_alias, kpisecondhandcustomers_alias).\
             join(kpisecondhandcustomers_alias, kpi_alias.id == kpisecondhandcustomers_alias.id).\
             join(city_alias, city_alias.id == kpi_alias.city_id).\
@@ -2619,6 +5496,22 @@ async def get_kpis_differdange():
                         result_dict[key] = getattr(table, key)
             results_list.append(result_dict)
                             
+        query = session.query(kpi_alias, kpitraffic_alias).\
+            join(kpitraffic_alias, kpi_alias.id == kpitraffic_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("differdange"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
         query = session.query(kpi_alias, kpitotalrenewableenergy_alias).\
             join(kpitotalrenewableenergy_alias, kpi_alias.id == kpitotalrenewableenergy_alias.id).\
             join(city_alias, city_alias.id == kpi_alias.city_id).\
@@ -2635,8 +5528,72 @@ async def get_kpis_differdange():
                         result_dict[key] = getattr(table, key)
             results_list.append(result_dict)
                             
+        query = session.query(kpi_alias, kpicollectedwaste_alias).\
+            join(kpicollectedwaste_alias, kpi_alias.id == kpicollectedwaste_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("differdange"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpitextilewasteperperson_alias).\
+            join(kpitextilewasteperperson_alias, kpi_alias.id == kpitextilewasteperperson_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("differdange"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
         query = session.query(kpi_alias, kpinumberhouseholdrenewableenergy_alias).\
             join(kpinumberhouseholdrenewableenergy_alias, kpi_alias.id == kpinumberhouseholdrenewableenergy_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("differdange"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpiwastesorted_alias).\
+            join(kpiwastesorted_alias, kpi_alias.id == kpiwastesorted_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("differdange"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpico2avoided_alias).\
+            join(kpico2avoided_alias, kpi_alias.id == kpico2avoided_alias.id).\
             join(city_alias, city_alias.id == kpi_alias.city_id).\
             filter(func.lower(city_alias.name) == func.lower("differdange"))
 
@@ -2685,54 +5642,6 @@ async def get_kpis_differdange():
                             
         query = session.query(kpi_alias, kpiwasteavoided_alias).\
             join(kpiwasteavoided_alias, kpi_alias.id == kpiwasteavoided_alias.id).\
-            join(city_alias, city_alias.id == kpi_alias.city_id).\
-            filter(func.lower(city_alias.name) == func.lower("differdange"))
-
-        # Execute the query to get the results
-        results = query.all()
-        # Convert SQLAlchemy objects to dictionaries
-        for result in results:
-            result_dict = {}
-            for table in result: 
-                for key in table.__dict__.keys():
-                    if not key.startswith('_'):
-                        result_dict[key] = getattr(table, key)
-            results_list.append(result_dict)
-                            
-        query = session.query(kpi_alias, kpico2avoided_alias).\
-            join(kpico2avoided_alias, kpi_alias.id == kpico2avoided_alias.id).\
-            join(city_alias, city_alias.id == kpi_alias.city_id).\
-            filter(func.lower(city_alias.name) == func.lower("differdange"))
-
-        # Execute the query to get the results
-        results = query.all()
-        # Convert SQLAlchemy objects to dictionaries
-        for result in results:
-            result_dict = {}
-            for table in result: 
-                for key in table.__dict__.keys():
-                    if not key.startswith('_'):
-                        result_dict[key] = getattr(table, key)
-            results_list.append(result_dict)
-                            
-        query = session.query(kpi_alias, kpiwastesorted_alias).\
-            join(kpiwastesorted_alias, kpi_alias.id == kpiwastesorted_alias.id).\
-            join(city_alias, city_alias.id == kpi_alias.city_id).\
-            filter(func.lower(city_alias.name) == func.lower("differdange"))
-
-        # Execute the query to get the results
-        results = query.all()
-        # Convert SQLAlchemy objects to dictionaries
-        for result in results:
-            result_dict = {}
-            for table in result: 
-                for key in table.__dict__.keys():
-                    if not key.startswith('_'):
-                        result_dict[key] = getattr(table, key)
-            results_list.append(result_dict)
-                            
-        query = session.query(kpi_alias, kpitextilewasteperperson_alias).\
-            join(kpitextilewasteperperson_alias, kpi_alias.id == kpitextilewasteperperson_alias.id).\
             join(city_alias, city_alias.id == kpi_alias.city_id).\
             filter(func.lower(city_alias.name) == func.lower("differdange"))
 
@@ -2849,24 +5758,8 @@ async def get_visualizations_differdange():
     try:
         results_list = []
                     
-        query = session.query(visualisation_alias, table_alias).\
-            join(table_alias, visualisation_alias.id == table_alias.id).\
-            join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
-            filter(func.lower(dashboard_alias.code) == func.lower("differdange"))
-
-        # Execute the query to get the results
-        results = query.all()
-        # Convert SQLAlchemy objects to dictionaries
-        for result in results:
-            result_dict = {}
-            for table in result: 
-                for key in table.__dict__.keys():
-                    if not key.startswith('_'):
-                        result_dict[key] = getattr(table, key)
-            results_list.append(result_dict)
-                            
-        query = session.query(visualisation_alias, piechart_alias).\
-            join(piechart_alias, visualisation_alias.id == piechart_alias.id).\
+        query = session.query(visualisation_alias, linechart_alias).\
+            join(linechart_alias, visualisation_alias.id == linechart_alias.id).\
             join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
             filter(func.lower(dashboard_alias.code) == func.lower("differdange"))
 
@@ -2897,6 +5790,22 @@ async def get_visualizations_differdange():
                         result_dict[key] = getattr(table, key)
             results_list.append(result_dict)
                             
+        query = session.query(visualisation_alias, piechart_alias).\
+            join(piechart_alias, visualisation_alias.id == piechart_alias.id).\
+            join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
+            filter(func.lower(dashboard_alias.code) == func.lower("differdange"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
         query = session.query(visualisation_alias, statchart_alias).\
             join(statchart_alias, visualisation_alias.id == statchart_alias.id).\
             join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
@@ -2913,8 +5822,8 @@ async def get_visualizations_differdange():
                         result_dict[key] = getattr(table, key)
             results_list.append(result_dict)
                             
-        query = session.query(visualisation_alias, linechart_alias).\
-            join(linechart_alias, visualisation_alias.id == linechart_alias.id).\
+        query = session.query(visualisation_alias, table_alias).\
+            join(table_alias, visualisation_alias.id == table_alias.id).\
             join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
             filter(func.lower(dashboard_alias.code) == func.lower("differdange"))
 
@@ -2972,38 +5881,6 @@ async def get_kpis_sofia():
                         result_dict[key] = getattr(table, key)
             results_list.append(result_dict)
                             
-        query = session.query(kpi_alias, kpitraffic_alias).\
-            join(kpitraffic_alias, kpi_alias.id == kpitraffic_alias.id).\
-            join(city_alias, city_alias.id == kpi_alias.city_id).\
-            filter(func.lower(city_alias.name) == func.lower("sofia"))
-
-        # Execute the query to get the results
-        results = query.all()
-        # Convert SQLAlchemy objects to dictionaries
-        for result in results:
-            result_dict = {}
-            for table in result: 
-                for key in table.__dict__.keys():
-                    if not key.startswith('_'):
-                        result_dict[key] = getattr(table, key)
-            results_list.append(result_dict)
-                            
-        query = session.query(kpi_alias, kpicollectedwaste_alias).\
-            join(kpicollectedwaste_alias, kpi_alias.id == kpicollectedwaste_alias.id).\
-            join(city_alias, city_alias.id == kpi_alias.city_id).\
-            filter(func.lower(city_alias.name) == func.lower("sofia"))
-
-        # Execute the query to get the results
-        results = query.all()
-        # Convert SQLAlchemy objects to dictionaries
-        for result in results:
-            result_dict = {}
-            for table in result: 
-                for key in table.__dict__.keys():
-                    if not key.startswith('_'):
-                        result_dict[key] = getattr(table, key)
-            results_list.append(result_dict)
-                            
         query = session.query(kpi_alias, kpisecondhandcustomers_alias).\
             join(kpisecondhandcustomers_alias, kpi_alias.id == kpisecondhandcustomers_alias.id).\
             join(city_alias, city_alias.id == kpi_alias.city_id).\
@@ -3036,6 +5913,22 @@ async def get_kpis_sofia():
                         result_dict[key] = getattr(table, key)
             results_list.append(result_dict)
                             
+        query = session.query(kpi_alias, kpitraffic_alias).\
+            join(kpitraffic_alias, kpi_alias.id == kpitraffic_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("sofia"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
         query = session.query(kpi_alias, kpitotalrenewableenergy_alias).\
             join(kpitotalrenewableenergy_alias, kpi_alias.id == kpitotalrenewableenergy_alias.id).\
             join(city_alias, city_alias.id == kpi_alias.city_id).\
@@ -3052,8 +5945,72 @@ async def get_kpis_sofia():
                         result_dict[key] = getattr(table, key)
             results_list.append(result_dict)
                             
+        query = session.query(kpi_alias, kpicollectedwaste_alias).\
+            join(kpicollectedwaste_alias, kpi_alias.id == kpicollectedwaste_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("sofia"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpitextilewasteperperson_alias).\
+            join(kpitextilewasteperperson_alias, kpi_alias.id == kpitextilewasteperperson_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("sofia"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
         query = session.query(kpi_alias, kpinumberhouseholdrenewableenergy_alias).\
             join(kpinumberhouseholdrenewableenergy_alias, kpi_alias.id == kpinumberhouseholdrenewableenergy_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("sofia"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpiwastesorted_alias).\
+            join(kpiwastesorted_alias, kpi_alias.id == kpiwastesorted_alias.id).\
+            join(city_alias, city_alias.id == kpi_alias.city_id).\
+            filter(func.lower(city_alias.name) == func.lower("sofia"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
+        query = session.query(kpi_alias, kpico2avoided_alias).\
+            join(kpico2avoided_alias, kpi_alias.id == kpico2avoided_alias.id).\
             join(city_alias, city_alias.id == kpi_alias.city_id).\
             filter(func.lower(city_alias.name) == func.lower("sofia"))
 
@@ -3102,54 +6059,6 @@ async def get_kpis_sofia():
                             
         query = session.query(kpi_alias, kpiwasteavoided_alias).\
             join(kpiwasteavoided_alias, kpi_alias.id == kpiwasteavoided_alias.id).\
-            join(city_alias, city_alias.id == kpi_alias.city_id).\
-            filter(func.lower(city_alias.name) == func.lower("sofia"))
-
-        # Execute the query to get the results
-        results = query.all()
-        # Convert SQLAlchemy objects to dictionaries
-        for result in results:
-            result_dict = {}
-            for table in result: 
-                for key in table.__dict__.keys():
-                    if not key.startswith('_'):
-                        result_dict[key] = getattr(table, key)
-            results_list.append(result_dict)
-                            
-        query = session.query(kpi_alias, kpico2avoided_alias).\
-            join(kpico2avoided_alias, kpi_alias.id == kpico2avoided_alias.id).\
-            join(city_alias, city_alias.id == kpi_alias.city_id).\
-            filter(func.lower(city_alias.name) == func.lower("sofia"))
-
-        # Execute the query to get the results
-        results = query.all()
-        # Convert SQLAlchemy objects to dictionaries
-        for result in results:
-            result_dict = {}
-            for table in result: 
-                for key in table.__dict__.keys():
-                    if not key.startswith('_'):
-                        result_dict[key] = getattr(table, key)
-            results_list.append(result_dict)
-                            
-        query = session.query(kpi_alias, kpiwastesorted_alias).\
-            join(kpiwastesorted_alias, kpi_alias.id == kpiwastesorted_alias.id).\
-            join(city_alias, city_alias.id == kpi_alias.city_id).\
-            filter(func.lower(city_alias.name) == func.lower("sofia"))
-
-        # Execute the query to get the results
-        results = query.all()
-        # Convert SQLAlchemy objects to dictionaries
-        for result in results:
-            result_dict = {}
-            for table in result: 
-                for key in table.__dict__.keys():
-                    if not key.startswith('_'):
-                        result_dict[key] = getattr(table, key)
-            results_list.append(result_dict)
-                            
-        query = session.query(kpi_alias, kpitextilewasteperperson_alias).\
-            join(kpitextilewasteperperson_alias, kpi_alias.id == kpitextilewasteperperson_alias.id).\
             join(city_alias, city_alias.id == kpi_alias.city_id).\
             filter(func.lower(city_alias.name) == func.lower("sofia"))
 
@@ -3266,24 +6175,8 @@ async def get_visualizations_sofia():
     try:
         results_list = []
                     
-        query = session.query(visualisation_alias, table_alias).\
-            join(table_alias, visualisation_alias.id == table_alias.id).\
-            join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
-            filter(func.lower(dashboard_alias.code) == func.lower("sofia"))
-
-        # Execute the query to get the results
-        results = query.all()
-        # Convert SQLAlchemy objects to dictionaries
-        for result in results:
-            result_dict = {}
-            for table in result: 
-                for key in table.__dict__.keys():
-                    if not key.startswith('_'):
-                        result_dict[key] = getattr(table, key)
-            results_list.append(result_dict)
-                            
-        query = session.query(visualisation_alias, piechart_alias).\
-            join(piechart_alias, visualisation_alias.id == piechart_alias.id).\
+        query = session.query(visualisation_alias, linechart_alias).\
+            join(linechart_alias, visualisation_alias.id == linechart_alias.id).\
             join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
             filter(func.lower(dashboard_alias.code) == func.lower("sofia"))
 
@@ -3314,6 +6207,22 @@ async def get_visualizations_sofia():
                         result_dict[key] = getattr(table, key)
             results_list.append(result_dict)
                             
+        query = session.query(visualisation_alias, piechart_alias).\
+            join(piechart_alias, visualisation_alias.id == piechart_alias.id).\
+            join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
+            filter(func.lower(dashboard_alias.code) == func.lower("sofia"))
+
+        # Execute the query to get the results
+        results = query.all()
+        # Convert SQLAlchemy objects to dictionaries
+        for result in results:
+            result_dict = {}
+            for table in result: 
+                for key in table.__dict__.keys():
+                    if not key.startswith('_'):
+                        result_dict[key] = getattr(table, key)
+            results_list.append(result_dict)
+                            
         query = session.query(visualisation_alias, statchart_alias).\
             join(statchart_alias, visualisation_alias.id == statchart_alias.id).\
             join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
@@ -3330,8 +6239,8 @@ async def get_visualizations_sofia():
                         result_dict[key] = getattr(table, key)
             results_list.append(result_dict)
                             
-        query = session.query(visualisation_alias, linechart_alias).\
-            join(linechart_alias, visualisation_alias.id == linechart_alias.id).\
+        query = session.query(visualisation_alias, table_alias).\
+            join(table_alias, visualisation_alias.id == table_alias.id).\
             join(dashboard_alias, dashboard_alias.id == visualisation_alias.dashboard_id).\
             filter(func.lower(dashboard_alias.code) == func.lower("sofia"))
 
@@ -3390,6 +6299,82 @@ async def get_visualizations_sofia():
     
     
     
+    
+@app.get("/ioannina/kpi/", response_model=list[object], summary="get a KPI object", tags = ["KPI"])
+async def get_kpi_ioannina(id: int):
+    try:
+        results = session.query(KPIValueDB).join(KPIDB, KPIValueDB.kpi_id == KPIDB.id).join(
+            CityDB, KPIDB.city_id == CityDB.id).filter(func.lower(CityDB.name) == func.lower("ioannina"), KPIDB.id == id).order_by(KPIValueDB.timestamp).all()
+        results_list = []
+        for result in results:
+            res = dict()
+            attributes = inspect(result).attrs
+            for attr in attributes:
+                if attr.key.lower() == "values" or attr.key.lower() == "value":
+                    continue
+                res[attr.key] = getattr(result, attr.key)
+            results_list.append(res)
+
+        return results_list
+    except Exception as e:
+        return [{'err': e}]
+    
+@app.get("/maribor/kpi/", response_model=list[object], summary="get a KPI object", tags = ["KPI"])
+async def get_kpi_maribor(id: int):
+    try:
+        results = session.query(KPIValueDB).join(KPIDB, KPIValueDB.kpi_id == KPIDB.id).join(
+            CityDB, KPIDB.city_id == CityDB.id).filter(func.lower(CityDB.name) == func.lower("maribor"), KPIDB.id == id).order_by(KPIValueDB.timestamp).all()
+        results_list = []
+        for result in results:
+            res = dict()
+            attributes = inspect(result).attrs
+            for attr in attributes:
+                if attr.key.lower() == "values" or attr.key.lower() == "value":
+                    continue
+                res[attr.key] = getattr(result, attr.key)
+            results_list.append(res)
+
+        return results_list
+    except Exception as e:
+        return [{'err': e}]
+    
+@app.get("/grenoble/kpi/", response_model=list[object], summary="get a KPI object", tags = ["KPI"])
+async def get_kpi_grenoble(id: int):
+    try:
+        results = session.query(KPIValueDB).join(KPIDB, KPIValueDB.kpi_id == KPIDB.id).join(
+            CityDB, KPIDB.city_id == CityDB.id).filter(func.lower(CityDB.name) == func.lower("grenoble"), KPIDB.id == id).order_by(KPIValueDB.timestamp).all()
+        results_list = []
+        for result in results:
+            res = dict()
+            attributes = inspect(result).attrs
+            for attr in attributes:
+                if attr.key.lower() == "values" or attr.key.lower() == "value":
+                    continue
+                res[attr.key] = getattr(result, attr.key)
+            results_list.append(res)
+
+        return results_list
+    except Exception as e:
+        return [{'err': e}]
+    
+@app.get("/athens/kpi/", response_model=list[object], summary="get a KPI object", tags = ["KPI"])
+async def get_kpi_athens(id: int):
+    try:
+        results = session.query(KPIValueDB).join(KPIDB, KPIValueDB.kpi_id == KPIDB.id).join(
+            CityDB, KPIDB.city_id == CityDB.id).filter(func.lower(CityDB.name) == func.lower("athens"), KPIDB.id == id).order_by(KPIValueDB.timestamp).all()
+        results_list = []
+        for result in results:
+            res = dict()
+            attributes = inspect(result).attrs
+            for attr in attributes:
+                if attr.key.lower() == "values" or attr.key.lower() == "value":
+                    continue
+                res[attr.key] = getattr(result, attr.key)
+            results_list.append(res)
+
+        return results_list
+    except Exception as e:
+        return [{'err': e}]
     
 @app.get("/torino/kpi/", response_model=list[object], summary="get a KPI object", tags = ["KPI"])
 async def get_kpi_torino(id: int):

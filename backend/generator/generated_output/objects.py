@@ -55,3 +55,11 @@ differdange = City(name = "Differdange", kpiTemp_Differdange, kpiMoney_Differdan
 cascais = City(name = "Cascais", kpiCollectedWaste_Cascais, kpiCSecondHandCustomers_Cascais)
 
 torino = City(name = "Torino", kpiCollectedClothes, kpiCollectedTextileWaste, kpiCollectedTextileWasteEcoIsole, kpiInformedCitizens, kpiDiscardedWaste, kpiInvolvedCitizens, kpiInformedBusinesses, kpiInvolvedBusinesses, kpiReuseBusinesses, kpiWasteAvoided, kpiCo2Avoided, kpiWasteSorted, kpiCollectedWaste, kpiTextileWastePerPerson, kpiHouseholdInvolvedThreeBagCollection, kpiCollectedClothes2)
+
+athens = City(name = "Athens")
+
+grenoble = City(name = "Grenoble-Alpes")
+
+maribor = City(name = "Maribor")
+
+ioannina = City(name = "Ioannina")
