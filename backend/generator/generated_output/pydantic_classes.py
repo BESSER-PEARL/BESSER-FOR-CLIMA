@@ -6,69 +6,65 @@ from sqlalchemy.orm import declared_attr
 from abc import ABC, abstractmethod
 
 
-class User(ABC, BaseModel):
-    firstName: str
-    password: str
-    email: str
-    lastName: str
-    
-class CityAngel(User):
-    pass 
-    
-class KPIValue(BaseModel):
-    kpiValue: int
-    timestamp: datetime
-    currentStanding: str
-    
 class Visualisation(ABC, BaseModel):
-    title: str
-    width: int
-    chartType: str
     xposition: int
     yposition: int
-    section: str
-    i: str
+    width: int
     height: int
-    
-class PieChart(Visualisation):
-    pass 
+    chartType: str
+    title: str
+    i: str
+    section: str
     
 class Table(Visualisation):
     pass 
     
-class LineChart(Visualisation):
-    ytitle: str
-    color: str
-    target: int
-    xtitle: str
+class PieChart(Visualisation):
+    pass 
     
-class TableColumn(BaseModel):
-    name: str
+class BarChart(Visualisation):
+    pass 
     
 class StatChart(Visualisation):
     unit: str
     target: int
     
-class Dashboard(BaseModel):
-    code: str
+class LineChart(Visualisation):
+    target: int
+    ytitle: str
+    color: str
+    xtitle: str
+    
+class TableColumn(BaseModel):
+    name: str
     
 class Map(Visualisation):
     pass 
     
+class User(BaseModel):
+    email: str
+    firstName: str
+    password: str
+    lastName: str
+    type_spec: str
+    
 class Admin(User):
+    pass 
+    
+class CityUser(User):
+    pass 
+    
+class CityAngel(User):
+    pass 
+    
+class SolutionProvider(User):
     pass 
     
 class Citizen(User):
     pass 
     
-class City(BaseModel):
-    name: str
-    
-class BarChart(Visualisation):
-    pass 
-    
-class CityUser(User):
-    pass 
+class Dashboard(BaseModel):
+    code: str
     
 class MapData(ABC, BaseModel):
     title: str
@@ -77,34 +73,49 @@ class GeoJson(MapData):
     data: str
     
 class WMS(MapData):
-    name: str
     url: str
+    name: str
+    
+class City(BaseModel):
+    name: str
     
 class KPI(ABC, BaseModel):
+    id_kpi: str
+    name: str
+    category: str
     description: str
     provider: str
-    name: str
-    id_kpi: str
     calculationFrequency: str
     unitText: str
-    category: str
+    type_spec: str = "KPI"
     
-class KPIWasteSorted(KPI):
+class KPIValue(BaseModel):
+    kpiValue: int
+    timestamp: datetime
+    currentStanding: str
+    
+class KPITemp(KPI):
+    threshold: int
+    
+class KPITraffic(KPI):
+    target: int
+    
+class KPICollectedWaste(KPI):
     target: int
     
 class KPISecondHandCustomers(KPI):
     target: int
     
-class KPITraffic(KPI):
+class KPIMoney(KPI):
     target: int
     
-class KPICo2Avoided(KPI):
+class KPITotalRenewableEnergy(KPI):
     target: int
-    
-class KPITemp(KPI):
-    threshold: int
     
 class KPINumberHouseholdRenewableEnergy(KPI):
+    target: int
+    
+class KPIPeakSolarEnergy(KPI):
     target: int
     
 class KPIParticipants(KPI):
@@ -113,21 +124,11 @@ class KPIParticipants(KPI):
 class KPIWasteAvoided(KPI):
     target: int
     
-class KPITotalRenewableEnergy(KPI):
+class KPICo2Avoided(KPI):
     target: int
     
-class KPICollectedWaste(KPI):
+class KPIWasteSorted(KPI):
     target: int
-    
-class SolutionProvider(User):
-    pass 
     
 class KPITextileWastePerPerson(KPI):
-    pass 
-    
-class KPIMoney(KPI):
-    target: int
-    
-class KPIPeakSolarEnergy(KPI):
-    target: int
-    
+    pass

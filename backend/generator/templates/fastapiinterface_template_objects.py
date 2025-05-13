@@ -331,7 +331,7 @@ async def create_kpi(
     - provider (str, required): Organization that provides the data.
     - calculationFrequency (str, required): How often data is calculated (e.g. Monthly, Yearly).
     - unitText (str, required): Unit of measurement (e.g. Kg, Tons).
-    - type_spec (str, optional): Optional, default to kpimoney with target not used. Defines the type of KPI model to create. Defaults to 'kpitemp'.
+    - type_spec (str, optional): Optional, default to KPI with target not used. Defines the type of KPI model to create. Defaults to 'kpitemp'.
 
 
 
@@ -369,10 +369,9 @@ async def create_kpi(
     
     # Determine the KPI type and create the appropriate DB object
     try:
-        if kpi.type_spec == "kpi":
+        kpi_type = getattr(kpi, "type_spec", "kpimoney").lower() //TODO: Create a KPI with target
+        if kpi_type == "KPI":
             kpi_type = "kpimoney"
-        else:
-            kpi_type = kpi.type_spec if hasattr(kpi, "type_spec") else "kpimoney"
         kpi_db = None
         
         if kpi_type == "kpitemp":
