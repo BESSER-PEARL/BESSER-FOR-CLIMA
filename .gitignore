@@ -7,7 +7,4 @@ env
 generator/generated_output
 node_modules
 climaborough-data-platform-frontend/src/views/HomeView copy.vue
-backend/Docker/docker-compose copy 2.yaml
-backend/Docker/docker-compose localdb.yaml
-climaborough-data-platform-frontend/src/views/envpython.ps1
 backend/Docker/
