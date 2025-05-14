@@ -38,7 +38,7 @@ const login = async () => {
             const data = await response.json()
             console.log("this is the data", data)
             if (data && 'access_token' in data) {
-                window.alert("Successful login")
+                // window.alert("Successful login")
                 localStorage.setItem("login", data["firstName"])
                 localStorage.setItem("loginToken", data["access_token"])
                 localStorage.setItem("userType", data["type_spec"])

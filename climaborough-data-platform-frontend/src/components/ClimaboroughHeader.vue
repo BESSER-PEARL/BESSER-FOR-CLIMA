@@ -127,7 +127,7 @@ const login = async () => {
       const data = await response.json();
       if (data) {
         if ('access_token' in data) {
-          window.alert("Successful login");
+          // window.alert("Successful login");
 
           // Stocker les informations de l'utilisateur dans le localStorage
           localStorage.setItem("login", data["firstName"]);
@@ -284,9 +284,9 @@ const toggleMobileMenu = () => {
 
         <ul class="nav-routes" :class="{ 'mobile-menu-active': isMobileMenuOpen }">
           <RouterLink @click="closeMobileMenu" to="/">{{ $t('header.home') }}</RouterLink>
-          <RouterLink @click="closeMobileMenu" to="/demo">DEMO Dashboard</RouterLink>
+          <!-- <RouterLink @click="closeMobileMenu" to="/demo">DEMO Dashboard</RouterLink> -->
           <RouterLink @click="closeMobileMenu" to="/projects">Dashboard</RouterLink>
-        <!--  <RouterLink to="/bot">ClimaSolutions Bot</RouterLink>-->
+          <RouterLink to="/bot">ClimaBot</RouterLink>
           <RouterLink @click="closeMobileMenu" to="/about">{{ $t('header.About') }}</RouterLink>
           <div class="user" @click="toggleLogin">
             <div v-if=!loggedIn class="unauthenticated">
