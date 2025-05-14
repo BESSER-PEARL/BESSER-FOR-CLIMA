@@ -38,12 +38,33 @@ async function getItems() {
   try {
     const response = await fetch(`http://localhost:8000/${props.city.toLowerCase()}/mapdata/`);
     const data = await response.json();
-    layers.value = data.map(item => ({
-      ...item,
-      label: item.title,
-      attribution: "Attribution for Layer 1",
-      legend: ""
-    }));
+    
+    // Create a Set to track unique titles
+    const uniqueTitles = new Set();
+    
+    // Filter out layers without names and prevent duplicates
+    layers.value = data
+      .filter(item => {
+        // Skip items without a title or with empty title
+        if (!item.title || item.title.trim() === '') {
+          return false;
+        }
+        
+        // Skip duplicates by checking if we've seen this title before
+        if (uniqueTitles.has(item.title)) {
+          return false;
+        }
+        
+        // Add this title to our tracking Set and keep the item
+        uniqueTitles.add(item.title);
+        return true;
+      })
+      .map(item => ({
+        ...item,
+        label: item.title,
+        attribution: "Attribution for Layer 1",
+        legend: ""
+      }));
   } catch (error) {
     console.error("Error fetching map data:", error);
   }
