@@ -720,7 +720,7 @@ async def delete_visualizations_{{object.className.name}}(ids: List[int], depend
         rows_to_delete = session.query(VisualisationDB).filter(~VisualisationDB.id.in_(ids)).all()
         for row in rows_to_delete:
             
-            if (row.consistsOf.code == "{{object.className.name}}"):
+            if row.consistsOf and row.consistsOf.code == "{{object.className.name}}":
                 session.delete(row)    
         # Delete the row
         session.commit()

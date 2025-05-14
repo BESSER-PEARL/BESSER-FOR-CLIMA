@@ -25,6 +25,7 @@ import { throttle } from '@vexip-ui/utils'
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { to } from 'plotly.js-dist';
+import DashboardChat from '../components/DashboardChat.vue';
 
 const loggedIn = ref(false)
 const userType = localStorage.getItem("userType");
@@ -209,23 +210,24 @@ const deleteVisualisations = (idList) => {
             },
             body: JSON.stringify(idList)
         }).then(response => {
-            edit()
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
             return response.json();
         })
-            .then(data => {
-                console.log('Success:', data);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-
+        .then(data => {
+            console.log('Success:', data);
+            // Only refresh visualizations after successful delete
+            getVisualisations();
+            // Now toggle edit mode if needed
+            edit();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
     } catch (error) {
-        window.alert(error)
+        window.alert(error);
     }
-    getVisualisations()
 }
 
 async function storeVisualisations() {
@@ -806,6 +808,12 @@ const exportToPDF = async () => {
     pdf.save(`${city.value}_dashboard_${new Date().toISOString().split('T')[0]}.pdf`);
 };
 
+const chatMode = ref(false);
+
+const toggleChat = () => {
+  chatMode.value = !chatMode.value;
+};
+
 </script>
 
 <template>
@@ -870,6 +878,15 @@ const exportToPDF = async () => {
                         <v-btn size="x-large" @click="organizeVisualisations(true)" color="#0177a9" class="button">
                             <Icon icon="material-symbols:border-all" width="30" height="30" style="color: #FFFFFF" />
                             Organise and Resize
+                        </v-btn>
+                        <v-btn 
+                          size="x-large" 
+                          @click="toggleChat" 
+                          color="climaboroughBlue" 
+                          class="button"
+                        >
+                          <Icon icon="material-symbols:chat" width="30" height="30" style="color: #FFFFFF; margin-right: 5px;" />
+                          Chat Assistant
                         </v-btn>
                     </div>
                 </div>
@@ -1058,6 +1075,18 @@ const exportToPDF = async () => {
         <div class="login" style="padding: 40px;">
             <LoginForm />
         </div>
+    </div>
+    <div v-if="chatMode" class="chat-popup">
+      <div class="chat-popup-inner">
+        <div class="chat-header">
+          <h3>Dashboard Assistant</h3>
+          <v-btn icon="mdi-close" size="small" @click="toggleChat" />
+        </div>
+        <DashboardChat 
+          :city="city" 
+          @createVisualisation="createVisualisation"
+        />
+      </div>
     </div>
 </template>
 
@@ -1276,5 +1305,51 @@ const exportToPDF = async () => {
         gap: 8px;
         align-items: center;
     }
+}
+
+.chat-popup {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 400px;
+  height: 600px;
+  z-index: 9999;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-popup-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  
+  :deep(.chat-container) {
+    height: calc(100% - 50px);
+    overflow: hidden;
+  }
+  
+  :deep(.messages) {
+    height: calc(100% - 140px);
+    overflow-y: auto;
+  }
+}
+
+.chat-header {
+  height: 50px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  border-bottom: 1px solid #eee;
+  background: #f8f9fa;
+  
+  h3 {
+    margin: 0;
+    color: #333;
+    font-size: 16px;
+  }
 }
 </style>

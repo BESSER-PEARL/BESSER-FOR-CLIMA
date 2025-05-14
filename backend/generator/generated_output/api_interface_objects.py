@@ -1639,7 +1639,7 @@ async def delete_visualizations_ioannina(ids: List[int], dependencies=[Depends(J
         rows_to_delete = session.query(VisualisationDB).filter(~VisualisationDB.id.in_(ids)).all()
         for row in rows_to_delete:
             
-            if (row.consistsOf.code == "ioannina"):
+            if row.consistsOf and row.consistsOf.code == "ioannina":
                 session.delete(row)    
         # Delete the row
         session.commit()
@@ -1863,7 +1863,7 @@ async def delete_visualizations_maribor(ids: List[int], dependencies=[Depends(JW
         rows_to_delete = session.query(VisualisationDB).filter(~VisualisationDB.id.in_(ids)).all()
         for row in rows_to_delete:
             
-            if (row.consistsOf.code == "maribor"):
+            if row.consistsOf and row.consistsOf.code == "maribor":
                 session.delete(row)    
         # Delete the row
         session.commit()
@@ -2087,7 +2087,7 @@ async def delete_visualizations_grenoble(ids: List[int], dependencies=[Depends(J
         rows_to_delete = session.query(VisualisationDB).filter(~VisualisationDB.id.in_(ids)).all()
         for row in rows_to_delete:
             
-            if (row.consistsOf.code == "grenoble"):
+            if row.consistsOf and row.consistsOf.code == "grenoble":
                 session.delete(row)    
         # Delete the row
         session.commit()
@@ -2311,7 +2311,7 @@ async def delete_visualizations_athens(ids: List[int], dependencies=[Depends(JWT
         rows_to_delete = session.query(VisualisationDB).filter(~VisualisationDB.id.in_(ids)).all()
         for row in rows_to_delete:
             
-            if (row.consistsOf.code == "athens"):
+            if row.consistsOf and row.consistsOf.code == "athens":
                 session.delete(row)    
         # Delete the row
         session.commit()
@@ -2535,7 +2535,7 @@ async def delete_visualizations_torino(ids: List[int], dependencies=[Depends(JWT
         rows_to_delete = session.query(VisualisationDB).filter(~VisualisationDB.id.in_(ids)).all()
         for row in rows_to_delete:
             
-            if (row.consistsOf.code == "torino"):
+            if row.consistsOf and row.consistsOf.code == "torino":
                 session.delete(row)    
         # Delete the row
         session.commit()
@@ -2759,7 +2759,7 @@ async def delete_visualizations_cascais(ids: List[int], dependencies=[Depends(JW
         rows_to_delete = session.query(VisualisationDB).filter(~VisualisationDB.id.in_(ids)).all()
         for row in rows_to_delete:
             
-            if (row.consistsOf.code == "cascais"):
+            if row.consistsOf and row.consistsOf.code == "cascais":
                 session.delete(row)    
         # Delete the row
         session.commit()
@@ -2982,8 +2982,7 @@ async def delete_visualizations_differdange(ids: List[int], dependencies=[Depend
         # Delete rows using ORM
         rows_to_delete = session.query(VisualisationDB).filter(~VisualisationDB.id.in_(ids)).all()
         for row in rows_to_delete:
-            
-            if (row.consistsOf.code == "differdange"):
+            if row.consistsOf and row.consistsOf.code == "differdange":
                 session.delete(row)    
         # Delete the row
         session.commit()
@@ -3207,7 +3206,7 @@ async def delete_visualizations_sofia(ids: List[int], dependencies=[Depends(JWTB
         rows_to_delete = session.query(VisualisationDB).filter(~VisualisationDB.id.in_(ids)).all()
         for row in rows_to_delete:
             
-            if (row.consistsOf.code == "sofia"):
+            if row.consistsOf and row.consistsOf.code == "sofia":
                 session.delete(row)    
         # Delete the row
         session.commit()
