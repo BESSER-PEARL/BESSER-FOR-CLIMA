@@ -59,13 +59,34 @@ const onMessageReceived = (message) => {
     metadata_response = metadata_response + "Document: <a href='/pdfs/" + value["metadata"]["source"] + "'>" + value["metadata"]["source"] + "</a> on page " + value["metadata"]["page"] + " <br>"
   })
 
+  // Check if bot_response is longer than the default greeting
+  const defaultGreeting = "Hello! How can I assist you today?";
+  let finalMessage;
+  
+  if (bot_response.length > defaultGreeting.length) {
+    finalMessage = `<strong>Bot:</strong> ${bot_response} <br> ${metadata_response}`;
+  } else {
+    finalMessage = `<strong>Bot:</strong> ${bot_response}`;
+  }
 
-  messages.value.push({ "message": `<strong>Bot:</strong> ${bot_response} <br> ${metadata_response}`, "bot": true });
+  messages.value.push({ "message": finalMessage, "bot": true });
 };
 
 onMounted(() => {
   websocketService = new WebSocketService('wss://climaborough-bot.iworker1.private.list.lu');
+  //websocketService = new WebSocketService('ws://localhost:8765');
   websocketService.setOnMessageCallback(onMessageReceived);
+    // Set a small delay to ensure the websocket connection is established
+  setTimeout(() => {
+    // Send an initial "rag" command to activate RAG mode
+    websocketService.send("rag");
+    
+    // Add a welcome message
+    messages.value.push({ 
+      "message": "<strong>System:</strong> RAG mode activated. You can now ask questions about climate solutions.", 
+      "bot": true 
+    });
+  }, 1000);
 });
 </script>
 
