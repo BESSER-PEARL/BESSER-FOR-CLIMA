@@ -4,11 +4,11 @@ docs/_build/
 *.pyc
 *.pyo
 *.bat
-env
+*.env
 **/besser_venv/
 
 # Backend
-backend/generator/generated_output
+backend/generator/generated_output/auth
 backend/Docker/
 backend/docs/_build/
 

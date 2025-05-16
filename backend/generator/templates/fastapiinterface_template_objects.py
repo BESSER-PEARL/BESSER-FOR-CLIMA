@@ -22,10 +22,7 @@ from geoalchemy2.shape import from_shape
 from shapely.geometry import shape
 
 # Authentication related imports
-from passlib.context import CryptContext
-from auth.auth_handler import sign_jwt, refresh_jwt
-from auth.auth_model import UserSchema, UserLoginSchema, TokenSchema
-from auth.auth_bearer import JWTBearer
+from auth.auth_bearer import KeycloakBearer
 
 # Local application imports
 {% set ns = namespace(first_object_added=false) -%}
@@ -36,11 +33,6 @@ from sql_alchemy import {% for object in classes %}{% if not ns.first_object_add
 from sql_alchemy import KPI as KPIDB
 
 import logging
-
-from passlib.context import CryptContext
-
-# Password hashing context
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 logger = logging.getLogger('uvicorn.error')
 logger.setLevel(logging.DEBUG)
@@ -71,136 +63,12 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base.metadata.create_all(bind=engine)
 
-
 session = SessionLocal()
 
-admin = (
-    session.query(UserDB)
-    .filter_by(email="admin@gmail.com")
-    .first()
-)
-if admin is None:
-    admin = AdminDB(
-        email="admin@gmail.com",
-        password=pwd_context.hash("adminpw"),
-        firstName="admin",
-        lastName="admin",
-    )
-try:
-    session.add(admin)
-    session.commit()
-except IntegrityError:
-    session.rollback()
-    print("error integrity")
-except Exception as e:
-    session.rollback()
-    print(e)
 
 
-@app.post("/user/signup", dependencies=[Depends(JWTBearer())], tags=["user"])
-async def create_user(user: User = Body(...), city_id: Optional[int] = None):
-    # Check if user already exists
-    user_db = session.query(UserDB).filter_by(email=user.email).first()
-    if user_db is not None:
-        return {"error": "User with email address '" + user.email + "' already registered!"}
-    
-    # Hash password
-    hashed_password = pwd_context.hash(user.password)
-    
-    # Create appropriate user type based on discriminator
-    user_types = {
-        "admin": AdminDB,
-        "cityuser": CityUserDB,
-        "cityangel": CityAngelDB,
-        "solutionprovider": SolutionProviderDB,
-        "citizen": CitizenDB
-    }
-    
-    UserClass = user_types.get(user.type_spec)
-    if not UserClass:
-        return {"error": f"Invalid user type: {user.type_spec}"}
-    
-    # For cityuser, verify city exists
-    if user.type_spec == "cityuser":
-        if not city_id:
-            return {"error": "City ID is required for city users"}
-        city = session.query(CityDB).filter_by(id=city_id).first()
-        if not city:
-            return {"error": "Invalid city ID"}
-            
-    # Create user object
-    statement = UserClass(
-        email=user.email,
-        password=hashed_password,
-        firstName=user.firstName,
-        lastName=user.lastName
-    )
-    
-    # Set city for cityuser
-    if user.type_spec == "cityuser":
-        statement.city_id = city_id
-        
-    try:
-        session.add(statement)
-        session.commit()
-        return sign_jwt(user.email)
-    except IntegrityError:
-        session.rollback()
-        return {"error": "Integrity error"}
-    except Exception as e:
-        session.rollback()
-        return {"error": f"Exception: {str(e)}"}
-
-@app.post("/user/refresh", dependencies=[Depends(JWTBearer())], tags=["user"])
-async def refresh_token(token: TokenSchema = Body(...)):
-    try:
-        return refresh_jwt(token.access_token)
-    except Exception as e:
-        print(e)
-        print("added user")
-        return {"error": "Exception " + e}
-
-def check_user_api(data: UserLoginSchema):
-    try:
-        user = session.query(UserDB).filter_by(email=data.email).first()
-        if user is None:
-            return None
-        if pwd_context.verify(data.password, user.password):
-            return user
-        return None
-    except Exception as e:
-        session.rollback()
-        return {"error": "Exception " + e}
-
-
-@app.post("/user/login", response_model=dict, tags=["user"])
-async def user_login(user: UserLoginSchema = Body(...)):
-    session.rollback()
-    user_db = check_user_api(user)
-    if user_db:
-        token_response = sign_jwt(user.email)
-        token_response["firstName"] = user_db.firstName
-        token_response["type_spec"] = user_db.type_spec
-
-        if user_db.type_spec == "cityuser":
-            if user_db.city_id:
-                city_record = session.query(CityDB).filter_by(id=user_db.city_id).first()
-                if city_record:
-                    city_name = city_record.name
-                    token_response["city"] = user_db.city_id
-                    token_response["city_name"] = city_name
-                    print(f"User city name: {city_name}")
-
-        return token_response
-    
-    return {"error": "Wrong login details!"}
-    
-    
 
 {% for object in objects -%}
-
-
-
 
 {{ object.className.name }} = session.query({{ object.name }}DB).filter_by(  
     {%- for attribute in object.attributes -%}
@@ -305,7 +173,7 @@ except:
 
 # KPI
 {% if city_object %}
-@app.post("/city/{city_name}/kpi/create", dependencies=[Depends(JWTBearer())], response_model=int, summary="Create a new KPI",description="", tags=["KPI"])
+@app.post("/city/{city_name}/kpi/create", dependencies=[Depends(KeycloakBearer())], response_model=int, summary="Create a new KPI",description="", tags=["KPI"])
 async def create_kpi(
     city_name: str,
     kpi: KPI = Body(...),
@@ -544,7 +412,7 @@ async def create_kpi(
         session.rollback()
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
-@app.post("/city/{city_name}/kpi/{kpi_id}", dependencies=[Depends(JWTBearer())], response_model=List[KPIValue], summary="Add KPI values", tags=["KPI"])
+@app.post("/city/{city_name}/kpi/{kpi_id}", dependencies=[Depends(KeycloakBearer())], response_model=List[KPIValue], summary="Add KPI values", tags=["KPI"])
 async def add_kpi_values(
     city_name: str,
     kpi_id: int,
@@ -680,7 +548,7 @@ async def get_kpis(city_name: str):
         {% for class in classes -%}
             {% for parent in class.parents() -%}
                 {% if parent.name == "Visualisation" %}            
-@app.post("/{{object.className.name}}/visualization/{{class.name}}/{id}", dependencies=[Depends(JWTBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
+@app.post("/{{object.className.name}}/visualization/{{class.name}}/{id}", dependencies=[Depends(KeycloakBearer())], response_model=int, summary="Add a Chart object", tags = ["Visualisation"])
 async def add_or_update_{{class.name}}_{{object.className.name}}(id: int, chart: {{class.name}}= Body(..., description="Chart object to add")):
     db_entry = {{class.name}}DB(**chart.dict())
     existing_chart = session.query({{class.name}}DB).filter({{class.name}}DB.i == db_entry.i).first()
@@ -713,7 +581,7 @@ async def add_or_update_{{class.name}}_{{object.className.name}}(id: int, chart:
         {%- endfor %}
         
 @app.delete("/{{object.className.name}}/visualizations")
-async def delete_visualizations_{{object.className.name}}(ids: List[int], dependencies=[Depends(JWTBearer())], tags = ["Visualisation"]):
+async def delete_visualizations_{{object.className.name}}(ids: List[int], dependencies=[Depends(KeycloakBearer())], tags = ["Visualisation"]):
     # Create a session
     try:
         # Delete rows using ORM
@@ -769,7 +637,7 @@ async def get_kpis_{{object.className.name}}():
         return [e]
     
 @app.post("/{{object.className.name}}/geojson/")
-async def upload_geojson_{{object.className.name}}(title: str = Query(..., description="Title of the GeoJSON data"), dependencies=[Depends(JWTBearer())], geojson_data: dict = Body(..., description="GeoJSON data")):
+async def upload_geojson_{{object.className.name}}(title: str = Query(..., description="Title of the GeoJSON data"), dependencies=[Depends(KeycloakBearer())], geojson_data: dict = Body(..., description="GeoJSON data")):
     try:
         # Create a new GeoJson entry
         new_data = GeoJsonDB(
@@ -803,7 +671,7 @@ async def get_geojson_for_{{object.className.name}}():
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
     
 @app.post("/{{object.className.name}}/wms/")
-async def upload_wms_{{object.className.name}}(title: str = Query(..., description="Title of the WMS data"), url: str = Query(..., description="URL of the WMS data"), dependencies=[Depends(JWTBearer())], name: str = Query(..., description="Name of the wms artifact")):
+async def upload_wms_{{object.className.name}}(title: str = Query(..., description="Title of the WMS data"), url: str = Query(..., description="URL of the WMS data"), dependencies=[Depends(KeycloakBearer())], name: str = Query(..., description="Name of the wms artifact")):
     try:
         
         # Create a new GeoJson entry
@@ -917,8 +785,8 @@ async def get_kpi_{{object.className.name}}(id: int):
 {%- endfor %}
 
 
-@app.delete("/", dependencies=[Depends(JWTBearer())],  summary="Delete everything from the database, please never use this")
-async def delete_all(dependencies=[Depends(JWTBearer())]):
+@app.delete("/", dependencies=[Depends(KeycloakBearer())],  summary="Delete everything from the database, please never use this")
+async def delete_all(dependencies=[Depends(KeycloakBearer())]):
     # Create a session
     from sqlalchemy import MetaData
     # Step 2: Reflect the existing tables from the database into SQLAlchemy metadata

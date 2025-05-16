@@ -8,5 +8,6 @@ shapely
 PyJWT==2.8.0
 python-decouple
 python-multipart
-passlib
 besser
+python-keycloak
+python-dotenv==1.0.0 

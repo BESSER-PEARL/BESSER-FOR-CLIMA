@@ -32,9 +32,15 @@
   "projectview": {
     "title":"Climaborough Dashboards", 
     "hub1": "Climaborough Hub 1 - From Isolated Energy and Mobility to Integrated Services",
-    "hub2": "Climaborough Hub 2 - From Waste to Circularity"
+    "hub2": "Climaborough Hub 2 - From Waste to Circularity",
+    "authentication_required": "Authentication Required"
   },
-  "dashboard": {},
+  "dashboard": {
+    "authentication_required": "Authentication Required"
+  },
+  "admin": {
+    "authentication_required": "Admin Authentication Required"
+  },
   "denied_header": "Access Denied",
   "denied_subheader": "You need to login if you want to access the Climaborough dashboards.",
   "login":{

@@ -32,7 +32,8 @@ const router = createRouter({
       // route level code-splitting
       // this generates a separate chunk (About.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
-      component: () => import('../views/Projects.vue')
+      component: () => import('../views/Projects.vue'),
+      meta: { requiresAuth: true }
     },
     {
       path: '/Dashboard/:city',
@@ -40,7 +41,8 @@ const router = createRouter({
       // route level code-splitting
       // this generates a separate chunk (About.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
-      component: () => import('../views/Dashboard.vue')
+      component: () => import('../views/Dashboard.vue'),
+      meta: { requiresAuth: true }
     },
     {
       path: '/tos',
@@ -54,9 +56,15 @@ const router = createRouter({
       component: () => import('../views/DemoDashboard.vue')
     },
     {
+      path: '/callback',
+      name: 'Callback',
+      component: () => import('../components/Callback.vue')
+    },
+    {
       path: '/admin',
       name: 'admin',
       component: AdminDashboard,
+      meta: { requiresAuth: true },
       beforeEnter: (to, from, next) => {
         const userType = localStorage.getItem('userType');
         if (userType === 'admin') {
@@ -68,5 +76,17 @@ const router = createRouter({
     }
   ]
 })
+
+// Navigation guard
+router.beforeEach((to, from, next) => {
+  const isAuthenticated = !!localStorage.getItem('keycloak_token');
+  
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    // Allow going to the page - the component will display the login form itself
+    next();
+  } else {
+    next();
+  }
+});
 
 export default router
