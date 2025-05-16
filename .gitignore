@@ -3,8 +3,19 @@ docs/_build/
 
 *.pyc
 *.pyo
+*.bat
 env
-generator/generated_output
-node_modules
-climaborough-data-platform-frontend/src/views/HomeView copy.vue
+**/besser_venv/
+
+# Backend
+backend/generator/generated_output
 backend/Docker/
+backend/docs/_build/
+
+# Frontend
+**/node_modules/
+climaborough-data-platform-frontend/src/views/HomeView copy.vue
+
+# Clima Solutions Bot
+climasolutionsbot/config.ini
+*.log
