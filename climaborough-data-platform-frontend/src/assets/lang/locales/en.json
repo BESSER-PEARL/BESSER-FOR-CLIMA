@@ -43,12 +43,14 @@
   },
   "denied_header": "Access Denied",
   "denied_subheader": "You need to login if you want to access the Climaborough dashboards.",
-  "login":{
+  "login": {
+    "title": "Sign In",
+    "sign_in": "Sign In with Keycloak",
+    "cancel": "Cancel",
     "login": "Log in to see more",
-    "email":"Email Address",
+    "email": "Email Address",
     "email_message": "Please enter an email address!",
     "password": "Password",
-    "submit": "Submit",
-    "cancel": "Cancel"
+    "submit": "Submit"
   } 
 }

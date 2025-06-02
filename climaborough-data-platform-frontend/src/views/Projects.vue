@@ -1,25 +1,24 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
-import LoginForm from '../components/forms/LoginForm.vue'
+import { useRouter } from 'vue-router';
+import AuthRequired from '../components/AuthRequired.vue';
+import { authService } from '../services/authService';
 
-const loggedIn = ref(false)
-const userCity = ref(localStorage.getItem("userCityName") || "")
-console.log("User City:", userCity.value)
-console.log("User Type:", localStorage.getItem("userType"))
+const router = useRouter();
+
+const userInfo = computed(() => authService.getUserInfo());
+const cityName = computed(() => authService.getUserCity());
+
+// // Optional: print user info for debugging
+// if (userInfo.value) {
+//   console.log('Decoded Keycloak user info:', userInfo.value);
+// }
 
 const isCityUser = computed(() => {
-  const matches = projects.some(project => project.title === userCity.value)
-  console.log("Matches any project:", matches)
-  return localStorage.getItem("userType") === "cityuser" && matches
-})
-
-const checkIfLogged = () => {
-  var userName = localStorage.getItem("login")
-  if (userName) {
-    loggedIn.value = true
-  }
-}
-checkIfLogged()
+  if (!userInfo.value) return false;
+  const isCityGroup = userInfo.value.group_membership?.some(group => group.startsWith('/City/'));
+  return isCityGroup && projects.some(project => project.title === cityName.value);
+});
 
 const isMobile = ref(false)
 
@@ -44,10 +43,18 @@ onMounted(() => {
   checkMobile()
   window.addEventListener('resize', checkMobile)
   updateCSSVariable()
+  
+  // Listen for authentication changes
+  window.addEventListener('keycloak-login-success', () => {
+    if (authService.isAuthenticated() && isCityUser.value) {
+      console.log('City user logged in:', cityName.value);
+    }
+  });
 });
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateCSSVariable);
+  window.removeEventListener('keycloak-login-success', () => {});
 });
 
 const projects = [
@@ -63,110 +70,105 @@ const projects = [
 </script>
 
 <template>
-  <div v-if="loggedIn" class="body" :class="{ 'mobile': isMobile }">
-    <a class="main-title">{{ $t('projectview.title') }}</a>
-    
-    <!-- Affichage pour les comptes ville -->
-    <template v-if="isCityUser">
-      <div class="hub">
-        <h1>My Project</h1>
-        <div class="icon-container">
-          <div v-for="project in projects" :key="project.id">
-            <div v-if="project.title === userCity" class="icon">
-              <RouterLink :to='"Dashboard/" + project.title'>
-                <div>
-                  <img class="imagebutton" :src="project.image"><br>
+  <AuthRequired>
+    <div class="body" :class="{ 'mobile': isMobile }">
+      <a class="main-title">{{ $t('projectview.title') }}</a>
+      
+      <!-- Affichage pour les comptes ville -->
+      <template v-if="isCityUser">
+        <div class="hub">
+          <h1>My Project</h1>
+          <div class="icon-container">
+            <div v-for="project in projects" :key="project.id">
+              <div v-if="project.title === cityName" class="icon">
+                <RouterLink :to='"Dashboard/" + project.title'>
+                  <div>
+                    <img class="imagebutton" :src="project.image"><br>
+                  </div>
+                </RouterLink>
+                <div class="info">
+                  <img :src="project.imageball">
+                  {{ project.title }}
                 </div>
-              </RouterLink>
-              <div class="info">
-                <img :src="project.imageball">
-                {{ project.title }}
-              </div>
-              <div class="grey">
-                {{ project.type }}
+                <div class="grey">
+                  {{ project.type }}
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="hub">
-        <h1 style="margin-left: 80px; margin-top: 30px">Other Projects</h1>
-        <div class="icon-container">
-          <div v-for="project in projects" :key="project.id">
-            <div v-if="project.title !== userCity" class="icon">
-              <RouterLink :to='"Dashboard/" + project.title'>
-                <div>
-                  <img class="imagebutton" :src="project.image"><br>
+        <div class="hub">
+          <h1 style="margin-left: 80px; margin-top: 30px">Other Projects</h1>
+          <div class="icon-container">
+            <div v-for="project in projects" :key="project.id">
+              <div v-if="project.title !== cityName" class="icon">
+                <RouterLink :to='"Dashboard/" + project.title'>
+                  <div>
+                    <img class="imagebutton" :src="project.image"><br>
+                  </div>
+                </RouterLink>
+                <div class="info">
+                  <img :src="project.imageball">
+                  {{ project.title }}
                 </div>
-              </RouterLink>
-              <div class="info">
-                <img :src="project.imageball">
-                {{ project.title }}
-              </div>
-              <div class="grey">
-                {{ project.type }}
+                <div class="grey">
+                  {{ project.type }}
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </template>
+      </template>
 
-    <!-- Affichage original pour les autres types de comptes -->
-    <template v-else>
-      <div class="hub">
-        <h1 style="margin-left: 80px; margin-top: 30px">{{ $t('projectview.hub1') }}</h1>
-        <div class="icon-container">
-          <div v-for="project in projects" :key="project.id">
-            <div v-if="project.hub == 1" class="icon">
-              <RouterLink :to='"Dashboard/" + project.title'>
-                <div>
-                  <img class="imagebutton" :src="project.image"><br>
+      <!-- Affichage original pour les autres types de comptes -->
+      <template v-else>
+        <div class="hub">
+          <h1 style="margin-left: 80px; margin-top: 30px">{{ $t('projectview.hub1') }}</h1>
+          <div class="icon-container">
+            <div v-for="project in projects" :key="project.id">
+              <div v-if="project.hub == 1" class="icon">
+                <RouterLink :to='"Dashboard/" + project.title'>
+                  <div>
+                    <img class="imagebutton" :src="project.image"><br>
+                  </div>
+                </RouterLink>
+                <div class="info">
+                  <img :src="project.imageball">
+                  {{ project.title }}
                 </div>
-              </RouterLink>
-              <div class="info">
-                <img :src="project.imageball">
-                {{ project.title }}
-              </div>
-              <div class="grey">
-                {{ project.type }}
+                <div class="grey">
+                  {{ project.type }}
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="hub">
-        <h1 style="margin-left: 80px; margin-top: 30px">{{ $t('projectview.hub2') }}</h1>
-        <div class="icon-container">
-          <div v-for="project in projects" :key="project.id">
-            <div v-if="project.hub == 2" class="icon">
-              <RouterLink :to='"Dashboard/" + project.title'>
-                <div>
-                  <img class="imagebutton" :src="project.image"><br>
+        <div class="hub">
+          <h1 style="margin-left: 80px; margin-top: 30px">{{ $t('projectview.hub2') }}</h1>
+          <div class="icon-container">
+            <div v-for="project in projects" :key="project.id">
+              <div v-if="project.hub == 2" class="icon">
+                <RouterLink :to='"Dashboard/" + project.title'>
+                  <div>
+                    <img class="imagebutton" :src="project.image"><br>
+                  </div>
+                </RouterLink>
+                <div class="info">
+                  <img :src="project.imageball">
+                  {{ project.title }}
                 </div>
-              </RouterLink>
-              <div class="info">
-                <img :src="project.imageball">
-                {{ project.title }}
-              </div>
-              <div class="grey">
-                {{ project.type }}
+                <div class="grey">
+                  {{ project.type }}
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </template>
-  </div>
-
-  <div v-else class="login-warning">
-    <p>{{ $t('denied_subheader') }}</p>
-    <div class="login" style="padding: 40px;">
-      <LoginForm />
+      </template>
     </div>
-  </div>
+  </AuthRequired>
 </template>
 
 <style lang="scss" scoped>
@@ -278,53 +280,6 @@ const projects = [
 .grey {
   font-weight: 100;
   opacity: 70%;
-}
-
-.login-warning {
-  width: 100%;
-  height: calc(100vh - 40px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  text-align: center;
-  background-color: #f8f9fa;
-
-  h2 {
-    color: #dc3545;
-    margin-bottom: 25px;
-  }
-
-  p {
-    font-size: 1.2em;
-    line-height: 1.5em;
-    color: #343a40;
-
-    .login-link {
-      color: #0177a9;
-      text-decoration: none;
-    }
-  }
-
-  @media (max-width: 768px) {
-    padding: 20px;
-    height: calc(100vh - 80px);
-
-    h2 {
-      font-size: 20px;
-      margin-bottom: 15px;
-    }
-
-    p {
-      font-size: 16px;
-      padding: 0 20px;
-    }
-
-    .login {
-      width: 100%;
-      padding: 20px !important;
-    }
-  }
 }
 
 // Add touch-friendly interactions for mobile

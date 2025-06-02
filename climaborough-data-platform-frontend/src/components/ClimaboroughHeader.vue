@@ -1,179 +1,68 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-import { RouterLink } from 'vue-router';
-import { jwtDecode } from 'jwt-decode'
-
+import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { RouterLink, useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import LoginForm from './forms/LoginForm.vue';
+import { authService } from '../services/authService';
+
 const { locale } = useI18n();
+const route = useRoute();
+const router = useRouter();
 
 locale.value = "en"
 
 const loginBool = ref(false)
-
 const name = ref("")
-const password = ref("")
 const city = ref("");
 const userType = ref("");
-
 const loggedIn = ref(false)
 
 const checkIfLogged = () => {
-  var userName = localStorage.getItem("login")
-  var loginToken = localStorage.getItem("loginToken")
-  var userCityName = localStorage.getItem("userCityName");
-  var userAccountType = localStorage.getItem("userType");
-
-  if (userName && loginToken) {
-    var decoded = jwtDecode(loginToken)
-    if (decoded.expires * 1000 > Date.now()) {
-      name.value = userName;
-      city.value = userCityName || "";
-      userType.value = userAccountType || "";
-      loggedIn.value = true;
-    } else {
-      console.log("login token expired, login again");
-      localStorage.removeItem("login");
-      localStorage.removeItem("loginToken");
-      localStorage.removeItem("userCityName");
-      localStorage.removeItem("userType");
-      loggedIn.value = false;
+  loggedIn.value = authService.isAuthenticated();
+  
+  if (loggedIn.value) {
+    const userInfo = authService.getUserInfo();
+    if (userInfo) {
+      name.value = userInfo.name || userInfo.preferred_username;
+      city.value = authService.getUserCity() || "";
+      // Determine user type from group membership
+      if (userInfo.group_membership?.includes('/Administrator')) {
+        userType.value = "admin";
+      } else if (userInfo.group_membership?.some(group => group.startsWith('/City/'))) {
+        userType.value = "cityuser";
+      } else {
+        userType.value = "";
+      }
     }
   } else {
-    localStorage.removeItem("login");
-    localStorage.removeItem("loginToken");
-    localStorage.removeItem("userCityName");
-    localStorage.removeItem("userType");
-    loggedIn.value = false;
-    console.log("not logged in");
+    name.value = "";
+    city.value = "";
+    userType.value = "";
   }
 }
 
-checkIfLogged()
-const tokenCheckInterval = ref(null);
-const startTokenCheck = () => {
-  tokenCheckInterval.value = setInterval(async () => {
-    const token = localStorage.getItem("loginToken");
-    if (token) {
-      var decoded = jwtDecode(token)
-      if (decoded.expires * 1000 > Date.now()) {
-        if (decoded.expires * 1000 < Date.now() + 6 * 60 * 1000) {
-          try {
-            const response = await fetch('http://localhost:8000/user/refresh', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + localStorage.getItem("loginToken")
-              },
-              body: JSON.stringify({
-                access_token: token
-              })
-            })
-            if (response.ok) {
-              const data = await response.json()
-              if (data) {
-                if ('access_token' in data) {
-                  localStorage.setItem("loginToken", data["access_token"])
-                } else {
-                  window.alert("Problem occured")
-                }
-
-              } else {
-                window.alert("Problem occured")
-
-              }
-            } else {
-
-            }
-          } catch (err) {
-
-            console.error(err)
-          }
-        }
-      } else {
-        checkIfLogged()
-      }
-    }
-
-  }, 5 * 60 * 1000); // Check every 5 minutes
-};
-
-
-const rules = [value => {
-  if (value == "") {
-    return "Please enter an email address!"
+// Navigation handler that checks authentication before navigating
+const handleNavigation = (path) => {
+  const protectedRoutes = ['/projects', '/bot', '/datacatalogue'];
+  
+  if (protectedRoutes.includes(path) && !authService.isAuthenticated()) {
+    // Don't navigate, just show login popup
+    loginBool.value = true;
+    return;
   }
-}]
+  
+  // If authenticated or route is not protected, navigate normally
+  router.push(path);
+  closeMobileMenu();
+}
+
+const logout = () => {
+  authService.logout();
+}
 
 const toggleLogin = () => {
   loginBool.value = !loginBool.value
 }
-
-const login = async () => {
-  try {
-    console.log("attempting log in");
-    const response = await fetch('http://localhost:8000/user/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        email: name.value,
-        password: password.value,
-      }),
-    });
-    
-    if (response.ok) {
-      console.log("got login response");
-      const data = await response.json();
-      if (data) {
-        if ('access_token' in data) {
-          // window.alert("Successful login");
-
-          // Stocker les informations de l'utilisateur dans le localStorage
-          localStorage.setItem("login", data["firstName"]);
-          localStorage.setItem("loginToken", data["access_token"]);
-          localStorage.setItem("userCityName", data["city_name"] || ""); // Stocker le nom de la ville (si disponible)
-          localStorage.setItem("userType", data["type_spec"]); // Stocker le type d'utilisateur (par exemple, admin, cityuser)
-          
-          // Mettre à jour les variables réactives
-          name.value = data["firstName"];
-          city.value = data["city_name"] || ""; // Mise à jour de la ville si elle est disponible
-          userType.value = data["type_spec"];
-          loggedIn.value = true;
-          //window.alert(userType.value);
-          //window.alert(city.value);
-          loginBool.value = false;
-          window.location.reload();
-        } else {
-          window.alert("Wrong Credentials");
-        }
-      } else {
-        window.alert("Wrong Credentials");
-      }
-    } else {
-      console.error("Failed to log in. Response not OK.");
-      window.alert("Wrong Credentials");
-    }
-  } catch (err) {
-    console.error(err);
-    window.alert("An error occurred while trying to log in.");
-  }
-};
-
-
-const logOff = () => {
-  localStorage.removeItem("login");
-  localStorage.removeItem("loginToken");
-  localStorage.removeItem("userCityName"); 
-  localStorage.removeItem("userType"); 
-
-  name.value = "";
-  city.value = "";
-  userType.value = "";
-  loggedIn.value = false;
-
-  window.location.reload();
-};
 
 const selectedLanguage = ref('EN') // Default language
 const languages = ref(
@@ -247,18 +136,76 @@ const setLanguage = (language) => {
   selectedLanguage.value = language;
   localStorage.setItem("lang", selectedLanguage.value)
   locale.value = selectedLanguage.value.toLocaleLowerCase()
-
 }
 
 const closeMobileMenu = () => {
   isMobileMenuOpen.value = false
 }
 
+// Login polling and Keycloak redirect check
+let loginCheckInterval = null;
+
+const handleKeycloakLoginSuccess = () => {
+  // This will be called when the Keycloak login is successful
+  checkIfLogged();
+};
+
 onMounted(() => {
-  startTokenCheck();
+  checkIfLogged();
+  window.addEventListener('storage', handleStorageChange);
+  window.addEventListener('keycloak-login-success', handleKeycloakLoginSuccess);
+  
+  // Check for token on initial load and every few seconds
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has('state') && (urlParams.has('session_state') || urlParams.has('code'))) {
+    // This looks like a Keycloak redirect, start polling for token
+    startLoginCheck();
+  }
 });
 
+onUnmounted(() => {
+  window.removeEventListener('storage', handleStorageChange);
+  window.removeEventListener('keycloak-login-success', handleKeycloakLoginSuccess);
+  stopLoginCheck();
+});
 
+// Start polling for token after potential login
+const startLoginCheck = () => {
+  // First check immediately
+  checkIfLogged();
+  
+  // Then check every 1 second for 10 seconds
+  stopLoginCheck(); // Clear any existing interval
+  
+  loginCheckInterval = setInterval(() => {
+    // Check if user is now authenticated (using cookies)
+    if (authService.isAuthenticated()) {
+      checkIfLogged();
+      stopLoginCheck();
+    }
+  }, 1000);
+  
+  // Stop checking after 10 seconds regardless
+  setTimeout(stopLoginCheck, 10000);
+};
+
+const stopLoginCheck = () => {
+  if (loginCheckInterval) {
+    clearInterval(loginCheckInterval);
+    loginCheckInterval = null;
+  }
+};
+
+// Manually refresh user info when LoginForm completes
+const handleLoginComplete = () => {
+  checkIfLogged();
+  loginBool.value = false;
+};
+
+// Re-check login status when route changes
+watch(() => route.path, () => {
+  checkIfLogged();
+});
 
 const menu = ref(false)
 const isMobileMenuOpen = ref(false)
@@ -266,6 +213,14 @@ const isMobileMenuOpen = ref(false)
 const toggleMobileMenu = () => {
   isMobileMenuOpen.value = !isMobileMenuOpen.value
 }
+
+const handleStorageChange = (event) => {
+  // Since we're using cookies now, we don't need to listen for localStorage changes
+  // But we can listen for cookie changes indirectly through periodic checks
+  if (event.key === 'keycloak_token') {
+    checkIfLogged();
+  }
+};
 
 </script>
 
@@ -285,8 +240,9 @@ const toggleMobileMenu = () => {
         <ul class="nav-routes" :class="{ 'mobile-menu-active': isMobileMenuOpen }">
           <RouterLink @click="closeMobileMenu" to="/">{{ $t('header.home') }}</RouterLink>
           <!-- <RouterLink @click="closeMobileMenu" to="/demo">DEMO Dashboard</RouterLink> -->
-          <RouterLink @click="closeMobileMenu" to="/projects">Dashboard</RouterLink>
-          <RouterLink to="/bot">ClimaBot</RouterLink>
+          <a @click="handleNavigation('/projects')" class="nav-link">Dashboard</a>
+          <a @click="handleNavigation('/bot')" class="nav-link">ClimaBot</a>
+          <a @click="handleNavigation('/datacatalogue')" class="nav-link">Data Catalogue</a>
           <RouterLink @click="closeMobileMenu" to="/about">{{ $t('header.About') }}</RouterLink>
           <div class="user" @click="toggleLogin">
             <div v-if=!loggedIn class="unauthenticated">
@@ -314,13 +270,8 @@ const toggleMobileMenu = () => {
                   <v-divider></v-divider>
 
                   <v-list>
-                    <v-list-item v-if="userType === 'admin'">
-                      <v-btn color="primary" variant="text" @click="$router.push('/admin')">
-                        Admin Dashboard
-                      </v-btn>
-                    </v-list-item>
                     <v-list-item>
-                      <v-btn color="primary" variant="text" @click="logOff">
+                      <v-btn color="primary" variant="text" @click="logout">
                         Log out
                       </v-btn>
                     </v-list-item>
@@ -352,21 +303,11 @@ const toggleMobileMenu = () => {
         </ul>
       </nav>
     </header>
-    <div v-if=loginBool class="popup">
-      <div class="popup-inner">
-        <v-sheet class="mx-auto" width="300">
-          <v-form fast-fail @submit.prevent>
-            <v-text-field v-model=name :rules label="Email Address"></v-text-field>
-
-            <v-text-field v-model=password type="password" label="Password"></v-text-field>
-
-            <v-btn class="mt-2" type="submit" block @click="login">Submit</v-btn>
-            <v-btn class="mt-2" block @click="toggleLogin">Cancel</v-btn>
-          </v-form>
-        </v-sheet>
+    <div v-if="loginBool" class="login-popup-overlay">
+      <div class="login-popup-container">
+        <LoginForm @login-complete="handleLoginComplete" @login-cancel="toggleLogin" />
       </div>
     </div>
-
   </div>
 </template>
 
@@ -415,7 +356,7 @@ header {
         cursor: pointer;
       }
 
-      a {
+      a, .nav-link {
         text-decoration: none;
         color: inherit;
         font-weight: bold;
@@ -423,6 +364,7 @@ header {
         transition: all 0.3s ease;
         padding: 5px 10px;
         border-radius: 4px;
+        cursor: pointer;
 
         &:hover {
           background-color: rgba(0, 0, 0, 0.1);
@@ -599,5 +541,38 @@ header {
 
 .language-dropdown li:hover {
   background-color: #f0f0f0;
+}
+
+.login-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.login-popup-container {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  max-width: 400px;
+  width: 90%;
+  animation: popup-fade-in 0.3s ease;
+}
+
+@keyframes popup-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>

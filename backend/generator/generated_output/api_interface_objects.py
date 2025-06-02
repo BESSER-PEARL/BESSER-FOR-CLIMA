@@ -2,6 +2,7 @@
 import os
 import json
 import logging
+import requests
 
 # FastAPI related imports
 from fastapi import FastAPI, HTTPException, Body, Query, File, UploadFile, Depends
@@ -24,6 +25,14 @@ from shapely.geometry import shape
 # Authentication related imports
 from auth.auth_bearer import KeycloakBearer
 
+# Keycloak configuration constants
+AUTH_SERVER_URL = os.environ.get("KEYCLOAK_SERVER_URL", "https://auth.iworker2.private.list.lu")
+KEYCLOAK_REALM = os.environ.get("KEYCLOAK_REALM", "climaborough")
+CLIENT_ID = os.environ.get("KEYCLOAK_CLIENT_ID", "climaborough-platform")
+
+# Construct the full auth URL for token operations
+KEYCLOAK_AUTH_URL = f"{AUTH_SERVER_URL}/realms/{KEYCLOAK_REALM}"
+
 
 # Local application imports
 from pydantic_classes import Dashboard, Citizen, CityAngel, TableColumn, Admin, SolutionProvider, KPI, KPINumberHouseholdRenewableEnergy, KPITotalRenewableEnergy, KPIPeakSolarEnergy, KPIParticipants, KPIWasteAvoided, KPICollectedWaste, KPITraffic, KPIMoney, City, MapData, GeoJson, WMS, Visualisation, StatChart, LineChart, BarChart, Table, CityUser, KPISecondHandCustomers, KPITextileWastePerPerson, PieChart, KPIWasteSorted, KPITemp, KPIValue, KPICo2Avoided, Map
@@ -38,6 +47,115 @@ logger = logging.getLogger('uvicorn.error')
 logger.setLevel(logging.DEBUG)
 
 app = FastAPI()
+
+# Authentication endpoints for API users
+@app.post("/auth/token", summary="Get access token", tags=["Authentication"])
+async def get_token(
+    username: str = Body(...),
+    password: str = Body(...)
+):
+    """
+    Get an access token using username and password.
+    This token can be used in the Authorization header for protected endpoints.
+    
+    Example usage:
+    1. Call this endpoint with your username and password
+    2. Copy the access_token from the response
+    3. Use it in the Authorization header: 'Bearer <access_token>'
+    4. In Swagger UI, click 'Authorize' and enter: 'Bearer <access_token>'
+    """    
+    try:
+        # Keycloak token endpoint
+        token_url = f"{KEYCLOAK_AUTH_URL}/protocol/openid-connect/token"
+        
+        data = {
+            'grant_type': 'password',
+            'client_id': CLIENT_ID,
+            'username': username,
+            'password': password,
+            'scope': 'openid'
+        }
+        
+        response = requests.post(token_url, data=data)
+        
+        if response.status_code == 200:
+            token_data = response.json()
+            return {
+                "access_token": token_data["access_token"],
+                "token_type": "bearer",
+                "expires_in": token_data["expires_in"],
+                "refresh_token": token_data.get("refresh_token")
+            }
+        else:
+            raise HTTPException(
+                status_code=401, 
+                detail="Invalid credentials"
+            )
+            
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Authentication failed: {str(e)}"
+        )
+
+@app.post("/auth/refresh", summary="Refresh access token", tags=["Authentication"])
+async def refresh_token(refresh_token: str = Body(...)):
+    """
+    Refresh an expired access token using a refresh token.
+    
+    Example usage:
+    1. Use the refresh_token from a previous /auth/token call
+    2. Get a new access_token without re-entering credentials
+    """    
+    try:
+        token_url = f"{KEYCLOAK_AUTH_URL}/protocol/openid-connect/token"
+        
+        data = {
+            'grant_type': 'refresh_token',
+            'client_id': CLIENT_ID,
+            'refresh_token': refresh_token
+        }
+        
+        response = requests.post(token_url, data=data)
+        
+        if response.status_code == 200:
+            token_data = response.json()
+            return {
+                "access_token": token_data["access_token"],
+                "token_type": "bearer",
+                "expires_in": token_data["expires_in"],
+                "refresh_token": token_data.get("refresh_token")
+            }
+        else:
+            raise HTTPException(
+                status_code=401, 
+                detail="Invalid refresh token"
+            )
+            
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Token refresh failed: {str(e)}"
+        )
+
+@app.get("/auth/info", summary="Authentication Information", tags=["Authentication"])
+async def auth_info():
+    """
+    Get information about how to authenticate with this API.
+    
+    This endpoint provides step-by-step instructions for API authentication.
+    """
+    return {
+        "message": "This API uses Keycloak for authentication",
+        "steps": [
+            "1. Get a token using POST /auth/token with your username/password",
+            "2. Use the token in the Authorization header: 'Bearer <token>'",
+            "3. In Swagger UI, click 'Authorize' and enter: 'Bearer <token>'"
+        ],        "keycloak_server": AUTH_SERVER_URL,
+        "client_id": CLIENT_ID,
+        "direct_token_url": f"{KEYCLOAK_AUTH_URL}/protocol/openid-connect/token",
+        "example_curl": f"curl -X POST '{KEYCLOAK_AUTH_URL}/protocol/openid-connect/token' -H 'Content-Type: application/x-www-form-urlencoded' -d 'grant_type=password&client_id={CLIENT_ID}&username=YOUR_USERNAME&password=YOUR_PASSWORD'"
+    }
 
 db_host = os.environ.get("DB_HOST")
 if db_host is None:
@@ -803,11 +921,10 @@ async def create_kpi(
     city = session.query(CityDB).filter(func.lower(CityDB.name) == func.lower(city_name)).first()
     if not city:
         raise HTTPException(status_code=404, detail=f"City {city_name} not found")
-    
-    # Determine the KPI type and create the appropriate DB object
+      # Determine the KPI type and create the appropriate DB object
     try:
         kpi_type = getattr(kpi, "type_spec", "kpimoney").lower()
-        if kpi_type == "KPI":
+        if kpi_type == "kpi":
             kpi_type = "kpimoney"
         kpi_db = None
         
@@ -6623,6 +6740,10 @@ async def delete_all(dependencies=[Depends(KeycloakBearer())]):
 
 # Optional: Swagger UI metadata
 tags_metadata = [
+    {
+        "name": "Authentication",
+        "description": "Authentication endpoints for obtaining and managing access tokens",
+    },
     {
         "name": "KPI",
         "description": "Operations related to KPI objects",

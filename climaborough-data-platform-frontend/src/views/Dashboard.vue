@@ -1,8 +1,9 @@
 <script setup>
-import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue';
+import { ref, reactive, computed, onMounted, onBeforeUnmount, watchEffect } from 'vue';
 import { GridLayout, GridItem } from 'grid-layout-plus'
 import { useRoute } from 'vue-router';
-
+import { authService } from '../services/authService';
+import AuthRequired from '../components/AuthRequired.vue';
 
 import ElementForm from '../components/ElementForm.vue'
 import KPIForm from '../components/KPIForm.vue'
@@ -27,40 +28,39 @@ import jsPDF from 'jspdf';
 import { to } from 'plotly.js-dist';
 import DashboardChat from '../components/DashboardChat.vue';
 
-const loggedIn = ref(false)
-const userType = localStorage.getItem("userType");
-const userCity = localStorage.getItem("userCityName");
-console.log(userType)
-console.log(userCity)
+// Use the authService for authentication
+// Remove the loggedIn computed since AuthRequired will handle authentication
 
+// Use the authService for user info
+const userInfo = computed(() => authService.getUserInfo());
+const userType = computed(() => {
+  if (!userInfo.value) return null;
+  if (userInfo.value.group_membership?.includes('/Administrator')) return 'admin';
+  if (userInfo.value.group_membership?.some(group => group.startsWith('/City/'))) return 'cityuser';
+  return null;
+});
 
-const checkIfLogged = () => {
-    var userName = localStorage.getItem("login")
-    if (userName) {
-        loggedIn.value = true
-    }
-}
-checkIfLogged()
+const userCity = computed(() => authService.getUserCity());
 
-// Définir les autorisations d'accès selon le type d'utilisateur
+// Define permissions based on user type
 const canCreateDashboard = computed(() => {
-  return userType === 'admin' || (userType === 'cityuser' && useRoute().params.city === userCity);	
+  return userType.value === 'admin' || (userType.value === 'cityuser' && useRoute().params.city === userCity.value);	
 });
 
 const canUpdateOrDeleteDashboard = (dashboard) => {
-  if (userType === 'admin') {
+  if (userType.value === 'admin') {
     return true;
-  } else if (userType === 'cityuser' && dashboard.creator === localStorage.getItem("login")) {
+  } else if (userType.value === 'cityuser' && dashboard.creator === userInfo.value?.preferred_username) {
     return true;
   }
   return false;
 };
 
 const canReadDashboard = (dashboardCity) => {
-  if (userType === 'admin' || userType === 'solutionprovider' || userType === 'partnerorsupplier' || userType === 'citizen') {
+  if (userType.value === 'admin' || userType.value === 'solutionprovider' || userType.value === 'partnerorsupplier' || userType.value === 'citizen') {
     return true;
-  } else if (userType === 'cityuser' || userType === 'cityangel') {
-    return true; // dashboardCity.toLowerCase() === userCity.toLowerCase(); maybe after
+  } else if (userType.value === 'cityuser' || userType.value === 'cityangel') {
+    return true; // dashboardCity.toLowerCase() === userCity.value.toLowerCase(); maybe after
   }
   return false;
 };
@@ -71,9 +71,7 @@ const canReadDashboard = (dashboardCity) => {
 
 const popupTriggers = ref({ buttonTrigger: false })
 
-
 const city = ref(useRoute().params.city)
-
 
 const layout = ref([
 
@@ -90,8 +88,6 @@ const projects = {
     'Grenoble-Alpes': "franceball.png",
     Torino: "italyball.png"
 }
-
-
 
 const flag = projects[city.value]
 
@@ -199,14 +195,14 @@ const getVisualisations = () => {
 }
 getVisualisations()
 
-
-const deleteVisualisations = (idList) => {
+const deleteVisualisations = async (idList) => {
     try {
+        const token = await authService.getAccessToken();
         fetch('http://localhost:8000/' + city.value.toLowerCase() + '/visualizations', {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + localStorage.getItem("access_token")
+                'Authorization': 'Bearer ' + token
             },
             body: JSON.stringify(idList)
         }).then(response => {
@@ -226,7 +222,8 @@ const deleteVisualisations = (idList) => {
             console.error('Error:', error);
         });
     } catch (error) {
-        window.alert(error);
+        console.error('Authentication error:', error);
+        window.alert('Authentication failed. Please log in again.');
     }
 }
 
@@ -268,7 +265,7 @@ async function storeVisualisations() {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + localStorage.getItem("loginToken")
+                        'Authorization': 'Bearer ' + await authService.getAccessToken()
                     },
                     body: JSON.stringify(jsonObj)
                 });
@@ -292,8 +289,6 @@ async function storeVisualisations() {
     deleteVisualisations(idList);
 }
 
-
-
 const lineChartBool = ref(false)
 const pieChartBool = ref(false)
 const barChartBool = ref(false)
@@ -306,7 +301,6 @@ const editMode = ref(false)
 const tableForm = ref(false)
 
 const currentSelectedChart = ref("")
-
 
 const edit = () => {
     getVisualisations()
@@ -379,8 +373,6 @@ const createVisualisation = (tableId, tableName, chart, kpi) => {
     tableForm.value = false
 
 }
-
-
 
 const toggleLineChartEdit = () => {
     lineChartBool.value = !lineChartBool.value
@@ -485,15 +477,24 @@ const organizeVisualisations = (resizeBool) => {
     });
 };
 
-
-
+watchEffect(() => {
+    console.log('AuthRequired component will handle authentication');
+});
 
 onMounted(() => {
     document.addEventListener('dragover', syncMousePosition);
+      // Listen for authentication changes
+    window.addEventListener('keycloak-login-success', () => {
+        if (authService.isAuthenticated()) {
+            console.log('User logged in, refreshing dashboard');
+            getVisualisations();
+        }
+    });
 });
 
 onBeforeUnmount(() => {
     document.removeEventListener('dragover', syncMousePosition);
+    window.removeEventListener('keycloak-login-success', () => {});
 });
 
 const mouseAt = { x: -1, y: -1 }
@@ -817,7 +818,8 @@ const toggleChat = () => {
 </script>
 
 <template>
-    <div v-if="loggedIn" class="body">
+  <AuthRequired>
+    <div class="body">
         <h2 style="align-items: center;"> Overview: {{ city }} <img :src='"../../" + flag' /></h2>
         <ElementForm v-if="popupTriggers.buttonTrigger" @cancel="toggleForm" @addElement="addElement" label="Enter the box's content:">
         </ElementForm>
@@ -1066,15 +1068,7 @@ const toggleChat = () => {
                         </GridItem>
                     </GridLayout>
                 </div>
-            </div>
-        </div>
-    </div>
-    <div v-else class="login-warning">
-        <p>You need to login if you want to have access to the projects. Use the login button on the top right corner of
-            this page.</p>
-        <div class="login" style="padding: 40px;">
-            <LoginForm />
-        </div>
+            </div>        </div>
     </div>
     <div v-if="chatMode" class="chat-popup">
       <div class="chat-popup-inner">
@@ -1088,6 +1082,7 @@ const toggleChat = () => {
         />
       </div>
     </div>
+  </AuthRequired>
 </template>
 
 
@@ -1202,32 +1197,7 @@ const toggleChat = () => {
 
 
 
-.login-warning {
-    width: 100%;
-    height: calc(100vh - 40px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    text-align: center;
-    background-color: #f8f9fa;
 
-    h2 {
-        color: #dc3545;
-        margin-bottom: 25px;
-    }
-
-    p {
-        font-size: 1.2em;
-        line-height: 1.5em;
-        color: #343a40;
-
-        .login-link {
-            color: #0177a9;
-            text-decoration: none;
-        }
-    }
-}
 
 .droppable-element {
     width: 150px;
