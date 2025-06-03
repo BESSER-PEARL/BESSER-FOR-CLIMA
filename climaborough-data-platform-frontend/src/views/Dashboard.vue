@@ -481,20 +481,22 @@ watchEffect(() => {
     console.log('AuthRequired component will handle authentication');
 });
 
+const handleKeycloakLoginSuccess = () => {
+    if (authService.isAuthenticated()) {
+        console.log('User logged in, refreshing dashboard');
+        getVisualisations();
+    }
+};
+
 onMounted(() => {
     document.addEventListener('dragover', syncMousePosition);
-      // Listen for authentication changes
-    window.addEventListener('keycloak-login-success', () => {
-        if (authService.isAuthenticated()) {
-            console.log('User logged in, refreshing dashboard');
-            getVisualisations();
-        }
-    });
+    // Listen for authentication changes
+    window.addEventListener('keycloak-login-success', handleKeycloakLoginSuccess);
 });
 
 onBeforeUnmount(() => {
     document.removeEventListener('dragover', syncMousePosition);
-    window.removeEventListener('keycloak-login-success', () => {});
+    window.removeEventListener('keycloak-login-success', handleKeycloakLoginSuccess);
 });
 
 const mouseAt = { x: -1, y: -1 }

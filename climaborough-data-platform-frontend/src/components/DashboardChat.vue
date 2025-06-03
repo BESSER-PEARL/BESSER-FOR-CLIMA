@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import WebSocketService from '../js/websocket.js';
+import { authService } from '../services/authService';
 
 const props = defineProps({
   city: {
@@ -45,9 +46,10 @@ const sendMessage = () => {
 
 const getAvailableKPIs = async () => {
   try {
+    const token = await authService.getAccessToken();
     const response = await fetch(`http://localhost:8000/${props.city.toLowerCase()}/kpis`, {
       headers: {
-        'Authorization': 'Bearer ' + localStorage.getItem("keycloak_token")
+        'Authorization': 'Bearer ' + token
       }
     });
     const kpis = await response.json();
@@ -258,4 +260,4 @@ onMounted(() => {
     }
   }
 }
-</style> 
+</style>

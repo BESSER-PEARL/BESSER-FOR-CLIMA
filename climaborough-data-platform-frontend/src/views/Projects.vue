@@ -26,6 +26,12 @@ const checkMobile = () => {
   isMobile.value = window.innerWidth <= 768
 }
 
+const keycloakLoginSuccessHandler = () => {
+  if (authService.isAuthenticated() && isCityUser.value) {
+    console.log('City user logged in:', cityName.value);
+  }
+};
+
 function updateCSSVariable() {
   if (isMobile.value) {
     document.documentElement.style.setProperty('--starting-position', '20px');
@@ -45,16 +51,12 @@ onMounted(() => {
   updateCSSVariable()
   
   // Listen for authentication changes
-  window.addEventListener('keycloak-login-success', () => {
-    if (authService.isAuthenticated() && isCityUser.value) {
-      console.log('City user logged in:', cityName.value);
-    }
-  });
+  window.addEventListener('keycloak-login-success', keycloakLoginSuccessHandler);
 });
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateCSSVariable);
-  window.removeEventListener('keycloak-login-success', () => {});
+  window.removeEventListener('keycloak-login-success', keycloakLoginSuccessHandler);
 });
 
 const projects = [
