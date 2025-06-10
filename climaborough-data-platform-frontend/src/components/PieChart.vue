@@ -15,6 +15,31 @@ const props = defineProps({
   }
 })
 
+// Consistent color mapping for categories
+const categoryColorMap = {
+  'Low': '#B1E3FF',      // Light Blue
+  'Medium': '#A1E3CB',   // Light Green
+  'High': '#95A4FC',     // Light Purple
+  'Good': '#95A4FC',     // Light Purple
+  'Fair': '#A1E3CB',     // Light Green
+  'Poor': '#B1E3FF',     // Light Blue
+  'Excellent': '#A8C5DA', // Light Blue-Gray
+  'Bad': '#69696A'       // Gray
+};
+
+// Available colors for random assignment
+const availableColors = ['#B1E3FF', '#A1E3CB', '#95A4FC', '#A8C5DA', '#69696A'];
+
+// Function to get unique random color from remaining colors
+const getUniqueRandomColor = (usedColors) => {
+  const remainingColors = availableColors.filter(color => !usedColors.has(color));
+  if (remainingColors.length === 0) {
+    // If all colors are used, start cycling through them again
+    return availableColors[Math.floor(Math.random() * availableColors.length)];
+  }
+  return remainingColors[Math.floor(Math.random() * remainingColors.length)];
+};
+
 const refTitle = ref(props.title)
 
 function countOccurrences(arr) {
@@ -60,10 +85,36 @@ async function getItems() {
     items.value = data
     mapping.value = countOccurrences(stands.value)
     console.log(mapping.value)
+      // Clear existing arrays
+    labels.value = [];
+    series.value = [];
+    const colors = [];
+    const usedColors = new Set(); // Track used colors
+    
     for (const [key, value] of Object.entries(mapping.value)) {
       labels.value.push(key)
       series.value.push(value)
+      
+      let color;
+      if (categoryColorMap[key]) {
+        // Use predefined color for known categories
+        color = categoryColorMap[key];
+      } else {
+        // Get unique random color for unknown categories
+        color = getUniqueRandomColor(usedColors);
+      }
+      
+      colors.push(color);
+      usedColors.add(color);
     }
+    
+    // Update chart options with consistent colors
+    chartOptions.value = {
+      ...chartOptions.value,
+      colors: colors,
+      labels: labels.value
+    };
+    
     console.log(series.value)
     console.log(labels.value)
 
@@ -90,7 +141,6 @@ const chartOptions = ref({
     offsetY: -8,
   },
   labels: labels.value,
-  colors: ['#B1E3FF', '#A1E3CB', '#A8C5DA', '#69696A', '#95A4FC'],
   dataLabels: {
     enabled: true,
     style: {
@@ -136,9 +186,7 @@ const chartOptions = ref({
 
 watch(() => [props.title], () => {
   chartOptions.value = {
-    chart: {
-      type: 'pie'
-    },
+    ...chartOptions.value,
     title: {
       text: props.title
     },

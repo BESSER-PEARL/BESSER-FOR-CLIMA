@@ -52,5 +52,13 @@
     "email_message": "Please enter an email address!",
     "password": "Password",
     "submit": "Submit"
-  } 
+  },
+  "auth": {
+    "access_required": "Access Required",
+    "please_login": "Please login to access this page.",
+    "go_home": "Go to Home",
+    "logout_error": "Logout error, please try again.",
+    "unauthorized": "You are not authorized to access this resource.",
+    "forbidden": "Access forbidden. You do not have permission to view this page."
+  }
 }

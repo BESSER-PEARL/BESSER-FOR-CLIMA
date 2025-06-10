@@ -31,7 +31,7 @@
             class="login-button flex-grow-1"
           >
             <v-icon left>mdi-login</v-icon>
-            {{ $t('auth.sign_in') || 'Sign In' }}
+            {{ $t('login.title') || 'Sign In' }}
           </v-btn>
           
           <v-btn 
