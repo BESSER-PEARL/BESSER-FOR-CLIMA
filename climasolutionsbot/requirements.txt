@@ -1,1 +1,21 @@
 besser-agentic-framework[llms, extras, torch]==3.0.1
+
+{
+  "builder": {
+    "gc": {
+      "defaultKeepStorage": "20GB",
+      "enabled": true
+    }
+  },
+  "experimental": false,
+  "max-concurrent-uploads": 1,
+  "max-download-attempts": 5,
+  "registry-mirrors": [],
+  "insecure-registries": [],
+  "storage-opts": [],
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "10m",
+    "max-file": "3"
+  }
+}

@@ -79,13 +79,14 @@ jsonObjects = dict()
 for obj in objects:
     if (obj.name == "City"):
         city = dict()
-        for kpi in obj.deps:
-            kpi_json = dict()
-            print(kpi)
-            for attribute in kpi.attribute_dict:
-                print(attribute)
-                kpi_json[attribute] = kpi.attribute_dict[attribute]
-            city[kpi.name] =  kpi_json
+        if hasattr(obj, 'deps') and obj.deps:
+            for kpi in obj.deps:
+                kpi_json = dict()
+                print(kpi)
+                for attribute in kpi.attribute_dict:
+                    print(attribute)
+                    kpi_json[attribute] = kpi.attribute_dict[attribute]
+                city[kpi.name] = kpi_json
         jsonObjects[obj.className.name] = city
         
 # Specify the file name
