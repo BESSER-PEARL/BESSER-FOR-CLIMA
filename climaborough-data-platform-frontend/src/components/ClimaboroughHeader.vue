@@ -64,60 +64,59 @@ const toggleLogin = () => {
   loginBool.value = !loginBool.value
 }
 
-const selectedLanguage = ref('EN') // Default language
+const selectedLanguage = ref('en') // Default language
 const languages = ref(
   [{
-    "iso639": "EN",
+    "iso639": "en",
     "name": "English",
     "flag": "openmoji:flag-england"
   },
   {
-    "iso639": "IT",
+    "iso639": "it",
     "name": "Italiano",
     "flag": "openmoji:flag-italy"
   },
   {
-    "iso639": "FR",
+    "iso639": "fr",
     "name": "Français",
     "flag": "openmoji:flag-france"
   },
   {
-    "iso639": "LU",
+    "iso639": "lb",
     "name": "Lëtzebuergesch",
-    "flag": "openmoji:flag-luxembourg"
-  },
+    "flag": "openmoji:flag-luxembourg"  },
   {
-    "iso639": "SL",
+    "iso639": "sl",
     "name": "Slovenščina",
     "flag": "openmoji:flag-slovenia"
   },
   {
-    "iso639": "EL",
+    "iso639": "el",
     "name": "Ελληνικά",
     "flag": "openmoji:flag-greece"
   },
   {
-    "iso639": "PL",
+    "iso639": "pl",
     "name": "Polski",
     "flag": "openmoji:flag-poland"
   },
   {
-    "iso639": "CNR",
+    "iso639": "sr",
     "name": "Crnogorski",
     "flag": "openmoji:flag-montenegro"
   },
   {
-    "iso639": "CS",
+    "iso639": "cs",
     "name": "Čeština",
     "flag": "openmoji:flag-czechia"
   },
   {
-    "iso639": "BS",
+    "iso639": "bs",
     "name": "Bosanski",
     "flag": "openmoji:flag-bosnia-and-herzegovina"
   },
   {
-    "iso639": "BG",
+    "iso639": "bg",
     "name": "Български",
     "flag": "openmoji:flag-bulgaria"
   },
@@ -126,16 +125,16 @@ const languages = ref(
 function getLanguage() {
   var lang = localStorage.getItem("lang")
   if (lang != null) {
-    selectedLanguage.value = lang
-    locale.value = lang.toLocaleLowerCase()
+    selectedLanguage.value = lang.toLowerCase()
+    locale.value = lang.toLowerCase()
   }
 }
 getLanguage()
 
 const setLanguage = (language) => {
-  selectedLanguage.value = language;
+  selectedLanguage.value = language.toLowerCase();
   localStorage.setItem("lang", selectedLanguage.value)
-  locale.value = selectedLanguage.value.toLocaleLowerCase()
+  locale.value = selectedLanguage.value
 }
 
 const closeMobileMenu = () => {
@@ -284,10 +283,9 @@ const handleStorageChange = (event) => {
 
           </div>
           <li class="separator"></li> <!-- Separator line -->
-          <v-menu>
-            <template v-slot:activator="{ props }">
+          <v-menu>            <template v-slot:activator="{ props }">
               <p id="language" v-bind="props" @click="closeMobileMenu">
-                {{ selectedLanguage }}</p>
+                {{ selectedLanguage.toUpperCase() }}</p>
             </template>
             <v-list>
               <v-list-item v-for="(item, index) in languages" :key="index" :value="index"

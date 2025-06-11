@@ -28,21 +28,36 @@
     "carousel_prijedor": "La città di Prijedor è situata nella parte nord-occidentale della Bosnia ed Erzegovina, nell'entità della Repubblica Srpska, sulle rive dei fiumi Sana e Gomjenica, e sui pendii del monte Kozara. Prijedor è diventata un importante centro commerciale e di scambio grazie alle strade romane e alla navigazione del fiume Sana, oltre che alla prima ferrovia costruita nel 1873. Gli edifici storici e le infrastrutture risalenti ai periodi ottomano e austro-ungarico caratterizzano il paesaggio urbano. Oggi, Prijedor è un grande centro urbano, commerciale e industriale e ospita alcune delle famose aziende internazionali e aziende della Bosnia ed Erzegovina. Secondo l'ultimo censimento effettuato nel 2013, nell'area del comune di Prijedor erano registrati 97.588 abitanti distribuiti in 71 località (organizzate in 49 comunità locali), di cui circa la metà costituisce la popolazione rurale, rendendola la settima città più grande della Bosnia ed Erzegovina. La visione di Prijedor è complessiva e determina la città e i suoi abitanti a proseguire verso nuove sfide, costruendo il futuro di una nuova, avanzata e moderna città europea. Il ricco patrimonio in ogni senso costituisce una buona base per un nuovo concetto e impegno per rendere la città una città di giovani, una città di prospettiva, moderna e con le migliori soluzioni possibili per il bene di tutti i cittadini.",
     "carousel_katowice": "Katowice è la città principale dell'area metropolitana della Slesia Superiore e l'11ª città più popolosa della Polonia (circa 285.000 abitanti), mentre la sua area urbana è la più popolosa del paese (circa 5,3 milioni) e una delle più popolose dell'UE. La città di Katowice, come Autorità Pubblica Locale, fornisce servizi in diverse aree (ad es. istruzione, cultura, assistenza sanitaria, costruzione e manutenzione delle strade) per i cittadini, basati su regolamenti nazionali e locali. Katowice ha una grande esperienza con progetti internazionali organizzati in vari settori. Inoltre, dal 1° gennaio 2013 esiste un Dipartimento di Gestione Energetica nella struttura organizzativa del Comune di Katowice, responsabile di, ad esempio, avviare e partecipare alla preparazione di programmi riguardanti il miglioramento dell'efficienza energetica, inclusa l'utilizzazione di fonti di energia rinnovabile, monitorare gli effetti ottenuti come risultato della sua realizzazione e attività educative e informative per i residenti locali. Katowice gestisce una serie di azioni relative alla realizzazione di progetti, investimenti e compiti educativi in termini di miglioramento dell'efficienza energetica e protezione ambientale. Oltre ai progetti internazionali sopra menzionati, la città realizza una serie di programmi e strategie a livello locale e provinciale, tra cui: 1. Programma di Protezione dell'Aria per la Slesia, 2. Strategia di Sviluppo della Città, 3. Programma di Protezione Ambientale per Katowice per il 2014-2017, 4. Presupposti per pianificare l'approvvigionamento di calore, elettricità e gas combustibile per la città di Katowice, 5. Piano per un'economia a basse emissioni di carbonio per la città di Katowice."
   },
-  "projectview": {},
-  "dashboard": {},
-  "denied_header": "Accesso Negato",
-  "denied_subheader": "Devi accedere se vuoi avere accesso a questa parte della pagina!",
   "projectview": {
     "title": "Pagine del dashboard disponibili",
     "hub1": "Climaborough Hub 1 - Dall'energia e mobilità isolate ai servizi integrati",
-    "hub2": "Climaborough Hub 2 - Dai rifiuti alla circolarità"
+    "hub2": "Climaborough Hub 2 - Dai rifiuti alla circolarità",
+    "authentication_required": "Autenticazione Richiesta"
   },
+  "dashboard": {
+    "authentication_required": "Autenticazione Richiesta"
+  },
+  "admin": {
+    "authentication_required": "Autenticazione Amministratore Richiesta"
+  },
+  "denied_header": "Accesso Negato",
+  "denied_subheader": "Devi accedere se vuoi avere accesso alle dashboard Climaborough.",
   "login": {
+    "title": "Accedi",
+    "sign_in": "Accedi con Keycloak",
+    "cancel": "Annulla",
     "login": "Accedi per vedere di più",
     "email": "Indirizzo email",
     "email_message": "Per favore inserisci un indirizzo email!",
     "password": "Password",
-    "submit": "Invia",
-    "cancel": "Annulla"
+    "submit": "Invia"
+  },
+  "auth": {
+    "access_required": "Accesso Richiesto",
+    "please_login": "Per favore accedi per accedere a questa pagina.",
+    "go_home": "Torna alla Home",
+    "logout_error": "Errore di logout, per favore riprova.",
+    "unauthorized": "Non sei autorizzato ad accedere a questa risorsa.",
+    "forbidden": "Accesso vietato. Non hai il permesso di visualizzare questa pagina."
   }
 }

@@ -4,13 +4,27 @@ import { createI18n } from 'vue-i18n';
 import en from './locales/en.json';
 import fr from './locales/fr.json';
 import it from './locales/it.json';
-// Add more languages as needed
+import lb from './locales/lb.json'; // Lëtzebuergesch (Luxembourgish)
+import sl from './locales/sl.json'; // Slovenščina (Slovenian)
+import el from './locales/el.json'; // Ελληνικά (Greek)
+import pl from './locales/pl.json'; // Polski (Polish)
+import sr from './locales/sr.json'; // Crnogorski (Montenegrin)
+import cs from './locales/cs.json'; // Čeština (Czech)
+import bs from './locales/bs.json'; // Bosanski (Bosnian)
+import bg from './locales/bg.json'; // Български (Bulgarian)
 
 const messages = {
     en,
     fr,
-    it
-    // Add more languages as needed
+    it,
+    lb, // Lëtzebuergesch (Luxembourgish)
+    sl, // Slovenščina (Slovenian)
+    el, // Ελληνικά (Greek)
+    pl, // Polski (Polish)
+    sr, // Crnogorski (Montenegrin)
+    cs, // Čeština (Czech)
+    bs, // Bosanski (Bosnian)
+    bg  // Български (Bulgarian)
 };
 
 const i18n = createI18n({

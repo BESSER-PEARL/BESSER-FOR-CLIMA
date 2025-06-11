@@ -29,19 +29,36 @@
     "carousel_prijedor": "La ville de Prijedor est située dans la partie nord-ouest de la Bosnie-Herzégovine, dans l'entité de la République Srpska, sur les rives des rivières Sana et Gomjenica, ainsi que sur les pentes du mont Kozara. Prijedor est devenue un important centre commercial et de commerce grâce aux routes romaines et à la navigation sur la rivière Sana, ainsi qu'à la première ligne de chemin de fer construite en 1873. Les bâtiments historiques et les infrastructures des périodes ottomane et austro-hongroise sont des caractéristiques du paysage urbain. Aujourd'hui, Prijedor est un grand centre urbain, commercial et industriel, et accueille certaines des entreprises internationales célèbres ainsi que des entreprises locales de Bosnie-Herzégovine. Selon le dernier recensement réalisé en 2013, la municipalité de Prijedor comptait 97 588 habitants répartis dans 71 localités (organisées en 49 communautés locales), dont environ la moitié est constituée de la population rurale, faisant de Prijedor la septième plus grande ville de Bosnie-Herzégovine.     La vision de Prijedor est globale et détermine la ville et ses habitants à relever de nouveaux défis, en construisant l'avenir d'une nouvelle ville européenne avancée et moderne. Le riche patrimoine de la ville constitue une bonne base pour un nouveau concept et un engagement visant à faire de Prijedor une ville de jeunesse, de perspectives, moderne et offrant les solutions de la plus haute qualité possible pour le bien-être de tous ses citoyens.",
     "carousel_katowice": "Katowice est la ville principale de l'agglomération métropolitaine de Haute-Silésie et la onzième ville la plus peuplée de Pologne (environ 285 000 habitants), tandis que sa zone urbaine est la plus peuplée du pays (environ 5,3 millions) et l'une des plus peuplées de l'UE. En tant qu'autorité publique locale, la ville de Katowice fournit des services dans divers domaines (par exemple, l'éducation, la culture, les soins de santé, la construction et l'entretien des routes) aux citoyens, en se basant sur des réglementations nationales et locales. Katowice possède une grande expérience dans la gestion de projets internationaux organisés dans divers domaines. De plus, depuis le 1er janvier 2013, un Département de la Gestion de l'Énergie existe dans la structure organisationnelle de l'Hôtel de Ville de Katowice. Ce département est chargé, entre autres, d'initier et de participer à la préparation de programmes visant à améliorer l'efficacité énergétique, y compris l'utilisation de sources d'énergie renouvelables, de surveiller les effets obtenus à la suite de leur mise en œuvre, ainsi que de mener des activités éducatives et informatives pour les résidents locaux. Katowice mène une série d'actions liées à la réalisation de projets, aux investissements et aux tâches éducatives en matière d'amélioration de l'efficacité énergétique et de protection de l'environnement. En plus des projets internationaux mentionnés ci-dessus, la ville met en œuvre une série de programmes et de stratégies aux niveaux local et provincial, notamment : 1. Le Programme de Protection de l'Air pour la voïvodie de Silésie, 2. La Stratégie de Développement de la Ville, 3. Le Programme de Protection de l'Environnement pour Katowice pour 2014-2017, 4. Les Hypothèses pour planifier l'approvisionnement en chaleur, électricité et gaz combustible pour la ville de Katowice, 5. Le Plan pour une économie à faible émission de carbone pour la ville de Katowice."
   },
-  "denied_header": "Accès Refusé",
-  "denied_subheader": "Vous devez vous connecter si vous voulez accéder à cette partie de la page !",
   "projectview": {
     "title": "Pages de dashboard disponibles",
     "hub1": "Climaborough Hub 1 - De l'énergie et de la mobilité isolées aux services intégrés",
-    "hub2": "Climaborough Hub 2 - Du déchet à la circularité"
+    "hub2": "Climaborough Hub 2 - Du déchet à la circularité",
+    "authentication_required": "Authentification Requise"
   },
+  "dashboard": {
+    "authentication_required": "Authentification Requise"
+  },
+  "admin": {
+    "authentication_required": "Authentification Administrateur Requise"
+  },
+  "denied_header": "Accès Refusé",
+  "denied_subheader": "Vous devez vous connecter si vous voulez accéder aux tableaux de bord Climaborough.",
   "login": {
+    "title": "Se Connecter",
+    "sign_in": "Se Connecter avec Keycloak",
+    "cancel": "Annuler",
     "login": "Connectez-vous pour voir plus",
     "email": "Adresse e-mail",
     "email_message": "Veuillez entrer une adresse e-mail !",
     "password": "Mot de passe",
-    "submit": "Soumettre",
-    "cancel": "Annuler"
+    "submit": "Soumettre"
+  },
+  "auth": {
+    "access_required": "Accès Requis",
+    "please_login": "Veuillez vous connecter pour accéder à cette page.",
+    "go_home": "Retourner à l'Accueil",
+    "logout_error": "Erreur de déconnexion, veuillez réessayer.",
+    "unauthorized": "Vous n'êtes pas autorisé à accéder à cette ressource.",
+    "forbidden": "Accès interdit. Vous n'avez pas la permission de voir cette page."
   }
 }
