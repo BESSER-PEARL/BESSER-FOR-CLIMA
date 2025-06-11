@@ -30,14 +30,34 @@ const categoryColorMap = {
 // Available colors for random assignment
 const availableColors = ['#B1E3FF', '#A1E3CB', '#95A4FC', '#A8C5DA', '#69696A'];
 
-// Function to get unique random color from remaining colors
-const getUniqueRandomColor = (usedColors) => {
-  const remainingColors = availableColors.filter(color => !usedColors.has(color));
-  if (remainingColors.length === 0) {
-    // If all colors are used, start cycling through them again
-    return availableColors[Math.floor(Math.random() * availableColors.length)];
+// Function to get consistent color based on label name
+const getConsistentColorForLabel = (labelName, usedColors) => {
+  // Create a simple hash from the label name
+  let hash = 0;
+  for (let i = 0; i < labelName.length; i++) {
+    const char = labelName.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32-bit integer
   }
-  return remainingColors[Math.floor(Math.random() * remainingColors.length)];
+  
+  // Get a consistent index based on the hash
+  const colorIndex = Math.abs(hash) % availableColors.length;
+  let selectedColor = availableColors[colorIndex];
+  
+  // If the color is already used, try the next available colors
+  let attempts = 0;
+  while (usedColors.has(selectedColor) && attempts < availableColors.length) {
+    const nextIndex = (colorIndex + attempts + 1) % availableColors.length;
+    selectedColor = availableColors[nextIndex];
+    attempts++;
+  }
+  
+  // If all colors are used, still return the hash-based color for consistency
+  if (attempts >= availableColors.length) {
+    selectedColor = availableColors[colorIndex];
+  }
+  
+  return selectedColor;
 };
 
 const refTitle = ref(props.title)
@@ -98,10 +118,9 @@ async function getItems() {
       let color;
       if (categoryColorMap[key]) {
         // Use predefined color for known categories
-        color = categoryColorMap[key];
-      } else {
-        // Get unique random color for unknown categories
-        color = getUniqueRandomColor(usedColors);
+        color = categoryColorMap[key];      } else {
+        // Get consistent color based on label name for unknown categories
+        color = getConsistentColorForLabel(key, usedColors);
       }
       
       colors.push(color);
