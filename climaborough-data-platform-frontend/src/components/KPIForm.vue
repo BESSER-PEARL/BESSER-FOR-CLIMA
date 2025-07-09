@@ -35,19 +35,65 @@ const items = ref([])
 const itemObjects = ref([])
 const table = ref("")
 
+// Function to sort KPIs based on chart type using hasCategoryLabel
+const sortKPIsForChart = (kpis, chartType) => {
+    const isBarOrPieChart = chartType.toLowerCase() === 'barchart' || chartType.toLowerCase() === 'piechart';
+
+    return kpis.sort((a, b) => {
+        if (isBarOrPieChart) {
+            // For Bar/Pie charts, prioritize KPIs with hasCategoryLabel
+            if (a.hasCategoryLabel && !b.hasCategoryLabel) return -1;
+            if (!a.hasCategoryLabel && b.hasCategoryLabel) return 1;
+        } else {
+            // For other charts, prioritize KPIs without hasCategoryLabel
+            if (!a.hasCategoryLabel && b.hasCategoryLabel) return -1;
+            if (a.hasCategoryLabel && !b.hasCategoryLabel) return 1;
+        }
+        // Secondary sort by name
+        return a.name.localeCompare(b.name);
+    });
+}
+
+// Function to add recommendation labels using hasCategoryLabel
+const addRecommendationLabels = (kpis, chartType) => {
+    const isBarOrPieChart = chartType.toLowerCase() === 'barchart' || chartType.toLowerCase() === 'piechart';
+
+    return kpis.map(kpi => {
+        const hasCategoryLabel = kpi.hasCategoryLabel;
+        let recommendation = '';
+
+        if (isBarOrPieChart) {
+            if (hasCategoryLabel) {
+                recommendation = ' ✅ (Recommended)';
+            } else {
+                recommendation = ' ⚠️ (Not recommended - no category label)';
+            }
+        } else {
+            if (!hasCategoryLabel) {
+                recommendation = ' ✅ (Recommended)';
+            } else {
+                recommendation = ' ⚠️ (Better for Bar/Pie charts)';
+            }
+        }
+
+        return {
+            ...kpi,
+            displayName: kpi.name + recommendation
+        };
+    });
+}
+
 async function getItem(){
     try{
         const response = await fetch('http://localhost:8000/' +props.city.toLowerCase()+'/kpis')
         const data = await response.json();
-        
-        // Iterate over the list of strings and log each string
-        var ll = []
-        data.forEach(item => {
-            ll.push(item)
-            // Do whatever you want with each item here
-        });
-        items.value = ll
-        itemObjects.value = data
+
+        // Sort and add recommendation labels based on chart type
+        const sortedKPIs = sortKPIsForChart(data, props.chart);
+        const labeledKPIs = addRecommendationLabels(sortedKPIs, props.chart);
+
+        items.value = labeledKPIs;
+        itemObjects.value = data;
     } catch (error) {
         window.alert(error)
     }
@@ -68,7 +114,8 @@ const createVisualisation = () => {
         <v-select
         v-model="table"
         :items="items"
-        item-title="name"
+        item-title="displayName"
+        item-value="id"
         density="comfortable"
         label="Data source"
         style="margin-top:10px"

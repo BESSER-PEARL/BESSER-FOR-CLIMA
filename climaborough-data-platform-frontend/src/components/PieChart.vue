@@ -62,16 +62,13 @@ const getConsistentColorForLabel = (labelName, usedColors) => {
 
 const refTitle = ref(props.title)
 
-function countOccurrences(arr) {
-  const occurrences = {};
-  arr.forEach(item => {
-    if (occurrences[item]) {
-      occurrences[item]++;
-    } else {
-      occurrences[item] = 1;
-    }
+function getLatestKpiValues(items) {
+  const latestValues = {};
+  items.forEach(item => {
+    // Use the latest KPI value for each category/standing
+    latestValues[item.currentStanding] = item.kpiValue;
   });
-  return occurrences;
+  return latestValues;
 }
 
 const items = ref([])
@@ -94,31 +91,30 @@ async function getItems() {
   try {
     const response = await fetch('http://localhost:8000/' + props.city.toLowerCase() + '/kpi/?id=' + props.tableId)
     const data = await response.json();
-    console.log(data)
-    // Iterate over the list of strings and log each string
+    console.log(data);
+
     data.forEach(item => {
-      items.value.push(item)
-      stands.value.push(item.currentStanding)
-      lastTimestamp.value = formatDate(item.timestamp)
-      // Do whatever you want with each item here
+      items.value.push(item);
+      stands.value.push(item.currentStanding);
+      lastTimestamp.value = formatDate(item.timestamp);
     });
+    
     items.value = data
-    mapping.value = countOccurrences(stands.value)
-    console.log(mapping.value)
-      // Clear existing arrays
+    mapping.value = getLatestKpiValues(data);    // Clear existing arrays
     labels.value = [];
     series.value = [];
     const colors = [];
     const usedColors = new Set(); // Track used colors
-    
+
     for (const [key, value] of Object.entries(mapping.value)) {
-      labels.value.push(key)
-      series.value.push(value)
+      labels.value.push(key);
+      series.value.push(value);
       
       let color;
       if (categoryColorMap[key]) {
         // Use predefined color for known categories
-        color = categoryColorMap[key];      } else {
+        color = categoryColorMap[key];
+      } else {
         // Get consistent color based on label name for unknown categories
         color = getConsistentColorForLabel(key, usedColors);
       }

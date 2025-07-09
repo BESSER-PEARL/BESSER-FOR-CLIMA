@@ -42,16 +42,13 @@ const getUniqueRandomColor = (usedColors) => {
 
 const refTitle = ref(props.title);
 
-function countOccurrences(arr) {
-  const occurrences = {};
-  arr.forEach(item => {
-    if (occurrences[item]) {
-      occurrences[item]++;
-    } else {
-      occurrences[item] = 1;
-    }
+function getLatestKpiValues(items) {
+  const latestValues = {};
+  items.forEach(item => {
+    // Use the latest KPI value for each category/standing
+    latestValues[item.currentStanding] = item.kpiValue;
   });
-  return occurrences;
+  return latestValues;
 }
 
 const items = ref([]);
@@ -83,7 +80,7 @@ async function getItems() {
     });
     
     items.value = data
-    mapping.value = countOccurrences(stands.value);    // Clear existing arrays
+    mapping.value = getLatestKpiValues(data);    // Clear existing arrays
     labels.value = [];
     series.value = [];
     const colors = [];

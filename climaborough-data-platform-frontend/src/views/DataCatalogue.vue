@@ -28,7 +28,7 @@ import { ref, onMounted } from 'vue';
 import { authService } from '../services/authService';
 import AuthRequired from '../components/AuthRequired.vue';
 
-const dashboardUrl = ref('https://ui.iworker2.private.list.lu/app/data-catalog?embed=true');
+const dashboardUrl = ref('https://ui.climaplatform.eu/app/data-catalog?embed=true');
 const isFullscreen = ref(false);
 const dataIframe = ref(null);
 
@@ -54,7 +54,7 @@ onMounted(async () => {
     const sendMessageToIframe = () => {
       const iframe = dataIframe.value;
       if (iframe && iframe.contentWindow) {
-        iframe.contentWindow.postMessage(message, 'https://ui.iworker2.private.list.lu');
+        iframe.contentWindow.postMessage(message, 'https://ui.climaplatform.eu');
       }
     };
 
@@ -66,7 +66,7 @@ onMounted(async () => {
 
   // Listen for messages from the iframe (e.g., for CMP data)
   window.addEventListener('message', (event) => {
-    if (event.origin !== 'https://ui.iworker2.private.list.lu') return;
+    if (event.origin !== 'https://ui.climaplatform.eu') return;
 
     const { type, data } = event.data;
     console.log("Message from iframe:", type, data);
