@@ -65,7 +65,7 @@ def plantuml_to_object(model_path: str):
 
 # start creation of metamodel and generate classes
 
-domain: DomainModel = plantuml_to_buml("clima_model/metamodel.txt")
+domain: DomainModel = plantuml_to_buml("clima_model/metamodel.plantuml")
 
 generator = ClimaGenerator(output_dir="generator/generated_output", model=domain)
 generator.generate()
@@ -74,7 +74,7 @@ sqlalc.generate()
 
 # instantiate objects given classes and object model
 
-objects = plantuml_to_object("clima_model/plantumlobject.txt")
+objects = plantuml_to_object("clima_model/plantumlobject.plantuml")
 jsonObjects = dict()
 for obj in objects:
     if (obj.name == "City"):

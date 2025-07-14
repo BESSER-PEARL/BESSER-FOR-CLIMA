@@ -8,6 +8,14 @@ object "athens: City" as Athens {
     name = "Athens"
 }
 
+object "cascais: City" as Cascais {
+    name = "Cascais"
+}
+
+object "sofia: City" as Sofia {
+    name = "Sofia"
+}
+
 object "grenoble: City" as Grenoble {
     name = "Grenoble-Alpes"
 }
@@ -26,7 +34,7 @@ name = "Differdange"
 }
 
 
-object "kpiTemp_Differdange: KPITemp" as KPITemperature_Differdange {
+object "kpiTemp_Differdange: KPI" as KPITemperature_Differdange {
     id_kpi = "temp001"
     name = "Average Temperature"
     category = "Environment"
@@ -34,10 +42,12 @@ object "kpiTemp_Differdange: KPITemp" as KPITemperature_Differdange {
     provider = "WeatherService"
     calculationFrequency = "Daily"
     unitText = "Celsius"
-    threshold = 25
+    minThreshold = 15
+    maxThreshold = 35
+    hasCategoryLabel = false
 }
 
-object "kpiMoney_Differdange: KPIMoney" as KPIMoney_Differdange {
+object "kpiMoney_Differdange: KPI" as KPIMoney_Differdange {
     id_kpi = "money001"
     name = "Money Invested"
     category = "Environment"
@@ -45,7 +55,9 @@ object "kpiMoney_Differdange: KPIMoney" as KPIMoney_Differdange {
     provider = "BankService"
     calculationFrequency = "Weekly"
     unitText = "Euros"
-    target = 1000
+    minThreshold = 500
+    maxThreshold = 2000
+    hasCategoryLabel = false
 }
 
 
@@ -54,15 +66,24 @@ object "kpiMoney_Differdange: KPIMoney" as KPIMoney_Differdange {
 Differdange --> KPITemperature_Differdange
 Differdange --> KPIMoney_Differdange
 
-
-
-
-object "sofia: City" as Sofia {
-    name = "Sofia"
+object "tempValue1: KPIValue" as TempValue1 {
+    kpiValue = 22
+    timestamp = "2025-07-07 10:00:00"
+    categoryLabel = "Good"
 }
 
+object "moneyValue1: KPIValue" as MoneyValue1 {
+    kpiValue = 1200
+    timestamp = "2025-07-07 10:00:00"
+    categoryLabel = "Good"
+}
 
-object "kpiTrafficCongestion_Sofia: KPITraffic" as KPITrafficCongestion_Sofia {
+KPITemperature_Differdange --> TempValue1
+KPIMoney_Differdange --> MoneyValue1
+
+
+
+object "kpiTrafficCongestion_Sofia: KPI" as KPITrafficCongestion_Sofia {
     id_kpi = "traffic001"
     name = "Traffic Congestion Level"
     category = "Transport"
@@ -70,7 +91,9 @@ object "kpiTrafficCongestion_Sofia: KPITraffic" as KPITrafficCongestion_Sofia {
     provider = "TransportDepartment"
     calculationFrequency = "Hourly"
     unitText = "Number of Cars"
-    target = 30
+    minThreshold = 10
+    maxThreshold = 50
+    hasCategoryLabel = false
 }
 
 
@@ -81,11 +104,7 @@ object "kpiTrafficCongestion_Sofia: KPITraffic" as KPITrafficCongestion_Sofia {
 Sofia --> KPITrafficCongestion_Sofia
 
 
-object "cascais: City" as Cascais {
-    name = "Cascais"
-}
-
-object "kpiCollectedWaste_Cascais: KPICollectedWaste" as KPICollectedWaste_Cascais {
+object "kpiCollectedWaste_Cascais: KPI" as KPICollectedWaste_Cascais {
     id_kpi = "waste001"
     name = "Collected Textile Waste in Ton"
     category = "Waste"
@@ -93,11 +112,13 @@ object "kpiCollectedWaste_Cascais: KPICollectedWaste" as KPICollectedWaste_Casca
     provider = "WasteDepartment"
     calculationFrequency = "Weekly"
     unitText = "Tons"
-    target = 10
+    minThreshold = 5
+    maxThreshold = 15
+    hasCategoryLabel = false
 }
 
 
-object "kpiCSecondHandCustomers_Cascais: KPISecondHandCustomers" as KPISecondHandCustomers_Cascais {
+object "kpiCSecondHandCustomers_Cascais: KPI" as KPISecondHandCustomers_Cascais {
     id_kpi = "waste002"
     name = "Customers in second hand shops"
     category = "Waste"
@@ -105,12 +126,14 @@ object "kpiCSecondHandCustomers_Cascais: KPISecondHandCustomers" as KPISecondHan
     provider = "Shops"
     calculationFrequency = "Daily"
     unitText = "Number of people"
-    target = 1000
+    minThreshold = 500
+    maxThreshold = 1500
+    hasCategoryLabel = true
 }
 
 
 
-object "kpiTotalRenewableEnergy_Differdange: KPITotalRenewableEnergy" as KPITotalRenewableEnergy_Differdange {
+object "kpiTotalRenewableEnergy_Differdange: KPI" as KPITotalRenewableEnergy_Differdange {
     id_kpi = "energy001"
     name = "Percentage of renewable energy in Differdange"
     category = "Energy"
@@ -118,11 +141,13 @@ object "kpiTotalRenewableEnergy_Differdange: KPITotalRenewableEnergy" as KPITota
     provider = "Solution Provider"
     calculationFrequency = "Monthly"
     unitText = "Percentage"
-    target = 20
+    minThreshold = 15
+    maxThreshold = 25
+    hasCategoryLabel = false
 }
 
 
-object "kpiNumberHouseholdRenewableEnergy_Differdange: KPINumberHouseholdRenewableEnergy" as KPINumberHouseholdRenewableEnergy_Differdange {
+object "kpiNumberHouseholdRenewableEnergy_Differdange: KPI" as KPINumberHouseholdRenewableEnergy_Differdange {
     id_kpi = "energy002"
     name = "Household with renewable energy"
     category = "Energy"
@@ -130,11 +155,13 @@ object "kpiNumberHouseholdRenewableEnergy_Differdange: KPINumberHouseholdRenewab
     provider = "Citizens"
     calculationFrequency = "Monthly"
     unitText = "Number"
-    target = 500
+    minThreshold = 300
+    maxThreshold = 700
+    hasCategoryLabel = false
 }
 
 
-object "kpiPeakSolarEnergy_Differdange: KPIPeakSolarEnergy" as KPIPeakSolarEnergy_Differdange {
+object "kpiPeakSolarEnergy_Differdange: KPI" as KPIPeakSolarEnergy_Differdange {
     id_kpi = "energy003"
     name = "Peak solar energy"
     category = "Energy"
@@ -142,7 +169,9 @@ object "kpiPeakSolarEnergy_Differdange: KPIPeakSolarEnergy" as KPIPeakSolarEnerg
     provider = "Differdange"
     calculationFrequency = "Monthly"
     unitText = "KW peak"
-    target = 1000
+    minThreshold = 800
+    maxThreshold = 1200
+    hasCategoryLabel = false
 }
 
 Differdange --> KPITotalRenewableEnergy_Differdange
@@ -156,7 +185,7 @@ Cascais --> KPICollectedWaste_Cascais
 
 Cascais --> KPISecondHandCustomers_Cascais
 
-object "kpiInformedCitizens: KPIParticipants" as KPIInformedCitizens_Torino {
+object "kpiInformedCitizens: KPI" as KPIInformedCitizens_Torino {
     id_kpi = "participants_001"
     name = "Citizens informed through Re4Circular"
     category = "Waste"
@@ -164,10 +193,12 @@ object "kpiInformedCitizens: KPIParticipants" as KPIInformedCitizens_Torino {
     provider = "Re4Circular"
     calculationFrequency = "Monthly"
     unitText = "Number of people"
-    target = 1000
+    minThreshold = 800
+    maxThreshold = 1200
+    hasCategoryLabel = false
 }
 
-object "kpiInvolvedCitizens: KPIParticipants" as KPIInvolvedCitizens_Torino {
+object "kpiInvolvedCitizens: KPI" as KPIInvolvedCitizens_Torino {
     id_kpi = "participants_002"
     name = "Citizens active on Re4Circular"
     category = "Waste"
@@ -175,11 +206,13 @@ object "kpiInvolvedCitizens: KPIParticipants" as KPIInvolvedCitizens_Torino {
     provider = "Re4Circular"
     calculationFrequency = "Monthly"
     unitText = "Number of people"
-    target = 500
+    minThreshold = 400
+    maxThreshold = 600
+    hasCategoryLabel = false
 }
 
 
-object "kpiInformedBusinesses: KPIParticipants" as KPIInformedBusinesses_Torino {
+object "kpiInformedBusinesses: KPI" as KPIInformedBusinesses_Torino {
     id_kpi = "participants_003"
     name = "Businesses informed through Re4Circular"
     category = "Waste"
@@ -187,10 +220,12 @@ object "kpiInformedBusinesses: KPIParticipants" as KPIInformedBusinesses_Torino 
     provider = "Re4Circular"
     calculationFrequency = "Monthly"
     unitText = "Number of businesses"
-    target = 50
+    minThreshold = 40
+    maxThreshold = 60
+    hasCategoryLabel = false
 }
 
-object "kpiInvolvedBusinesses: KPIParticipants" as KPIInvolvedBusinesses_Torino {
+object "kpiInvolvedBusinesses: KPI" as KPIInvolvedBusinesses_Torino {
     id_kpi = "participants_004"
     name = "Businesses active on Re4Circular"
     category = "Waste"
@@ -198,10 +233,12 @@ object "kpiInvolvedBusinesses: KPIParticipants" as KPIInvolvedBusinesses_Torino 
     provider = "Re4Circular"
     calculationFrequency = "Monthly"
     unitText = "Number of businesses"
-    target = 20
+    minThreshold = 15
+    maxThreshold = 25
+    hasCategoryLabel = false
 }
 
-object "kpiReuseBusinesses: KPIParticipants" as KPIReuseBusinesses_Torino {
+object "kpiReuseBusinesses: KPI" as KPIReuseBusinesses_Torino {
     id_kpi = "participants_005"
     name = "Businesses re-using textiles through Re4Circular"
     category = "Waste"
@@ -209,10 +246,12 @@ object "kpiReuseBusinesses: KPIParticipants" as KPIReuseBusinesses_Torino {
     provider = "Re4Circular"
     calculationFrequency = "Monthly"
     unitText = "Number of businesses"
-    target = 10
+    minThreshold = 8
+    maxThreshold = 12
+    hasCategoryLabel = false
 }
 
-object "kpiWasteAvoided: KPIWasteAvoided" as KPIWasteAvoided_Torino {
+object "kpiWasteAvoided: KPI" as KPIWasteAvoided_Torino {
     id_kpi = "waste_001"
     name = "Waste avoided through Re4Circular"
     category = "Waste"
@@ -220,10 +259,12 @@ object "kpiWasteAvoided: KPIWasteAvoided" as KPIWasteAvoided_Torino {
     provider = "Re4Circular"
     calculationFrequency = "Monthly"
     unitText = "Tons"
-    target = 10
+    minThreshold = 8
+    maxThreshold = 12
+    hasCategoryLabel = false
 }
 
-object "kpiCo2Avoided: KPICo2Avoided" as KPICo2Avoided_Torino {
+object "kpiCo2Avoided: KPI" as KPICo2Avoided_Torino {
     id_kpi = "co2_001"
     name = "Co2 avoided through collection of waste through Re4Circular"
     category = "Waste"
@@ -231,10 +272,12 @@ object "kpiCo2Avoided: KPICo2Avoided" as KPICo2Avoided_Torino {
     provider = "DKSR"
     calculationFrequency = "Monthly"
     unitText = "Tons"
-    target = 1
+    minThreshold = 2
+    maxThreshold = 8
+    hasCategoryLabel = false
 }
 
-object "kpiWasteSorted: KPIWasteSorted" as KPIWasteSorted_Torino {
+object "kpiWasteSorted: KPI" as KPIWasteSorted_Torino {
     id_kpi = "waste_006"
     name = "Amount of correctly sorted waste in bins using ReLearn sensors"
     category = "Waste"
@@ -242,12 +285,13 @@ object "kpiWasteSorted: KPIWasteSorted" as KPIWasteSorted_Torino {
     provider = "ReLearn"
     calculationFrequency = "Monthly"
     unitText = "Kg"
-    target = 1000
-
+    minThreshold = 800
+    maxThreshold = 1200
+    hasCategoryLabel = false
 }
 
 
-object "kpiCollectedWaste: KPICollectedWaste" as KPICollectedWaste_Torino {
+object "kpiCollectedWaste: KPI" as KPICollectedWaste_Torino {
     id_kpi = "waste_007"
     name = "Amount of collected textile waste"
     category = "Waste"
@@ -255,13 +299,15 @@ object "kpiCollectedWaste: KPICollectedWaste" as KPICollectedWaste_Torino {
     provider = "ReLearn"
     calculationFrequency = "Monthly"
     unitText = "Kg"
-    target = 6000
+    minThreshold = 5000
+    maxThreshold = 7000
+    hasCategoryLabel = false
 }
 
 
 
 
-object "kpiTextileWastePerPerson: KPITextileWastePerPerson" as KPITextileWastePerPerson_Torino {
+object "kpiTextileWastePerPerson: KPI" as KPITextileWastePerPerson_Torino {
     id_kpi = "waste_010"
     name = "Amount of yearly textile waste per person"
     category = "Waste"
@@ -269,9 +315,12 @@ object "kpiTextileWastePerPerson: KPITextileWastePerPerson" as KPITextileWastePe
     provider = "City"
     calculationFrequency = "Yearly"
     unitText = "Kg"
+    minThreshold = 10
+    maxThreshold = 30
+    hasCategoryLabel = false
 }
 
-object "kpiHouseholdInvolvedThreeBagCollection: KPIParticipants" as KPIHouseholds_Torino {
+object "kpiHouseholdInvolvedThreeBagCollection: KPI" as KPIHouseholds_Torino {
     id_kpi = "participants_006"
     name = "Households participating in the three bags collection"
     category = "Waste"
@@ -279,10 +328,12 @@ object "kpiHouseholdInvolvedThreeBagCollection: KPIParticipants" as KPIHousehold
     provider = "Torino"
     calculationFrequency = "Monthly"
     unitText = "Households"
-    target = 100
+    minThreshold = 80
+    maxThreshold = 120
+    hasCategoryLabel = false
 }
 
-object "kpiCollectedClothes: KPICollectedWaste" as KPICollectedClothes_Torino {
+object "kpiCollectedClothes: KPI" as KPICollectedClothes_Torino {
     id_kpi = "waste_011"
     name = "Amount of collected textile clothes"
     category = "Waste"
@@ -290,13 +341,14 @@ object "kpiCollectedClothes: KPICollectedWaste" as KPICollectedClothes_Torino {
     provider = "City of Torino"
     calculationFrequency = "Monthly"
     unitText = "Kg"
-    target = 6000
+    minThreshold = 5500
+    maxThreshold = 6500
 }
 
 
 
 
-object "kpiCollectedTextileWaste: KPICollectedWaste" as KPICollectedTextileWaste_Torino {
+object "kpiCollectedTextileWaste: KPI" as KPICollectedTextileWaste_Torino {
     id_kpi = "waste_012"
     name = "Amount of other types of textiles collected"
     category = "Waste"
@@ -304,10 +356,11 @@ object "kpiCollectedTextileWaste: KPICollectedWaste" as KPICollectedTextileWaste
     provider = "City of Torino"
     calculationFrequency = "Monthly"
     unitText = "Kg"
-    target = 5000
+    minThreshold = 4500
+    maxThreshold = 5500
 }
 
-object "kpiDiscardedWaste: KPICollectedWaste" as KPIDiscardedTextileWaste_Torino {
+object "kpiDiscardedWaste: KPI" as KPIDiscardedTextileWaste_Torino {
     id_kpi = "waste_013"
     name = "Amount of textile waste discarded from the differentiated share"
     category = "Waste"
@@ -315,10 +368,11 @@ object "kpiDiscardedWaste: KPICollectedWaste" as KPIDiscardedTextileWaste_Torino
     provider = "City of Torino"
     calculationFrequency = "Monthly"
     unitText = "Kg"
-    target = 50
+    minThreshold = 40
+    maxThreshold = 60
 }
 
-object "kpiCollectedTextileWasteEcoIsole: KPICollectedWaste" as KPICollectedTextileWasteEcoIsole_Torino {
+object "kpiCollectedTextileWasteEcoIsole: KPI" as KPICollectedTextileWasteEcoIsole_Torino {
     id_kpi = "waste_014"
     name = "Amount of textile left in the indifferentiated waste (Eco-Isole)"
     category = "Waste"
@@ -326,11 +380,12 @@ object "kpiCollectedTextileWasteEcoIsole: KPICollectedWaste" as KPICollectedText
     provider = "City of Torino"
     calculationFrequency = "Monthly"
     unitText = "Kg"
-    target = 3000
+    minThreshold = 2800
+    maxThreshold = 3200
 }
 
 
-object "kpiCollectedClothes2: KPICollectedWaste" as KPICollectedClothes_Torino2 {
+object "kpiCollectedClothes2: KPI" as KPICollectedClothes_Torino2 {
     id_kpi = "waste_015"
     name = "Amount of collected textile clothes"
     category = "Waste"
@@ -338,7 +393,8 @@ object "kpiCollectedClothes2: KPICollectedWaste" as KPICollectedClothes_Torino2 
     provider = "City of Torino"
     calculationFrequency = "Monthly"
     unitText = "Kg"
-    target = 100
+    minThreshold = 90
+    maxThreshold = 110
 }
 
 Torino --> KPICollectedClothes_Torino

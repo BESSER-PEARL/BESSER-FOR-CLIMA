@@ -1,6 +1,6 @@
 {
     "sofia": {
-        "KPITraffic": {
+        "KPI": {
             "id_kpi": "traffic001",
             "name": "Traffic Congestion Level",
             "category": "Transport",
@@ -8,73 +8,13 @@
             "provider": "TransportDepartment",
             "calculationFrequency": "Hourly",
             "unitText": "Number of Cars",
-            "target": 30
-        }
-    },
-    "differdange": {
-        "KPITemp": {
-            "id_kpi": "temp001",
-            "name": "Average Temperature",
-            "category": "Environment",
-            "description": "Measures the average temperature of the city",
-            "provider": "WeatherService",
-            "calculationFrequency": "Daily",
-            "unitText": "Celsius",
-            "threshold": 25
-        },
-        "KPIMoney": {
-            "id_kpi": "money001",
-            "name": "Money Invested",
-            "category": "Environment",
-            "description": "Measures the money invested in green stuff",
-            "provider": "BankService",
-            "calculationFrequency": "Weekly",
-            "unitText": "Euros",
-            "target": 1000
-        },
-        "KPITotalRenewableEnergy": {
-            "id_kpi": "energy001",
-            "name": "Percentage of renewable energy in Differdange",
-            "category": "Energy",
-            "description": "Percentage of renewable energy in Differdange based on total amount of energy",
-            "provider": "Solution Provider",
-            "calculationFrequency": "Monthly",
-            "unitText": "Percentage",
-            "target": 20
-        },
-        "KPINumberHouseholdRenewableEnergy": {
-            "id_kpi": "energy002",
-            "name": "Household with renewable energy",
-            "category": "Energy",
-            "description": "Number of households producing any kind of renewable energy",
-            "provider": "Citizens",
-            "calculationFrequency": "Monthly",
-            "unitText": "Number",
-            "target": 500
-        },
-        "KPIPeakSolarEnergy": {
-            "id_kpi": "energy003",
-            "name": "Peak solar energy",
-            "category": "Energy",
-            "description": "Peak solar energy in Differdange",
-            "provider": "Differdange",
-            "calculationFrequency": "Monthly",
-            "unitText": "KW peak",
-            "target": 1000
+            "minThreshold": 10,
+            "maxThreshold": 50,
+            "hasCategoryLabel": false
         }
     },
     "cascais": {
-        "KPICollectedWaste": {
-            "id_kpi": "waste001",
-            "name": "Collected Textile Waste in Ton",
-            "category": "Waste",
-            "description": "Total textile waste collected in Cascais",
-            "provider": "WasteDepartment",
-            "calculationFrequency": "Weekly",
-            "unitText": "Tons",
-            "target": 10
-        },
-        "KPISecondHandCustomers": {
+        "KPI": {
             "id_kpi": "waste002",
             "name": "Customers in second hand shops",
             "category": "Waste",
@@ -82,11 +22,13 @@
             "provider": "Shops",
             "calculationFrequency": "Daily",
             "unitText": "Number of people",
-            "target": 1000
+            "minThreshold": 500,
+            "maxThreshold": 1500,
+            "hasCategoryLabel": true
         }
     },
     "torino": {
-        "KPICollectedWaste": {
+        "KPI": {
             "id_kpi": "waste_015",
             "name": "Amount of collected textile clothes",
             "category": "Waste",
@@ -94,56 +36,22 @@
             "provider": "City of Torino",
             "calculationFrequency": "Monthly",
             "unitText": "Kg",
-            "target": 100
-        },
-        "KPIParticipants": {
-            "id_kpi": "participants_006",
-            "name": "Households participating in the three bags collection",
-            "category": "Waste",
-            "description": "Households participating in the three bags collection",
-            "provider": "Torino",
+            "minThreshold": 90,
+            "maxThreshold": 110
+        }
+    },
+    "differdange": {
+        "KPI": {
+            "id_kpi": "energy003",
+            "name": "Peak solar energy",
+            "category": "Energy",
+            "description": "Peak solar energy in Differdange",
+            "provider": "Differdange",
             "calculationFrequency": "Monthly",
-            "unitText": "Households",
-            "target": 100
-        },
-        "KPIWasteAvoided": {
-            "id_kpi": "waste_001",
-            "name": "Waste avoided through Re4Circular",
-            "category": "Waste",
-            "description": "Waste avoided through Re4Circular (collecting material before it becomes waste)",
-            "provider": "Re4Circular",
-            "calculationFrequency": "Monthly",
-            "unitText": "Tons",
-            "target": 10
-        },
-        "KPICo2Avoided": {
-            "id_kpi": "co2_001",
-            "name": "Co2 avoided through collection of waste through Re4Circular",
-            "category": "Waste",
-            "description": "Co2 avoided through collection of waste through Re4Circular",
-            "provider": "DKSR",
-            "calculationFrequency": "Monthly",
-            "unitText": "Tons",
-            "target": 1
-        },
-        "KPIWasteSorted": {
-            "id_kpi": "waste_006",
-            "name": "Amount of correctly sorted waste in bins using ReLearn sensors",
-            "category": "Waste",
-            "description": "Amount of correctly sorted waste in bins using ReLearn sensors",
-            "provider": "ReLearn",
-            "calculationFrequency": "Monthly",
-            "unitText": "Kg",
-            "target": 1000
-        },
-        "KPITextileWastePerPerson": {
-            "id_kpi": "waste_010",
-            "name": "Amount of yearly textile waste per person",
-            "category": "Waste",
-            "description": "Amount of yearly textile waste per person",
-            "provider": "City",
-            "calculationFrequency": "Yearly",
-            "unitText": "Kg"
+            "unitText": "KW peak",
+            "minThreshold": 800,
+            "maxThreshold": 1200,
+            "hasCategoryLabel": false
         }
     },
     "athens": {},
