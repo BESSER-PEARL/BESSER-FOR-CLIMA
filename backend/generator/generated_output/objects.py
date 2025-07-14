@@ -1,60 +1,64 @@
 from classes import *
 
-kpiTemp_Differdange = KPITemp(id_kpi = "temp001", name = "Average Temperature", category = "Environment", description = "Measures the average temperature of the city", provider = "WeatherService", calculationFrequency = "Daily", unitText = "Celsius", threshold = "25")
+tempValue1 = KPIValue(kpiValue = "22", timestamp = "2025-07-07 10:00:00", currentStanding = "Good")
 
-kpiMoney_Differdange = KPIMoney(id_kpi = "money001", name = "Money Invested", category = "Environment", description = "Measures the money invested in green stuff", provider = "BankService", calculationFrequency = "Weekly", unitText = "Euros", target = "1000")
+moneyValue1 = KPIValue(kpiValue = "1200", timestamp = "2025-07-07 10:00:00", currentStanding = "Good")
 
-kpiTrafficCongestion_Sofia = KPITraffic(id_kpi = "traffic001", name = "Traffic Congestion Level", category = "Transport", description = "Measures the level of traffic congestion", provider = "TransportDepartment", calculationFrequency = "Hourly", unitText = "Number of Cars", target = "30")
+kpiTrafficCongestion_Sofia = KPI(id_kpi = "traffic001", name = "Traffic Congestion Level", category = "Transport", description = "Measures the level of traffic congestion", provider = "TransportDepartment", calculationFrequency = "Hourly", unitText = "Number of Cars", minThreshold = "10", maxThreshold = "50")
 
-kpiTotalRenewableEnergy_Differdange = KPITotalRenewableEnergy(id_kpi = "energy001", name = "Percentage of renewable energy in Differdange", category = "Energy", description = "Percentage of renewable energy in Differdange based on total amount of energy", provider = "Solution Provider", calculationFrequency = "Monthly", unitText = "Percentage", target = "20")
+kpiTotalRenewableEnergy_Differdange = KPI(id_kpi = "energy001", name = "Percentage of renewable energy in Differdange", category = "Energy", description = "Percentage of renewable energy in Differdange based on total amount of energy", provider = "Solution Provider", calculationFrequency = "Monthly", unitText = "Percentage", minThreshold = "15", maxThreshold = "25")
 
-kpiNumberHouseholdRenewableEnergy_Differdange = KPINumberHouseholdRenewableEnergy(id_kpi = "energy002", name = "Household with renewable energy", category = "Energy", description = "Number of households producing any kind of renewable energy", provider = "Citizens", calculationFrequency = "Monthly", unitText = "Number", target = "500")
+kpiNumberHouseholdRenewableEnergy_Differdange = KPI(id_kpi = "energy002", name = "Household with renewable energy", category = "Energy", description = "Number of households producing any kind of renewable energy", provider = "Citizens", calculationFrequency = "Monthly", unitText = "Number", minThreshold = "300", maxThreshold = "700")
 
-kpiPeakSolarEnergy_Differdange = KPIPeakSolarEnergy(id_kpi = "energy003", name = "Peak solar energy", category = "Energy", description = "Peak solar energy in Differdange", provider = "Differdange", calculationFrequency = "Monthly", unitText = "KW peak", target = "1000")
+kpiPeakSolarEnergy_Differdange = KPI(id_kpi = "energy003", name = "Peak solar energy", category = "Energy", description = "Peak solar energy in Differdange", provider = "Differdange", calculationFrequency = "Monthly", unitText = "KW peak", minThreshold = "800", maxThreshold = "1200")
 
-kpiCollectedWaste_Cascais = KPICollectedWaste(id_kpi = "waste001", name = "Collected Textile Waste in Ton", category = "Waste", description = "Total textile waste collected in Cascais", provider = "WasteDepartment", calculationFrequency = "Weekly", unitText = "Tons", target = "10")
+kpiCollectedWaste_Cascais = KPI(id_kpi = "waste001", name = "Collected Textile Waste in Ton", category = "Waste", description = "Total textile waste collected in Cascais", provider = "WasteDepartment", calculationFrequency = "Weekly", unitText = "Tons", minThreshold = "5", maxThreshold = "15")
 
-kpiCSecondHandCustomers_Cascais = KPISecondHandCustomers(id_kpi = "waste002", name = "Customers in second hand shops", category = "Waste", description = "Daily number of customers in second hand shops", provider = "Shops", calculationFrequency = "Daily", unitText = "Number of people", target = "1000")
+kpiCSecondHandCustomers_Cascais = KPI(id_kpi = "waste002", name = "Customers in second hand shops", category = "Waste", description = "Daily number of customers in second hand shops", provider = "Shops", calculationFrequency = "Daily", unitText = "Number of people", minThreshold = "500", maxThreshold = "1500")
 
-kpiCollectedClothes = KPICollectedWaste(id_kpi = "waste_011", name = "Amount of collected textile clothes", category = "Waste", description = "Amount of collected textile clothes", provider = "City of Torino", calculationFrequency = "Monthly", unitText = "Kg", target = "6000")
+kpiCollectedClothes = KPI(id_kpi = "waste_011", name = "Amount of collected textile clothes", category = "Waste", description = "Amount of collected textile clothes", provider = "City of Torino", calculationFrequency = "Monthly", unitText = "Kg", minThreshold = "5500", maxThreshold = "6500")
 
-kpiCollectedTextileWaste = KPICollectedWaste(id_kpi = "waste_012", name = "Amount of other types of textiles collected", category = "Waste", description = "Amount of other types of textiles collected", provider = "City of Torino", calculationFrequency = "Monthly", unitText = "Kg", target = "5000")
+kpiCollectedTextileWaste = KPI(id_kpi = "waste_012", name = "Amount of other types of textiles collected", category = "Waste", description = "Amount of other types of textiles collected", provider = "City of Torino", calculationFrequency = "Monthly", unitText = "Kg", minThreshold = "4500", maxThreshold = "5500")
 
-kpiCollectedTextileWasteEcoIsole = KPICollectedWaste(id_kpi = "waste_014", name = "Amount of textile left in the indifferentiated waste (Eco-Isole)", category = "Waste", description = "Amount of textile left in the indifferentiated waste (Eco-Isole)", provider = "City of Torino", calculationFrequency = "Monthly", unitText = "Kg", target = "3000")
+kpiCollectedTextileWasteEcoIsole = KPI(id_kpi = "waste_014", name = "Amount of textile left in the indifferentiated waste (Eco-Isole)", category = "Waste", description = "Amount of textile left in the indifferentiated waste (Eco-Isole)", provider = "City of Torino", calculationFrequency = "Monthly", unitText = "Kg", minThreshold = "2800", maxThreshold = "3200")
 
-kpiInformedCitizens = KPIParticipants(id_kpi = "participants_001", name = "Citizens informed through Re4Circular", category = "Waste", description = "Citizens informed through Re4Circular", provider = "Re4Circular", calculationFrequency = "Monthly", unitText = "Number of people", target = "1000")
+kpiInformedCitizens = KPI(id_kpi = "participants_001", name = "Citizens informed through Re4Circular", category = "Waste", description = "Citizens informed through Re4Circular", provider = "Re4Circular", calculationFrequency = "Monthly", unitText = "Number of people", minThreshold = "800", maxThreshold = "1200")
 
-kpiDiscardedWaste = KPICollectedWaste(id_kpi = "waste_013", name = "Amount of textile waste discarded from the differentiated share", category = "Waste", description = "Amount of textile waste discarded from the differentiated share", provider = "City of Torino", calculationFrequency = "Monthly", unitText = "Kg", target = "50")
+kpiDiscardedWaste = KPI(id_kpi = "waste_013", name = "Amount of textile waste discarded from the differentiated share", category = "Waste", description = "Amount of textile waste discarded from the differentiated share", provider = "City of Torino", calculationFrequency = "Monthly", unitText = "Kg", minThreshold = "40", maxThreshold = "60")
 
-kpiInvolvedCitizens = KPIParticipants(id_kpi = "participants_002", name = "Citizens active on Re4Circular", category = "Waste", description = "Citizens active on Re4Circular", provider = "Re4Circular", calculationFrequency = "Monthly", unitText = "Number of people", target = "500")
+kpiInvolvedCitizens = KPI(id_kpi = "participants_002", name = "Citizens active on Re4Circular", category = "Waste", description = "Citizens active on Re4Circular", provider = "Re4Circular", calculationFrequency = "Monthly", unitText = "Number of people", minThreshold = "400", maxThreshold = "600")
 
-kpiInformedBusinesses = KPIParticipants(id_kpi = "participants_003", name = "Businesses informed through Re4Circular", category = "Waste", description = "Businesses informed through Re4Circular", provider = "Re4Circular", calculationFrequency = "Monthly", unitText = "Number of businesses", target = "50")
+kpiInformedBusinesses = KPI(id_kpi = "participants_003", name = "Businesses informed through Re4Circular", category = "Waste", description = "Businesses informed through Re4Circular", provider = "Re4Circular", calculationFrequency = "Monthly", unitText = "Number of businesses", minThreshold = "40", maxThreshold = "60")
 
-kpiInvolvedBusinesses = KPIParticipants(id_kpi = "participants_004", name = "Businesses active on Re4Circular", category = "Waste", description = "Businesses active on Re4Circular", provider = "Re4Circular", calculationFrequency = "Monthly", unitText = "Number of businesses", target = "20")
+kpiInvolvedBusinesses = KPI(id_kpi = "participants_004", name = "Businesses active on Re4Circular", category = "Waste", description = "Businesses active on Re4Circular", provider = "Re4Circular", calculationFrequency = "Monthly", unitText = "Number of businesses", minThreshold = "15", maxThreshold = "25")
 
-kpiReuseBusinesses = KPIParticipants(id_kpi = "participants_005", name = "Businesses re-using textiles through Re4Circular", category = "Waste", description = "Businesses re-using textiles through Re4Circular", provider = "Re4Circular", calculationFrequency = "Monthly", unitText = "Number of businesses", target = "10")
+kpiReuseBusinesses = KPI(id_kpi = "participants_005", name = "Businesses re-using textiles through Re4Circular", category = "Waste", description = "Businesses re-using textiles through Re4Circular", provider = "Re4Circular", calculationFrequency = "Monthly", unitText = "Number of businesses", minThreshold = "8", maxThreshold = "12")
 
-kpiWasteAvoided = KPIWasteAvoided(id_kpi = "waste_001", name = "Waste avoided through Re4Circular", category = "Waste", description = "Waste avoided through Re4Circular (collecting material before it becomes waste)", provider = "Re4Circular", calculationFrequency = "Monthly", unitText = "Tons", target = "10")
+kpiWasteAvoided = KPI(id_kpi = "waste_001", name = "Waste avoided through Re4Circular", category = "Waste", description = "Waste avoided through Re4Circular (collecting material before it becomes waste)", provider = "Re4Circular", calculationFrequency = "Monthly", unitText = "Tons", minThreshold = "8", maxThreshold = "12")
 
-kpiCo2Avoided = KPICo2Avoided(id_kpi = "co2_001", name = "Co2 avoided through collection of waste through Re4Circular", category = "Waste", description = "Co2 avoided through collection of waste through Re4Circular", provider = "DKSR", calculationFrequency = "Monthly", unitText = "Tons", target = "1")
+kpiCo2Avoided = KPI(id_kpi = "co2_001", name = "Co2 avoided through collection of waste through Re4Circular", category = "Waste", description = "Co2 avoided through collection of waste through Re4Circular", provider = "DKSR", calculationFrequency = "Monthly", unitText = "Tons", minThreshold = "8", maxThreshold = "2")
 
-kpiWasteSorted = KPIWasteSorted(id_kpi = "waste_006", name = "Amount of correctly sorted waste in bins using ReLearn sensors", category = "Waste", description = "Amount of correctly sorted waste in bins using ReLearn sensors", provider = "ReLearn", calculationFrequency = "Monthly", unitText = "Kg", target = "1000")
+kpiWasteSorted = KPI(id_kpi = "waste_006", name = "Amount of correctly sorted waste in bins using ReLearn sensors", category = "Waste", description = "Amount of correctly sorted waste in bins using ReLearn sensors", provider = "ReLearn", calculationFrequency = "Monthly", unitText = "Kg", minThreshold = "800", maxThreshold = "1200")
 
-kpiCollectedWaste = KPICollectedWaste(id_kpi = "waste_007", name = "Amount of collected textile waste", category = "Waste", description = "Amount of collected textile waste", provider = "ReLearn", calculationFrequency = "Monthly", unitText = "Kg", target = "6000")
+kpiCollectedWaste = KPI(id_kpi = "waste_007", name = "Amount of collected textile waste", category = "Waste", description = "Amount of collected textile waste", provider = "ReLearn", calculationFrequency = "Monthly", unitText = "Kg", minThreshold = "5000", maxThreshold = "7000")
 
-kpiTextileWastePerPerson = KPITextileWastePerPerson(id_kpi = "waste_010", name = "Amount of yearly textile waste per person", category = "Waste", description = "Amount of yearly textile waste per person", provider = "City", calculationFrequency = "Yearly", unitText = "Kg")
+kpiTextileWastePerPerson = KPI(id_kpi = "waste_010", name = "Amount of yearly textile waste per person", category = "Waste", description = "Amount of yearly textile waste per person", provider = "City", calculationFrequency = "Yearly", unitText = "Kg", minThreshold = "10", maxThreshold = "30")
 
-kpiHouseholdInvolvedThreeBagCollection = KPIParticipants(id_kpi = "participants_006", name = "Households participating in the three bags collection", category = "Waste", description = "Households participating in the three bags collection", provider = "Torino", calculationFrequency = "Monthly", unitText = "Households", target = "100")
+kpiHouseholdInvolvedThreeBagCollection = KPI(id_kpi = "participants_006", name = "Households participating in the three bags collection", category = "Waste", description = "Households participating in the three bags collection", provider = "Torino", calculationFrequency = "Monthly", unitText = "Households", minThreshold = "80", maxThreshold = "120")
 
-kpiCollectedClothes2 = KPICollectedWaste(id_kpi = "waste_015", name = "Amount of collected textile clothes", category = "Waste", description = "Amount of collected textile clothes", provider = "City of Torino", calculationFrequency = "Monthly", unitText = "Kg", target = "100")
+kpiCollectedClothes2 = KPI(id_kpi = "waste_015", name = "Amount of collected textile clothes", category = "Waste", description = "Amount of collected textile clothes", provider = "City of Torino", calculationFrequency = "Monthly", unitText = "Kg", minThreshold = "90", maxThreshold = "110")
+
+kpiTemp_Differdange = KPI(id_kpi = "temp001", name = "Average Temperature", category = "Environment", description = "Measures the average temperature of the city", provider = "WeatherService", calculationFrequency = "Daily", unitText = "Celsius", minThreshold = "15", maxThreshold = "35", tempValue1)
+
+kpiMoney_Differdange = KPI(id_kpi = "money001", name = "Money Invested", category = "Environment", description = "Measures the money invested in green stuff", provider = "BankService", calculationFrequency = "Weekly", unitText = "Euros", minThreshold = "500", maxThreshold = "2000", moneyValue1)
 
 sofia = City(name = "Sofia", kpiTrafficCongestion_Sofia)
-
-differdange = City(name = "Differdange", kpiTemp_Differdange, kpiMoney_Differdange, kpiTotalRenewableEnergy_Differdange, kpiNumberHouseholdRenewableEnergy_Differdange, kpiPeakSolarEnergy_Differdange)
 
 cascais = City(name = "Cascais", kpiCollectedWaste_Cascais, kpiCSecondHandCustomers_Cascais)
 
 torino = City(name = "Torino", kpiCollectedClothes, kpiCollectedTextileWaste, kpiCollectedTextileWasteEcoIsole, kpiInformedCitizens, kpiDiscardedWaste, kpiInvolvedCitizens, kpiInformedBusinesses, kpiInvolvedBusinesses, kpiReuseBusinesses, kpiWasteAvoided, kpiCo2Avoided, kpiWasteSorted, kpiCollectedWaste, kpiTextileWastePerPerson, kpiHouseholdInvolvedThreeBagCollection, kpiCollectedClothes2)
+
+differdange = City(name = "Differdange", kpiTemp_Differdange, kpiMoney_Differdange, kpiTotalRenewableEnergy_Differdange, kpiNumberHouseholdRenewableEnergy_Differdange, kpiPeakSolarEnergy_Differdange)
 
 athens = City(name = "Athens")
 

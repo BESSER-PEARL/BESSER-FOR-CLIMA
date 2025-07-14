@@ -26,7 +26,7 @@ from shapely.geometry import shape
 from auth.auth_bearer import KeycloakBearer
 
 # Keycloak configuration constants
-AUTH_SERVER_URL = os.environ.get("KEYCLOAK_SERVER_URL", "https://auth.iworker2.private.list.lu")
+AUTH_SERVER_URL = os.environ.get("KEYCLOAK_SERVER_URL", "https://auth.climaplatform.eu")
 KEYCLOAK_REALM = os.environ.get("KEYCLOAK_REALM", "climaborough")
 CLIENT_ID = os.environ.get("KEYCLOAK_CLIENT_ID", "climaborough-platform")
 
@@ -39,7 +39,7 @@ from pydantic_classes import {% for object in classes %}{% if not ns.first_objec
 {% set ns.first_object_added=false -%}
 from sql_alchemy import Base
 from sql_alchemy import {% for object in classes %}{% if not ns.first_object_added -%}{% set ns.first_object_added = true -%}{% else -%}, {% endif -%} {{object.name}} as {{object.name}}DB{% endfor %}
-from sql_alchemy import KPI as KPIDB
+from sql_alchemy import KPI as KPIDB, KPIValue as KPIValueDB
 
 import logging
 
@@ -298,8 +298,8 @@ async def create_kpi(
     """
     Create a new Key Performance Indicator (KPI) for a specified city.
 
-    This endpoint creates a KPI record in the appropriate database table based on the `type_spec` field
-    (or defaults to 'kpitemp' if not provided). Each KPI type may require different fields (target or threshold).
+    This endpoint creates a generic KPI record in the database. All KPIs use the same structure
+    with common fields for provider, name, category, thresholds, etc.
 
     Authentication:
     - Requires JWT token in the header: `Authorization: Bearer <token>`
@@ -308,213 +308,48 @@ async def create_kpi(
     - city_name (str): The name of the city (case-insensitive). Must already exist in the system. Supported cities include:
     Torino, Cascais, Differdange, Sofia, Athens, Grenoble-Alpes, Maribor, Ioannina
 
-    Request Body Fields:
-    - id_kpi (str, required): Unique identifier for the KPI (e.g. "waste_001"). For personal info, not used afterwards.
-    - name (str, required): Name of the KPI (e.g. "Collected Textile Waste").
-    - category (str, required): Thematic category (e.g. "Waste", "Energy").
-    - description (str, required): Explanation of what the KPI measures.
-    - provider (str, required): Organization that provides the data.
-    - calculationFrequency (str, required): How often data is calculated (e.g. Monthly, Yearly).
-    - unitText (str, required): Unit of measurement (e.g. Kg, Tons).
-    - type_spec (str, optional): Optional, default to KPI with target not used. Defines the type of KPI model to create. Defaults to 'kpitemp'.
-
-
-
-
-    - threshold (float/int, conditionally required): Only used for type_spec='kpitemp'.
-    - target (float/int, conditionally required): Required for all other types (e.g. 'kpimoney', 'kpiparticipants').
-
-    Supported type_spec values:
-    - kpitemp > requires `threshold`
-    - kpisecondhandcustomers > requires `target`
-    - kpimoney > requires `target`
-    - kpitraffic > requires `target`
-    - kpitotalrenewableenergy > requires `target`
-    - kpicollectedwaste > requires `target`
-    - kpitextilewasteperperson > no extra field
-    - kpinumberhouseholdrenewableenergy > requires `target`
-    - kpiwastesorted > requires `target`
-    - kpico2avoided > requires `target`
-    - kpipeaksolarenergy > requires `target`
-    - kpiparticipants > requires `target`
-    - kpiwasteavoided > requires `target`
+    Request Body Fields (KPI):
+    - provider (str, Optional): The organization or system providing the KPI data.
+    - name (str, required): The name of the KPI.
+    - category (str, required): The category/domain of the KPI (e.g., 'energy', 'waste', 'transport').
+    - description (str, required): A detailed description of the KPI.
+    - calculationFrequency (str, Optional): How often the KPI is calculated (e.g., 'daily', 'monthly', 'yearly').
+    - unitText (str, required): The unit of measurement for the KPI (e.g., 'kWh', 'kg', '%').
+    - id_kpi (str, required): A unique identifier string for the KPI.
+    - minThreshold (float, Optional): The minimum threshold value for the KPI.
+    - maxThreshold (float, Optional): The maximum threshold value for the KPI.
+    - hasCategoryLabel (bool, required): Whether the KPI has category labels.
+    - categoryLabelDictionary (Optional[Dict[int, str]]): A dictionary mapping category labels to their string representations (optional).
 
     Returns:
     - The ID (int) of the newly created KPI in the database.
 
     Errors:
     - 404: City not found
-    - 400: Unsupported KPI type or duplicate ID (integrity error)
+    - 400: Duplicate ID (integrity error) or invalid data
     - 500: Internal server error
     """
     # Get city object
     city = session.query(CityDB).filter(func.lower(CityDB.name) == func.lower(city_name)).first()
     if not city:
         raise HTTPException(status_code=404, detail=f"City {city_name} not found")
-      # Determine the KPI type and create the appropriate DB object
+    
+    # Create the generic KPI DB object
     try:
-        kpi_type = getattr(kpi, "type_spec", "kpimoney").lower() //TODO: Create a KPI with target
-        if kpi_type == "kpi":
-            kpi_type = "kpimoney"
-        kpi_db = None
-        
-        if kpi_type == "kpitemp":
-            kpi_db = KPITempDB(
-                id_kpi=kpi.id_kpi,
-                name=kpi.name,
-                category=kpi.category,
-                description=kpi.description,
-                provider=kpi.provider,
-                calculationFrequency=kpi.calculationFrequency,
-                unitText=kpi.unitText,
-                city_id=city.id,
-                threshold=kpi.dict().get("threshold", 0)
-            )
-        elif kpi_type == "kpisecondhandcustomers":
-            kpi_db = KPISecondHandCustomersDB(
-                id_kpi=kpi.id_kpi,
-                name=kpi.name,
-                category=kpi.category,
-                description=kpi.description,
-                provider=kpi.provider,
-                calculationFrequency=kpi.calculationFrequency,
-                unitText=kpi.unitText,
-                city_id=city.id,
-                target=kpi.dict().get("target", 0)
-            )
-        elif kpi_type == "kpimoney":
-            kpi_db = KPIMoneyDB(
-                id_kpi=kpi.id_kpi,
-                name=kpi.name,
-                category=kpi.category,
-                description=kpi.description,
-                provider=kpi.provider,
-                calculationFrequency=kpi.calculationFrequency,
-                unitText=kpi.unitText,
-                city_id=city.id,
-                target=kpi.dict().get("target", 0)
-            )
-        elif kpi_type == "kpitraffic":
-            kpi_db = KPITrafficDB(
-                id_kpi=kpi.id_kpi,
-                name=kpi.name,
-                category=kpi.category,
-                description=kpi.description,
-                provider=kpi.provider,
-                calculationFrequency=kpi.calculationFrequency,
-                unitText=kpi.unitText,
-                city_id=city.id,
-                target=kpi.dict().get("target", 0)
-            )
-        elif kpi_type == "kpitotalrenewableenergy":
-            kpi_db = KPITotalRenewableEnergyDB(
-                id_kpi=kpi.id_kpi,
-                name=kpi.name,
-                category=kpi.category,
-                description=kpi.description,
-                provider=kpi.provider,
-                calculationFrequency=kpi.calculationFrequency,
-                unitText=kpi.unitText,
-                city_id=city.id,
-                target=kpi.dict().get("target", 0)
-            )
-        elif kpi_type == "kpicollectedwaste":
-            kpi_db = KPICollectedWasteDB(
-                id_kpi=kpi.id_kpi,
-                name=kpi.name,
-                category=kpi.category,
-                description=kpi.description,
-                provider=kpi.provider,
-                calculationFrequency=kpi.calculationFrequency,
-                unitText=kpi.unitText,
-                city_id=city.id,
-                target=kpi.dict().get("target", 0)
-            )
-        elif kpi_type == "kpitextilewasteperperson":
-            kpi_db = KPITextileWastePerPersonDB(
-                id_kpi=kpi.id_kpi,
-                name=kpi.name,
-                category=kpi.category,
-                description=kpi.description,
-                provider=kpi.provider,
-                calculationFrequency=kpi.calculationFrequency,
-                unitText=kpi.unitText,
-                city_id=city.id
-            )
-        elif kpi_type == "kpinumberhouseholdrenewableenergy":
-            kpi_db = KPINumberHouseholdRenewableEnergyDB(
-                id_kpi=kpi.id_kpi,
-                name=kpi.name,
-                category=kpi.category,
-                description=kpi.description,
-                provider=kpi.provider,
-                calculationFrequency=kpi.calculationFrequency,
-                unitText=kpi.unitText,
-                city_id=city.id,
-                target=kpi.dict().get("target", 0)
-            )
-        elif kpi_type == "kpiwastesorted":
-            kpi_db = KPIWasteSortedDB(
-                id_kpi=kpi.id_kpi,
-                name=kpi.name,
-                category=kpi.category,
-                description=kpi.description,
-                provider=kpi.provider,
-                calculationFrequency=kpi.calculationFrequency,
-                unitText=kpi.unitText,
-                city_id=city.id,
-                target=kpi.dict().get("target", 0)
-            )
-        elif kpi_type == "kpico2avoided":
-            kpi_db = KPICo2AvoidedDB(
-                id_kpi=kpi.id_kpi,
-                name=kpi.name,
-                category=kpi.category,
-                description=kpi.description,
-                provider=kpi.provider,
-                calculationFrequency=kpi.calculationFrequency,
-                unitText=kpi.unitText,
-                city_id=city.id,
-                target=kpi.dict().get("target", 0)
-            )
-        elif kpi_type == "kpipeaksolarenergy":
-            kpi_db = KPIPeakSolarEnergyDB(
-                id_kpi=kpi.id_kpi,
-                name=kpi.name,
-                category=kpi.category,
-                description=kpi.description,
-                provider=kpi.provider,
-                calculationFrequency=kpi.calculationFrequency,
-                unitText=kpi.unitText,
-                city_id=city.id,
-                target=kpi.dict().get("target", 0)
-            )
-        elif kpi_type == "kpiparticipants":
-            kpi_db = KPIParticipantsDB(
-                id_kpi=kpi.id_kpi,
-                name=kpi.name,
-                category=kpi.category,
-                description=kpi.description,
-                provider=kpi.provider,
-                calculationFrequency=kpi.calculationFrequency,
-                unitText=kpi.unitText,
-                city_id=city.id,
-                target=kpi.dict().get("target", 0)
-            )
-        elif kpi_type == "kpiwasteavoided":
-            kpi_db = KPIWasteAvoidedDB(
-                id_kpi=kpi.id_kpi,
-                name=kpi.name,
-                category=kpi.category,
-                description=kpi.description,
-                provider=kpi.provider,
-                calculationFrequency=kpi.calculationFrequency,
-                unitText=kpi.unitText,
-                city_id=city.id,
-                target=kpi.dict().get("target", 0)
-            )
-        else:
-            raise HTTPException(status_code=400, detail=f"Unsupported KPI type: {kpi_type}")
+        kpi_db = KPIDB(
+            id_kpi=kpi.id_kpi,
+            name=kpi.name,
+            category=kpi.category,
+            description=kpi.description,
+            provider=kpi.provider,
+            calculationFrequency=kpi.calculationFrequency,
+            unitText=kpi.unitText,
+            minThreshold=kpi.minThreshold,
+            maxThreshold=kpi.maxThreshold,
+            city_id=city.id,
+            hasCategoryLabel=kpi.hasCategoryLabel,
+            categoryLabelDictionary=kpi.categoryLabelDictionary
+        )
         
         session.add(kpi_db)
         session.commit()
@@ -607,16 +442,15 @@ async def get_kpis(city_name: str):
     """
     Retrieve all KPIs for a specific city.
     
-    This endpoint returns a list of all Key Performance Indicators (KPIs) configured for the specified city,
-    regardless of their type. The response includes all KPI metadata (name, category, description, etc.)
-    and type-specific properties (target or threshold values) but does not include time-series data.
+    This endpoint returns a list of all Key Performance Indicators (KPIs) configured for the specified city.
+    The response includes all KPI metadata (name, category, description, thresholds, etc.) but does not include time-series data.
     
     Path Parameters:
     - city_name (str): The name of the city (case-insensitive). Supported cities include:
       Torino, Cascais, Differdange, Sofia, Athens, Grenoble-Alpes, Maribor, Ioannina
     
     Returns:
-    - A list of KPI objects, each containing all metadata fields and type-specific values.
+    - A list of KPI objects, each containing all metadata fields.
       An empty list will be returned if the city exists but has no KPIs.
     
     Errors:
@@ -629,28 +463,28 @@ async def get_kpis(city_name: str):
         if not city:
             raise HTTPException(status_code=404, detail=f"City {city_name} not found")
             
-        results_list = []
-        {% for class in classes -%}
-            {% for parent in class.parents() -%}
-                {% if parent.name == "KPI" %}            
-        query = session.query(kpi_alias, {{class.name | lower }}_alias).\
-            join({{class.name | lower }}_alias, kpi_alias.id == {{class.name | lower}}_alias.id).\
-            join(city_alias, city_alias.id == kpi_alias.city_id).\
-            filter(city_alias.id == city.id)
-
-        # Execute the query to get the results
-        results = query.all()
+        # Query for all KPIs for this city
+        kpis = session.query(KPIDB).filter(KPIDB.city_id == city.id).all()
+        
         # Convert SQLAlchemy objects to dictionaries
-        for result in results:
-            result_dict = {}
-            for table in result: 
-                for key in table.__dict__.keys():
-                    if not key.startswith('_'):
-                        result_dict[key] = getattr(table, key)
-            results_list.append(result_dict)
-                {% endif -%}
-            {% endfor -%}
-        {%- endfor %}
+        results_list = []
+        for kpi in kpis:
+            kpi_dict = {
+                "id": kpi.id,
+                "id_kpi": kpi.id_kpi,
+                "name": kpi.name,
+                "category": kpi.category,
+                "description": kpi.description,
+                "provider": kpi.provider,
+                "calculationFrequency": kpi.calculationFrequency,
+                "unitText": kpi.unitText,
+                "minThreshold": kpi.minThreshold,
+                "maxThreshold": kpi.maxThreshold,
+                "hasCategoryLabel": kpi.hasCategoryLabel,
+                "categoryLabelDictionary": kpi.categoryLabelDictionary
+            }
+            results_list.append(kpi_dict)
+            
         return results_list
     except Exception as e:
         session.rollback()
@@ -726,31 +560,35 @@ async def delete_visualizations_{{object.className.name}}(ids: List[int], depend
 @app.get("/{{object.className.name}}/kpis", response_model=list[object], summary="get all KPI object",  tags=["KPI"])
 async def get_kpis_{{object.className.name}}():
     try:
-        results_list = []
-        {% for class in classes -%}
-            {% for parent in class.parents() -%}
-                {% if parent.name == "KPI" %}            
-        query = session.query(kpi_alias, {{class.name | lower }}_alias).\
-            join({{class.name | lower }}_alias, kpi_alias.id == {{class.name | lower}}_alias.id).\
-            join(city_alias, city_alias.id == kpi_alias.city_id).\
-            filter(func.lower(city_alias.name) == func.lower("{{object.className.name}}"))
-
-        # Execute the query to get the results
-        results = query.all()
+        # Query for all KPIs for this specific city
+        city = session.query(CityDB).filter(func.lower(CityDB.name) == func.lower("{{object.className.name}}")).first()
+        if not city:
+            return []
+        
+        kpis = session.query(KPIDB).filter(KPIDB.city_id == city.id).all()
+        
         # Convert SQLAlchemy objects to dictionaries
-        for result in results:
-            result_dict = {}
-            for table in result: 
-                for key in table.__dict__.keys():
-                    if not key.startswith('_'):
-                        result_dict[key] = getattr(table, key)
-            results_list.append(result_dict)
-                {% endif -%}
-            {% endfor -%}
-        {%- endfor %}
+        results_list = []
+        for kpi in kpis:
+            kpi_dict = {
+                "id": kpi.id,
+                "id_kpi": kpi.id_kpi,
+                "name": kpi.name,
+                "category": kpi.category,
+                "description": kpi.description,
+                "provider": kpi.provider,
+                "calculationFrequency": kpi.calculationFrequency,
+                "unitText": kpi.unitText,
+                "minThreshold": kpi.minThreshold,
+                "maxThreshold": kpi.maxThreshold,
+                "hasCategoryLabel": kpi.hasCategoryLabel,
+                "categoryLabelDictionary": kpi.categoryLabelDictionary
+            }
+            results_list.append(kpi_dict)
+            
         return results_list
     except Exception as e:
-        return [e]
+        return [{"error": str(e)}]
     
 @app.post("/{{object.className.name}}/geojson/")
 async def upload_geojson_{{object.className.name}}(title: str = Query(..., description="Title of the GeoJSON data"), dependencies=[Depends(KeycloakBearer())], geojson_data: dict = Body(..., description="GeoJSON data")):
@@ -845,7 +683,7 @@ async def get_mapdata_for_{{object.className.name}}():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")     
         
-@app.get("/{{object.className.name}}/visualizations", response_model=list[object], summary="get a KPI object", tags = ["Visualisation"])
+@app.get("/{{object.className.name}}/visualizations", response_model=list[object], summary="get visualization objects", tags = ["Visualisation"])
 async def get_visualizations_{{object.className.name}}():
     try:
         results_list = []
