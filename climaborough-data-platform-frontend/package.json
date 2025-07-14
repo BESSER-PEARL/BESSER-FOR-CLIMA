@@ -21,6 +21,7 @@
     "html2canvas": "^1.4.1",
     "jspdf": "^2.5.1",
     "jwt-decode": "^4.0.0",
+    "keycloak-js": "^26.2.0",
     "leaflet": "^1.9.4",
     "plotly.js-dist": "^2.31.1",
     "reconnecting-websocket": "^4.4.0",

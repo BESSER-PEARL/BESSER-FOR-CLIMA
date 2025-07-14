@@ -63,11 +63,6 @@ const router = createRouter({
       component: () => import('../views/DemoDashboard.vue')
     },
     {
-      path: '/callback',
-      name: 'Callback',
-      component: () => import('../components/Callback.vue')
-    },
-    {
       path: '/login',
       name: 'login',
       component: () => import('../views/Login.vue')
@@ -75,18 +70,29 @@ const router = createRouter({
   ]
 })
 
-// Navigation guard - COMMENTED OUT to allow popup authentication on page
-// router.beforeEach((to, from, next) => {
-//   const isAuthenticated = authService.isAuthenticated();
+// Navigation guard for protected routes
+router.beforeEach(async (to, from, next) => {
+  const isAuthenticated = authService.isAuthenticated();
   
-//   if (to.meta.requiresAuth && !isAuthenticated) {
-//     // Store the intended destination
-//     sessionStorage.setItem('postLoginRedirect', to.fullPath);
-//     // Redirect to home page, which will show the login prompt
-//     next('/');
-//   } else {
-//     next();
-//   }
-// });
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    // Store the intended destination
+    sessionStorage.setItem('postLoginRedirect', to.fullPath);
+    // Redirect to login page
+    next('/login');
+  } else {
+    next();
+  }
+});
+
+// Handle successful authentication after page loads
+router.afterEach((to, from) => {
+  // Check if this is a successful login redirect
+  if (authService.isAuthenticated() && to.path !== '/login') {
+    // Emit login success event for components to react to
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('keycloak-login-success'));
+    }, 100);
+  }
+});
 
 export default router

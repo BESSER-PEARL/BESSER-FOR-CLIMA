@@ -26,6 +26,9 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { authService } from '../services/authService';
+import { useAuth } from '../composables/useAuth';
+
+const auth = useAuth();
 import AuthRequired from '../components/AuthRequired.vue';
 
 const dashboardUrl = ref('https://ui.climaplatform.eu/app/data-catalog?embed=true');
@@ -37,13 +40,13 @@ const toggleFullscreen = () => {
 };
 
 onMounted(async () => {
-  if (!authService.isAuthenticated()) {
+  if (!auth.isAuthenticated.value) {
     console.warn("User not authenticated, consider redirecting to login");
     return;
   }
 
   try {
-    const token = await authService.getAccessToken();
+    const token = await auth.getAccessToken();
     
     // Optionally pass token to iframe via postMessage
     const message = {

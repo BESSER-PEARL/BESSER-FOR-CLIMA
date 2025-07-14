@@ -1,7 +1,9 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import WebSocketService from '../js/websocket.js';
-import { authService } from '../services/authService';
+import { useAuth } from '../composables/useAuth';
+
+const auth = useAuth();
 
 const props = defineProps({
   city: {
@@ -46,7 +48,7 @@ const sendMessage = () => {
 
 const getAvailableKPIs = async () => {
   try {
-    const token = await authService.getAccessToken();
+    const token = await auth.getAccessToken();
     const response = await fetch(`http://localhost:8000/${props.city.toLowerCase()}/kpis`, {
       headers: {
         'Authorization': 'Bearer ' + token

@@ -48,14 +48,24 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { authService } from '../services/authService';
+import { useAuth } from '../composables/useAuth';
 
 const router = useRouter();
 const route = useRoute();
 const loginLoading = ref(false);
 const errorMessage = ref('');
+
+const auth = useAuth();
+
+// Handle successful login
+const handleLoginSuccess = () => {
+  loginLoading.value = false;
+  const redirectPath = sessionStorage.getItem('postLoginRedirect') || '/projects';
+  sessionStorage.removeItem('postLoginRedirect');
+  router.push(redirectPath);
+};
 
 // Check for error parameters in URL
 onMounted(() => {
@@ -69,11 +79,18 @@ onMounted(() => {
   }
   
   // Check if user is already authenticated
-  if (authService.isAuthenticated()) {
+  if (auth.isAuthenticated.value) {
     const redirectPath = sessionStorage.getItem('postLoginRedirect') || '/projects';
     sessionStorage.removeItem('postLoginRedirect');
     router.push(redirectPath);
   }
+  
+  // Listen for login success events
+  window.addEventListener('keycloak-login-success', handleLoginSuccess);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('keycloak-login-success', handleLoginSuccess);
 });
 
 const handleLogin = () => {
@@ -83,7 +100,7 @@ const handleLogin = () => {
   try {
     // Get the intended destination
     const redirectPath = sessionStorage.getItem('postLoginRedirect') || '/projects';
-    authService.login(redirectPath);
+    auth.login(redirectPath);
   } catch (error) {
     console.error('Login error:', error);
     errorMessage.value = 'Unable to initiate login. Please try again.';

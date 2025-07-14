@@ -2,22 +2,17 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
 import AuthRequired from '../components/AuthRequired.vue';
-import { authService } from '../services/authService';
+import { useAuth } from '../composables/useAuth';
 
 const router = useRouter();
 
-const userInfo = computed(() => authService.getUserInfo());
-const cityName = computed(() => authService.getUserCity());
-
-// // Optional: print user info for debugging
-// if (userInfo.value) {
-//   console.log('Decoded Keycloak user info:', userInfo.value);
-// }
+// Use authentication composable
+const auth = useAuth();
 
 const isCityUser = computed(() => {
-  if (!userInfo.value) return false;
-  const isCityGroup = userInfo.value.group_membership?.some(group => group.startsWith('/City/'));
-  return isCityGroup && projects.some(project => project.title === cityName.value);
+  if (!auth.userInfo.value) return false;
+  const isCityGroup = auth.userInfo.value.group_membership?.some(group => group.startsWith('/City/'));
+  return isCityGroup && projects.some(project => project.title === auth.userCity.value);
 });
 
 const isMobile = ref(false)
@@ -27,8 +22,8 @@ const checkMobile = () => {
 }
 
 const keycloakLoginSuccessHandler = () => {
-  if (authService.isAuthenticated() && isCityUser.value) {
-    console.log('City user logged in:', cityName.value);
+  if (auth.isAuthenticated.value && isCityUser.value) {
+    console.log('City user logged in:', auth.userCity.value);
   }
 };
 
@@ -104,7 +99,7 @@ const projects = [
           <h1 style="margin-left: 80px; margin-top: 30px">Other Projects</h1>
           <div class="icon-container">
             <div v-for="project in projects" :key="project.id">
-              <div v-if="project.title !== cityName" class="icon">
+              <div v-if="project.title !== auth.userCity.value" class="icon">
                 <RouterLink :to='"Dashboard/" + project.title'>
                   <div>
                     <img class="imagebutton" :src="project.image"><br>

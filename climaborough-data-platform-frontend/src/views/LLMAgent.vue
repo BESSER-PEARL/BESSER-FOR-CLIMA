@@ -1,8 +1,10 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import WebSocketService from '../js/websocket.js';
-import { authService } from '../services/authService';
+import { useAuth } from '../composables/useAuth';
 import AuthRequired from '../components/AuthRequired.vue';
+
+const auth = useAuth();
 
 const pdfs = ref(["PDF1", "PDF2", "PDF3"])
 

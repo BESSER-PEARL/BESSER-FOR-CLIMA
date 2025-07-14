@@ -2,7 +2,7 @@
 import { ref, reactive, computed, onMounted, onBeforeUnmount, watchEffect } from 'vue';
 import { GridLayout, GridItem } from 'grid-layout-plus'
 import { useRoute } from 'vue-router';
-import { authService } from '../services/authService';
+import { useAuth } from '../composables/useAuth';
 import AuthRequired from '../components/AuthRequired.vue';
 
 import ElementForm from '../components/ElementForm.vue'
@@ -28,39 +28,28 @@ import jsPDF from 'jspdf';
 import { to } from 'plotly.js-dist';
 import DashboardChat from '../components/DashboardChat.vue';
 
-// Use the authService for authentication
-// Remove the loggedIn computed since AuthRequired will handle authentication
-
-// Use the authService for user info
-const userInfo = computed(() => authService.getUserInfo());
-const userType = computed(() => {
-  if (!userInfo.value) return null;
-  if (userInfo.value.group_membership?.includes('/Administrator')) return 'admin';
-  if (userInfo.value.group_membership?.some(group => group.startsWith('/City/'))) return 'cityuser';
-  return null;
-});
-
-const userCity = computed(() => authService.getUserCity());
+// Use the authentication composable
+const auth = useAuth();
 
 // Define permissions based on user type
 const canCreateDashboard = computed(() => {
-  return userType.value === 'admin' || (userType.value === 'cityuser' && useRoute().params.city === userCity.value);	
+  return auth.userType.value === 'admin' || (auth.userType.value === 'cityuser' && useRoute().params.city === auth.userCity.value);	
 });
 
 const canUpdateOrDeleteDashboard = (dashboard) => {
-  if (userType.value === 'admin') {
+  if (auth.userType.value === 'admin') {
     return true;
-  } else if (userType.value === 'cityuser' && dashboard.creator === userInfo.value?.preferred_username) {
+  } else if (auth.userType.value === 'cityuser' && dashboard.creator === auth.userInfo.value?.preferred_username) {
     return true;
   }
   return false;
 };
 
 const canReadDashboard = (dashboardCity) => {
-  if (userType.value === 'admin' || userType.value === 'solutionprovider' || userType.value === 'partnerorsupplier' || userType.value === 'citizen') {
+  if (auth.userType.value === 'admin' || auth.userType.value === 'solutionprovider' || auth.userType.value === 'partnerorsupplier' || auth.userType.value === 'citizen') {
     return true;
-  } else if (userType.value === 'cityuser' || userType.value === 'cityangel') {
-    return true; // dashboardCity.toLowerCase() === userCity.value.toLowerCase(); maybe after
+  } else if (auth.userType.value === 'cityuser' || auth.userType.value === 'cityangel') {
+    return true; // dashboardCity.toLowerCase() === auth.userCity.value.toLowerCase(); maybe after
   }
   return false;
 };
@@ -197,7 +186,7 @@ getVisualisations()
 
 const deleteVisualisations = async (idList) => {
     try {
-        const token = await authService.getAccessToken();
+        const token = await auth.getAccessToken();
         fetch('http://localhost:8000/' + city.value.toLowerCase() + '/visualizations', {
             method: 'DELETE',
             headers: {
@@ -265,7 +254,7 @@ async function storeVisualisations() {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + await authService.getAccessToken()
+                        'Authorization': 'Bearer ' + await auth.getAccessToken()
                     },
                     body: JSON.stringify(jsonObj)
                 });
@@ -482,7 +471,7 @@ watchEffect(() => {
 });
 
 const handleKeycloakLoginSuccess = () => {
-    if (authService.isAuthenticated()) {
+    if (auth.isAuthenticated.value) {
         console.log('User logged in, refreshing dashboard');
         getVisualisations();
     }

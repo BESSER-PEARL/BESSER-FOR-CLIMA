@@ -51,20 +51,20 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { authService } from '../services/authService';
+import { useAuth } from '../composables/useAuth';
 
 const router = useRouter();
 const route = useRoute();
 const loginLoading = ref(false);
 
-// Reactive authentication status
-const isAuthenticated = computed(() => authService.isAuthenticated());
+// Use authentication composable
+const auth = useAuth();
 
 // Control modal visibility
-const showAuthModal = ref(!isAuthenticated.value);
+const showAuthModal = ref(!auth.isAuthenticated.value);
 
 // Watch authentication status and update modal visibility
-watch(isAuthenticated, (newValue) => {
+watch(() => auth.isAuthenticated.value, (newValue) => {
   showAuthModal.value = !newValue;
 }, { immediate: true });
 
@@ -73,7 +73,7 @@ const handleLogin = () => {
   try {
     // Store current path for redirect after login
     const currentPath = route.fullPath;
-    authService.login(currentPath);
+    auth.login(currentPath);
   } catch (error) {
     console.error('Login error:', error);
     loginLoading.value = false;

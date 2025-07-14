@@ -1,9 +1,10 @@
 <script setup>
-import { ref } from 'vue';
-import { authService } from '../../services/authService';
+import { ref, onMounted, onUnmounted } from 'vue';
+import { useAuth } from '../../composables/useAuth';
 
 const emit = defineEmits(['login-complete', 'login-cancel']);
 
+const auth = useAuth();
 const loading = ref(false);
 const errorMessage = ref('');
 
@@ -12,13 +13,27 @@ const loginWithKeycloak = () => {
   errorMessage.value = '';
   
   try {
-    authService.login();
+    auth.login();
   } catch (error) {
     console.error('Login error:', error);
     errorMessage.value = 'Unable to initiate login. Please try again.';
     loading.value = false;
   }
 };
+
+// Listen for successful login events
+const handleLoginSuccess = () => {
+  loading.value = false;
+  emit('login-complete');
+};
+
+onMounted(() => {
+  window.addEventListener('keycloak-login-success', handleLoginSuccess);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('keycloak-login-success', handleLoginSuccess);
+});
 </script>
 
 <template>
