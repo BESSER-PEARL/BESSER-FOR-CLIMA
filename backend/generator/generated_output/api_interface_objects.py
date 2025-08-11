@@ -870,15 +870,17 @@ async def create_kpi(
     Torino, Cascais, Differdange, Sofia, Athens, Grenoble-Alpes, Maribor, Ioannina
 
     Request Body Fields (KPI):
-    - provider (str, required): The organization or system providing the KPI data.
     - name (str, required): The name of the KPI.
-    - category (str, required): The category/domain of the KPI (e.g., 'energy', 'waste', 'transport').
     - description (str, required): A detailed description of the KPI.
-    - calculationFrequency (str, required): How often the KPI is calculated (e.g., 'daily', 'monthly', 'yearly').
     - unitText (str, required): The unit of measurement for the KPI (e.g., 'kWh', 'kg', '%').
     - id_kpi (str, required): A unique identifier string for the KPI.
-    - minThreshold (float, required): The minimum threshold value for the KPI.
-    - maxThreshold (float, required): The maximum threshold value for the KPI.
+    - provider (str, Optional): The organization or system providing the KPI data.
+    - category (str, Optional): The category/domain of the KPI (e.g., 'energy', 'waste', 'transport').
+    - calculationFrequency (str, Optional): How often the KPI is calculated (e.g., 'daily', 'monthly', 'yearly').
+    - minThreshold (float, Optional): The minimum threshold value for the KPI.
+    - maxThreshold (float, Optional): The maximum threshold value for the KPI.
+    - hasCategoryLabel (bool, required): Whether the KPI has category labels (default: False).
+    - categoryLabelDictionary (dict, optional): A dictionary mapping category labels to their meanings (e.g., {1: "Low", 2: "Medium", 3: "High"}).
 
     Returns:
     - The ID (int) of the newly created KPI in the database.
@@ -944,8 +946,8 @@ async def add_kpi_values(
     
     Request Body Fields:
     - List of KPIValue objects, each containing:
-      - timestamp (datetime, required): The date/time for the KPI measurement.
       - kpiValue (float, required): The measured value for the KPI at the specified timestamp.
+      - timestamp (datetime, required): The date/time for the KPI measurement.
       - categoryLabel (str, required): The category label for the KPI measurement.
     
     Returns:
@@ -2703,7 +2705,7 @@ async def delete_visualizations_sofia(ids: List[int], dependencies=[Depends(Keyc
 
 
      
-@app.get("/ioannina/kpis", response_model=list[object], summary="get all KPI object",  tags=["KPI"])
+@app.get("/ioannina/kpis", response_model=list[object], summary="get all KPI object",  tags=["KPI_Info"])
 async def get_kpis_ioannina():
     try:
         # Query for all KPIs for this specific city
@@ -2936,7 +2938,7 @@ async def get_visualizations_ioannina():
         return [{"error": str(e)}]
     
      
-@app.get("/maribor/kpis", response_model=list[object], summary="get all KPI object",  tags=["KPI"])
+@app.get("/maribor/kpis", response_model=list[object], summary="get all KPI object",  tags=["KPI_Info"])
 async def get_kpis_maribor():
     try:
         # Query for all KPIs for this specific city
@@ -3169,7 +3171,7 @@ async def get_visualizations_maribor():
         return [{"error": str(e)}]
     
      
-@app.get("/grenoble/kpis", response_model=list[object], summary="get all KPI object",  tags=["KPI"])
+@app.get("/grenoble/kpis", response_model=list[object], summary="get all KPI object",  tags=["KPI_Info"])
 async def get_kpis_grenoble():
     try:
         # Query for all KPIs for this specific city
@@ -3402,7 +3404,7 @@ async def get_visualizations_grenoble():
         return [{"error": str(e)}]
     
      
-@app.get("/athens/kpis", response_model=list[object], summary="get all KPI object",  tags=["KPI"])
+@app.get("/athens/kpis", response_model=list[object], summary="get all KPI object",  tags=["KPI_Info"])
 async def get_kpis_athens():
     try:
         # Query for all KPIs for this specific city
@@ -3635,7 +3637,7 @@ async def get_visualizations_athens():
         return [{"error": str(e)}]
     
      
-@app.get("/differdange/kpis", response_model=list[object], summary="get all KPI object",  tags=["KPI"])
+@app.get("/differdange/kpis", response_model=list[object], summary="get all KPI object",  tags=["KPI_Info"])
 async def get_kpis_differdange():
     try:
         # Query for all KPIs for this specific city
@@ -3868,7 +3870,7 @@ async def get_visualizations_differdange():
         return [{"error": str(e)}]
     
      
-@app.get("/torino/kpis", response_model=list[object], summary="get all KPI object",  tags=["KPI"])
+@app.get("/torino/kpis", response_model=list[object], summary="get all KPI object",  tags=["KPI_Info"])
 async def get_kpis_torino():
     try:
         # Query for all KPIs for this specific city
@@ -4101,7 +4103,7 @@ async def get_visualizations_torino():
         return [{"error": str(e)}]
     
      
-@app.get("/cascais/kpis", response_model=list[object], summary="get all KPI object",  tags=["KPI"])
+@app.get("/cascais/kpis", response_model=list[object], summary="get all KPI object",  tags=["KPI_Info"])
 async def get_kpis_cascais():
     try:
         # Query for all KPIs for this specific city
@@ -4334,7 +4336,7 @@ async def get_visualizations_cascais():
         return [{"error": str(e)}]
     
      
-@app.get("/sofia/kpis", response_model=list[object], summary="get all KPI object",  tags=["KPI"])
+@app.get("/sofia/kpis", response_model=list[object], summary="get all KPI object",  tags=["KPI_Info"])
 async def get_kpis_sofia():
     try:
         # Query for all KPIs for this specific city
@@ -4592,7 +4594,7 @@ async def get_visualizations_sofia():
     
     
     
-@app.get("/ioannina/kpi/", response_model=list[object], summary="get a KPI object", tags = ["KPI"])
+@app.get("/ioannina/kpi/", response_model=list[object], summary="get a KPI object", tags = ["KPI_Info"])
 async def get_kpi_ioannina(id: int):
     try:
         results = session.query(KPIValueDB).join(KPIDB, KPIValueDB.kpi_id == KPIDB.id).join(
@@ -4611,7 +4613,7 @@ async def get_kpi_ioannina(id: int):
     except Exception as e:
         return [{'err': e}]
     
-@app.get("/maribor/kpi/", response_model=list[object], summary="get a KPI object", tags = ["KPI"])
+@app.get("/maribor/kpi/", response_model=list[object], summary="get a KPI object", tags = ["KPI_Info"])
 async def get_kpi_maribor(id: int):
     try:
         results = session.query(KPIValueDB).join(KPIDB, KPIValueDB.kpi_id == KPIDB.id).join(
@@ -4630,7 +4632,7 @@ async def get_kpi_maribor(id: int):
     except Exception as e:
         return [{'err': e}]
     
-@app.get("/grenoble/kpi/", response_model=list[object], summary="get a KPI object", tags = ["KPI"])
+@app.get("/grenoble/kpi/", response_model=list[object], summary="get a KPI object", tags = ["KPI_Info"])
 async def get_kpi_grenoble(id: int):
     try:
         results = session.query(KPIValueDB).join(KPIDB, KPIValueDB.kpi_id == KPIDB.id).join(
@@ -4649,7 +4651,7 @@ async def get_kpi_grenoble(id: int):
     except Exception as e:
         return [{'err': e}]
     
-@app.get("/athens/kpi/", response_model=list[object], summary="get a KPI object", tags = ["KPI"])
+@app.get("/athens/kpi/", response_model=list[object], summary="get a KPI object", tags = ["KPI_Info"])
 async def get_kpi_athens(id: int):
     try:
         results = session.query(KPIValueDB).join(KPIDB, KPIValueDB.kpi_id == KPIDB.id).join(
@@ -4668,7 +4670,7 @@ async def get_kpi_athens(id: int):
     except Exception as e:
         return [{'err': e}]
     
-@app.get("/differdange/kpi/", response_model=list[object], summary="get a KPI object", tags = ["KPI"])
+@app.get("/differdange/kpi/", response_model=list[object], summary="get a KPI object", tags = ["KPI_Info"])
 async def get_kpi_differdange(id: int):
     try:
         results = session.query(KPIValueDB).join(KPIDB, KPIValueDB.kpi_id == KPIDB.id).join(
@@ -4687,7 +4689,7 @@ async def get_kpi_differdange(id: int):
     except Exception as e:
         return [{'err': e}]
     
-@app.get("/torino/kpi/", response_model=list[object], summary="get a KPI object", tags = ["KPI"])
+@app.get("/torino/kpi/", response_model=list[object], summary="get a KPI object", tags = ["KPI_Info"])
 async def get_kpi_torino(id: int):
     try:
         results = session.query(KPIValueDB).join(KPIDB, KPIValueDB.kpi_id == KPIDB.id).join(
@@ -4706,7 +4708,7 @@ async def get_kpi_torino(id: int):
     except Exception as e:
         return [{'err': e}]
     
-@app.get("/cascais/kpi/", response_model=list[object], summary="get a KPI object", tags = ["KPI"])
+@app.get("/cascais/kpi/", response_model=list[object], summary="get a KPI object", tags = ["KPI_Info"])
 async def get_kpi_cascais(id: int):
     try:
         results = session.query(KPIValueDB).join(KPIDB, KPIValueDB.kpi_id == KPIDB.id).join(
@@ -4725,7 +4727,7 @@ async def get_kpi_cascais(id: int):
     except Exception as e:
         return [{'err': e}]
     
-@app.get("/sofia/kpi/", response_model=list[object], summary="get a KPI object", tags = ["KPI"])
+@app.get("/sofia/kpi/", response_model=list[object], summary="get a KPI object", tags = ["KPI_Info"])
 async def get_kpi_sofia(id: int):
     try:
         results = session.query(KPIValueDB).join(KPIDB, KPIValueDB.kpi_id == KPIDB.id).join(
@@ -4768,6 +4770,10 @@ tags_metadata = [
     {
         "name": "KPI",
         "description": "Operations related to KPI objects",
+    },
+    {
+        "name": "KPI_Info",
+        "description": "Operations related to KPI information retrieval",
     },
 ]
 

@@ -1,239 +1,250 @@
-// Authentication service for managing Keycloak interactions using keycloak-js
+// Authentication service using official Keycloak JavaScript adapter
 import Keycloak from 'keycloak-js';
 import config from '../config/env.js';
 
-// Validation for required environment variables
-if (!config.keycloak.url) {
-  console.warn('KEYCLOAK_URL not set, using fallback');
-}
-if (!config.keycloak.clientId) {
-  console.warn('CLIENT_ID not set, using fallback');
-}
+let keycloak = null;
+let initPromise = null;
 
 // Initialize Keycloak instance
-let keycloak = null;
-
 const initKeycloak = () => {
-  if (!keycloak) {
-    keycloak = new Keycloak({
-      url: config.keycloak.url || 'https://localhost:8080',
-      realm: config.keycloak.realm || 'master',
-      clientId: config.keycloak.clientId || 'your-client-id'
-    });
+  if (initPromise) {
+    return initPromise;
   }
-  return keycloak;
+
+  const keycloakConfig = {
+    url: config.keycloak.url,
+    realm: config.keycloak.realm,
+    clientId: config.keycloak.clientId
+  };
+
+  keycloak = new Keycloak(keycloakConfig);
+
+  initPromise = keycloak.init({
+    onLoad: 'check-sso',
+    checkLoginIframe: false, // Disable iframe checking for better performance
+    pkceMethod: 'S256' // Use PKCE for better security
+    // silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html', // Removed due to X-Frame-Options issue
+  }).then((authenticated) => {
+    console.log('Keycloak initialized, authenticated:', authenticated);
+    
+    // Set up token refresh
+    if (authenticated) {
+      setupTokenRefresh();
+    }
+    
+    return keycloak;
+  }).catch((error) => {
+    console.error('Keycloak initialization failed:', error);
+    throw error;
+  });
+
+  return initPromise;
+};
+
+// Set up automatic token refresh
+const setupTokenRefresh = () => {
+  if (!keycloak) return;
+
+  // Refresh token when it's about to expire (5 minutes before)
+  setInterval(() => {
+    if (keycloak.authenticated) {
+      keycloak.updateToken(300).then((refreshed) => {
+        if (refreshed) {
+          console.log('Token refreshed');
+          // Dispatch event for other components to listen to
+          window.dispatchEvent(new CustomEvent('keycloak-token-refreshed', {
+            detail: { token: keycloak.token }
+          }));
+        }
+      }).catch((error) => {
+        console.error('Failed to refresh token:', error);
+        // Force re-authentication
+        keycloak.login();
+      });
+    }
+  }, 60000); // Check every minute
 };
 
 export const authService = {
-  // Initialize Keycloak with fallback strategies
-  async init(options = {}) {
-    const kc = initKeycloak();
-    
-    // Primary initialization strategy
-    const initOptions = {
-      onLoad: options.onLoad || 'check-sso',
-      checkLoginIframe: false, // Disable iframe checking to avoid X-Frame-Options issues
-      enableLogging: true, // Enable logging for debugging
-      pkceMethod: 'S256', // Use PKCE for security
-      flow: 'standard', // Use standard flow
-      responseMode: 'fragment', // Use fragment response mode
-      checkLoginIframeInterval: 0, // Disable periodic iframe checks
-      silentCheckSsoFallback: false, // Disable fallback that might cause issues
-      ...options
-    };
-    
-    try {
-      // console.log('Initializing Keycloak with options:', initOptions);
-      const authenticated = await kc.init(initOptions);
-      
-      // Set up token refresh
-      this.setupTokenRefresh();
-      
-      // console.log('Keycloak initialized successfully, authenticated:', authenticated);
-      return authenticated;
-    } catch (error) {
-      console.error('Primary Keycloak initialization failed:', error);
-      
-      // Fallback strategy: try with minimal options
-      if (error.error && (error.error.includes('iframe') || error.error.includes('3rd party'))) {
-        console.log('Attempting fallback initialization without SSO check...');
-        
-        try {
-          const fallbackAuthenticated = await kc.init({
-            onLoad: 'login-required', // Force login if needed
-            checkLoginIframe: false,
-            enableLogging: true,
-            pkceMethod: 'S256',
-            flow: 'standard',
-            responseMode: 'fragment'
-          });
-          
-          this.setupTokenRefresh();
-          // console.log('Fallback Keycloak initialization successful');
-          return fallbackAuthenticated;
-        } catch (fallbackError) {
-          console.error('Fallback initialization also failed:', fallbackError);
-          throw fallbackError;
-        }
-      } else {
-        throw error;
-      }
-    }
+  // Initialize Keycloak
+  async init() {
+    return await initKeycloak();
   },
 
-  // Setup automatic token refresh
-  setupTokenRefresh() {
-    const kc = initKeycloak();
-    
-    kc.onTokenExpired = () => {
-      this.refreshToken().catch((error) => {
-        console.error('Failed to refresh token:', error);
-        this.logout();
-      });
-    };
+  // Get Keycloak instance
+  getKeycloak() {
+    return keycloak;
   },
 
-  // Get current authentication status
+  // Check if user is authenticated
   isAuthenticated() {
-    const kc = initKeycloak();
-    return kc.authenticated || false;
+    return keycloak?.authenticated || false;
   },
 
-  // Get user info from token
-  getUserInfo() {
-    const kc = initKeycloak();
-    if (!kc.authenticated) return null;
-    
-    return {
-      ...kc.tokenParsed,
-      name: kc.tokenParsed?.name || kc.tokenParsed?.preferred_username,
-      email: kc.tokenParsed?.email,
-      username: kc.tokenParsed?.preferred_username,
-      group_membership: kc.tokenParsed?.group_membership || []
-    };
-  },
-
-  // Initiate login process
+  // Login
   login(redirectPath = '/') {
-    const kc = initKeycloak();
+    if (!keycloak) {
+      console.error('Keycloak not initialized');
+      return;
+    }
     
-    // Store the intended destination for after login
+    // Store redirect path for after login
     sessionStorage.setItem('postLoginRedirect', redirectPath);
     
-    return kc.login({
-      redirectUri: window.location.origin + (redirectPath === '/' ? '' : redirectPath)
+    return keycloak.login({
+      redirectUri: window.location.origin + '/auth/callback'
     });
   },
 
-  // Handle callback from Keycloak after login (this is handled automatically by keycloak-js)
-  async handleCallback() {
-    // This method is kept for compatibility but keycloak-js handles callbacks automatically
-    const redirectPath = sessionStorage.getItem('postLoginRedirect') || '/';
-    sessionStorage.removeItem('postLoginRedirect');
-    
-    return redirectPath;
-  },
-
-  // Logout from Keycloak
+  // Logout
   logout() {
-    const kc = initKeycloak();
+    if (!keycloak) {
+      console.error('Keycloak not initialized');
+      return;
+    }
     
-    // Clear post login redirect
-    sessionStorage.removeItem('postLoginRedirect');
-    
-    return kc.logout({
+    return keycloak.logout({
       redirectUri: window.location.origin
     });
   },
 
-  // Refresh the token
-  async refreshToken() {
-    const kc = initKeycloak();
+  // Clean up old localStorage tokens from previous authentication system
+  cleanupLocalStorage() {
+    const keysToRemove = [
+      'access_token',
+      'refresh_token', 
+      'token_expiry',
+      'user_info',
+      'auth_token',
+      'keycloak_token'
+    ];
     
-    try {
-      const refreshed = await kc.updateToken(30); // Refresh if token expires in 30 seconds
-      if (refreshed) {
-        // console.log('Token refreshed successfully');
+    keysToRemove.forEach(key => {
+      if (localStorage.getItem(key)) {
+        localStorage.removeItem(key);
+        console.log(`Cleaned up old auth data: ${key}`);
       }
-      return refreshed;
-    } catch (error) {
-      console.error('Failed to refresh token:', error);
-      throw error;
-    }
+    });
   },
 
-  // Get the current access token
+  // Get access token
   async getAccessToken() {
-    const kc = initKeycloak();
-    
-    if (!kc.authenticated) {
-      throw new Error('Not authenticated');
+    if (!keycloak?.authenticated) {
+      return null;
     }
-    
-    // Ensure token is fresh
-    await kc.updateToken(30);
-    return kc.token;
+
+    try {
+      // Refresh token if it's about to expire (5 minutes)
+      await keycloak.updateToken(300);
+      return keycloak.token;
+    } catch (error) {
+      console.error('Failed to get access token:', error);
+      return null;
+    }
   },
 
-  // Get user roles/permissions
+  // Get user info
+  getUserInfo() {
+    if (!keycloak?.authenticated) {
+      return null;
+    }
+    
+    return keycloak.tokenParsed;
+  },
+
+  // Get user profile (detailed info)
+  async getUserProfile() {
+    if (!keycloak?.authenticated) {
+      return null;
+    }
+
+    try {
+      return await keycloak.loadUserProfile();
+    } catch (error) {
+      console.error('Failed to load user profile:', error);
+      return null;
+    }
+  },
+
+  // Get user roles
   getUserRoles() {
-    const kc = initKeycloak();
-    if (!kc.authenticated) return [];
+    if (!keycloak?.authenticated) {
+      return [];
+    }
     
-    const realmRoles = kc.realmAccess?.roles || [];
-    const clientRoles = Object.values(kc.resourceAccess || {}).flatMap(client => client.roles || []);
-    const groupMembership = kc.tokenParsed?.group_membership || [];
+    const realmRoles = keycloak.realmAccess?.roles || [];
+    const resourceRoles = keycloak.resourceAccess?.[config.keycloak.clientId]?.roles || [];
     
-    return [...realmRoles, ...clientRoles, ...groupMembership];
+    return [...realmRoles, ...resourceRoles];
   },
 
   // Check if user has specific role
   hasRole(role) {
-    const kc = initKeycloak();
-    if (!kc.authenticated) return false;
+    if (!keycloak?.authenticated) {
+      return false;
+    }
     
-    return kc.hasRealmRole(role) || kc.hasResourceRole(role) || this.getUserRoles().includes(role);
+    return keycloak.hasRealmRole(role) || keycloak.hasResourceRole(role);
   },
 
-  // Check if user belongs to a city group
+  // Get user city from groups
   getUserCity() {
     const userInfo = this.getUserInfo();
-    if (!userInfo) return null;
+    if (!userInfo || !userInfo.group_membership) {
+      return null;
+    }
     
-    const cityGroup = userInfo.group_membership?.find(group => group.startsWith('/City/'));
-    return cityGroup ? cityGroup.split('/').pop() : null;
+    const cityGroup = userInfo.group_membership.find(group => group.startsWith('/City/'));
+    return cityGroup ? cityGroup.replace('/City/', '') : null;
   },
 
-  // Get the Keycloak instance (for advanced usage)
-  getKeycloakInstance() {
-    return initKeycloak();
+  // Check if user has admin role
+  isAdmin() {
+    return this.hasRole('admin') || this.hasRole('realm-admin');
   },
 
-  // Clean up (for compatibility with old implementation)
-  cleanupLocalStorage() {
-    localStorage.removeItem('keycloak_token');
-    localStorage.removeItem('keycloak_refresh_token');
-    localStorage.removeItem('keycloak_expires_at');
-    localStorage.removeItem('userType');
+  // Update token
+  async updateToken(minValidity = 5) {
+    if (!keycloak?.authenticated) {
+      return false;
+    }
+
+    try {
+      return await keycloak.updateToken(minValidity);
+    } catch (error) {
+      console.error('Token update failed:', error);
+      return false;
+    }
+  },
+
+  // Handle callback (for compatibility, but Keycloak JS handles this automatically)
+  async handleCallback() {
+    // This is handled automatically by Keycloak JS
+    const redirectPath = sessionStorage.getItem('postLoginRedirect') || '/';
+    sessionStorage.removeItem('postLoginRedirect');
+    
+    // Dispatch success event
+    window.dispatchEvent(new CustomEvent('keycloak-login-success'));
+    
+    return redirectPath;
   }
 };
 
-// Create fetch wrapper for automatic token handling
+// Create fetch wrapper with automatic token handling
 export const authFetch = async (url, options = {}) => {
   try {
     const token = await authService.getAccessToken();
-    
     const headers = {
       ...options.headers,
-      'Authorization': `Bearer ${token}`
+      ...(token && { Authorization: `Bearer ${token}` })
     };
-    
+
     return fetch(url, {
       ...options,
       headers
     });
   } catch (error) {
-    console.error('Auth fetch error:', error);
+    console.error('Error in authFetch:', error);
     throw error;
   }
 };

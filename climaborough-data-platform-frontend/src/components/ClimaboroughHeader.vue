@@ -150,7 +150,7 @@ const toggleMobileMenu = () => {
           <RouterLink @click="closeMobileMenu" to="/">{{ $t('header.home') }}</RouterLink>
           <!-- <RouterLink @click="closeMobileMenu" to="/demo">DEMO Dashboard</RouterLink> -->
           <a @click="handleNavigation('/projects')" class="nav-link">Dashboard</a>
-          <a @click="handleNavigation('/bot')" class="nav-link">ClimaBot</a>
+          <a @click="handleNavigation('/bot')" class="nav-link">Clima Agent</a>
           <a @click="handleNavigation('/datacatalogue')" class="nav-link">Data Catalogue</a>
           <RouterLink @click="closeMobileMenu" to="/about">{{ $t('header.About') }}</RouterLink>
           <div class="user" @click="toggleLogin">
