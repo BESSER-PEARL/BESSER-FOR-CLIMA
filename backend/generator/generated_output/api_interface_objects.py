@@ -997,6 +997,61 @@ async def add_kpi_values(
             
     return db_entries
 
+@app.delete("/city/{city_name}/kpi/{kpi_id}", dependencies=[Depends(KeycloakBearer())], summary="Delete a KPI", tags=["KPI"])
+async def delete_kpi(
+    city_name: str,
+    kpi_id: int
+):
+    """
+    Delete a KPI and all its associated values for a specified city.
+    
+    This endpoint deletes a KPI record and all associated KPI values from the database.
+    It also handles any visualizations that reference this KPI by setting their kpi_id to NULL.
+    This operation is irreversible.
+    
+    Authentication:
+    - Requires JWT token in the header: `Authorization: Bearer <token>`
+    
+    Path Parameters:
+    - city_name (str): The name of the city (case-insensitive). Must already exist in the system. Supported cities include:
+    Torino, Cascais, Differdange, Sofia, Athens, Grenoble-Alpes, Maribor, Ioannina
+    - kpi_id (int): The ID of the KPI to delete.
+    
+    Returns:
+    - Success message confirming deletion.
+    
+    Errors:
+    - 404: City or KPI not found
+    - 500: Internal server error
+    """
+    try:
+        # Get city object
+        city = session.query(CityDB).filter(func.lower(CityDB.name) == func.lower(city_name)).first()
+        if not city:
+            raise HTTPException(status_code=404, detail=f"City {city_name} not found")
+        
+        # Get KPI object
+        kpi = session.query(KPIDB).filter_by(id=kpi_id, city_id=city.id).first()
+        if not kpi:
+            raise HTTPException(status_code=404, detail=f"KPI {kpi_id} not found for city {city_name}")
+        
+        # First, delete all visualizations that reference this KPI
+        # This prevents foreign key constraint violations
+        session.query(VisualisationDB).filter_by(kpi_id=kpi.id).delete()
+        
+        # Delete all KPI values (due to foreign key constraint)
+        session.query(KPIValueDB).filter_by(kpi_id=kpi.id).delete()
+        
+        # Delete the KPI itself
+        session.delete(kpi)
+        session.commit()
+        
+        return {"message": f"KPI {kpi_id} and all associated values and visualizations deleted successfully from city {city_name}"}
+        
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
 
 @app.get("/city/{city_name}/kpis", response_model=list[object], summary="Get all KPI objects, Value: Torino,Cascais,Differdange,Sofia,Athens,Grenoble-Alpes,Maribor,Ioannina", tags=["KPI"])
 async def get_kpis(city_name: str):
