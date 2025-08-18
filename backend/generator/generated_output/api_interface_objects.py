@@ -4594,157 +4594,165 @@ async def get_visualizations_sofia():
     
     
     
-@app.get("/ioannina/kpi/", response_model=list[object], summary="get a KPI object", tags = ["KPI_Info"])
+@app.get("/ioannina/kpi/", response_model=List[KPIValue], summary="get a KPI object", tags = ["KPI_Info"])
 async def get_kpi_ioannina(id: int):
     try:
         results = session.query(KPIValueDB).join(KPIDB, KPIValueDB.kpi_id == KPIDB.id).join(
             CityDB, KPIDB.city_id == CityDB.id).filter(func.lower(CityDB.name) == func.lower("ioannina"), KPIDB.id == id).order_by(KPIValueDB.timestamp).all()
-        results_list = []
+        
+        # Convert SQLAlchemy objects to Pydantic models
+        kpi_values = []
         for result in results:
-            res = dict()
-            attributes = inspect(result).attrs
-            for attr in attributes:
-                if attr.key.lower() == "values" or attr.key.lower() == "value":
-                    continue
-                res[attr.key] = getattr(result, attr.key)
-            results_list.append(res)
-
-        return results_list
+            kpi_value = KPIValue(
+                kpiValue=result.kpiValue,
+                timestamp=result.timestamp,
+                categoryLabel=result.categoryLabel if hasattr(result, 'categoryLabel') else ""
+            )
+            kpi_values.append(kpi_value)
+        
+        return kpi_values
     except Exception as e:
-        return [{'err': e}]
+        raise HTTPException(status_code=500, detail=str(e))
     
-@app.get("/maribor/kpi/", response_model=list[object], summary="get a KPI object", tags = ["KPI_Info"])
+@app.get("/maribor/kpi/", response_model=List[KPIValue], summary="get a KPI object", tags = ["KPI_Info"])
 async def get_kpi_maribor(id: int):
     try:
         results = session.query(KPIValueDB).join(KPIDB, KPIValueDB.kpi_id == KPIDB.id).join(
             CityDB, KPIDB.city_id == CityDB.id).filter(func.lower(CityDB.name) == func.lower("maribor"), KPIDB.id == id).order_by(KPIValueDB.timestamp).all()
-        results_list = []
+        
+        # Convert SQLAlchemy objects to Pydantic models
+        kpi_values = []
         for result in results:
-            res = dict()
-            attributes = inspect(result).attrs
-            for attr in attributes:
-                if attr.key.lower() == "values" or attr.key.lower() == "value":
-                    continue
-                res[attr.key] = getattr(result, attr.key)
-            results_list.append(res)
-
-        return results_list
+            kpi_value = KPIValue(
+                kpiValue=result.kpiValue,
+                timestamp=result.timestamp,
+                categoryLabel=result.categoryLabel if hasattr(result, 'categoryLabel') else ""
+            )
+            kpi_values.append(kpi_value)
+        
+        return kpi_values
     except Exception as e:
-        return [{'err': e}]
+        raise HTTPException(status_code=500, detail=str(e))
     
-@app.get("/grenoble/kpi/", response_model=list[object], summary="get a KPI object", tags = ["KPI_Info"])
+@app.get("/grenoble/kpi/", response_model=List[KPIValue], summary="get a KPI object", tags = ["KPI_Info"])
 async def get_kpi_grenoble(id: int):
     try:
         results = session.query(KPIValueDB).join(KPIDB, KPIValueDB.kpi_id == KPIDB.id).join(
             CityDB, KPIDB.city_id == CityDB.id).filter(func.lower(CityDB.name) == func.lower("grenoble"), KPIDB.id == id).order_by(KPIValueDB.timestamp).all()
-        results_list = []
+        
+        # Convert SQLAlchemy objects to Pydantic models
+        kpi_values = []
         for result in results:
-            res = dict()
-            attributes = inspect(result).attrs
-            for attr in attributes:
-                if attr.key.lower() == "values" or attr.key.lower() == "value":
-                    continue
-                res[attr.key] = getattr(result, attr.key)
-            results_list.append(res)
-
-        return results_list
+            kpi_value = KPIValue(
+                kpiValue=result.kpiValue,
+                timestamp=result.timestamp,
+                categoryLabel=result.categoryLabel if hasattr(result, 'categoryLabel') else ""
+            )
+            kpi_values.append(kpi_value)
+        
+        return kpi_values
     except Exception as e:
-        return [{'err': e}]
+        raise HTTPException(status_code=500, detail=str(e))
     
-@app.get("/athens/kpi/", response_model=list[object], summary="get a KPI object", tags = ["KPI_Info"])
+@app.get("/athens/kpi/", response_model=List[KPIValue], summary="get a KPI object", tags = ["KPI_Info"])
 async def get_kpi_athens(id: int):
     try:
         results = session.query(KPIValueDB).join(KPIDB, KPIValueDB.kpi_id == KPIDB.id).join(
             CityDB, KPIDB.city_id == CityDB.id).filter(func.lower(CityDB.name) == func.lower("athens"), KPIDB.id == id).order_by(KPIValueDB.timestamp).all()
-        results_list = []
+        
+        # Convert SQLAlchemy objects to Pydantic models
+        kpi_values = []
         for result in results:
-            res = dict()
-            attributes = inspect(result).attrs
-            for attr in attributes:
-                if attr.key.lower() == "values" or attr.key.lower() == "value":
-                    continue
-                res[attr.key] = getattr(result, attr.key)
-            results_list.append(res)
-
-        return results_list
+            kpi_value = KPIValue(
+                kpiValue=result.kpiValue,
+                timestamp=result.timestamp,
+                categoryLabel=result.categoryLabel if hasattr(result, 'categoryLabel') else ""
+            )
+            kpi_values.append(kpi_value)
+        
+        return kpi_values
     except Exception as e:
-        return [{'err': e}]
+        raise HTTPException(status_code=500, detail=str(e))
     
-@app.get("/differdange/kpi/", response_model=list[object], summary="get a KPI object", tags = ["KPI_Info"])
+@app.get("/differdange/kpi/", response_model=List[KPIValue], summary="get a KPI object", tags = ["KPI_Info"])
 async def get_kpi_differdange(id: int):
     try:
         results = session.query(KPIValueDB).join(KPIDB, KPIValueDB.kpi_id == KPIDB.id).join(
             CityDB, KPIDB.city_id == CityDB.id).filter(func.lower(CityDB.name) == func.lower("differdange"), KPIDB.id == id).order_by(KPIValueDB.timestamp).all()
-        results_list = []
+        
+        # Convert SQLAlchemy objects to Pydantic models
+        kpi_values = []
         for result in results:
-            res = dict()
-            attributes = inspect(result).attrs
-            for attr in attributes:
-                if attr.key.lower() == "values" or attr.key.lower() == "value":
-                    continue
-                res[attr.key] = getattr(result, attr.key)
-            results_list.append(res)
-
-        return results_list
+            kpi_value = KPIValue(
+                kpiValue=result.kpiValue,
+                timestamp=result.timestamp,
+                categoryLabel=result.categoryLabel if hasattr(result, 'categoryLabel') else ""
+            )
+            kpi_values.append(kpi_value)
+        
+        return kpi_values
     except Exception as e:
-        return [{'err': e}]
+        raise HTTPException(status_code=500, detail=str(e))
     
-@app.get("/torino/kpi/", response_model=list[object], summary="get a KPI object", tags = ["KPI_Info"])
+@app.get("/torino/kpi/", response_model=List[KPIValue], summary="get a KPI object", tags = ["KPI_Info"])
 async def get_kpi_torino(id: int):
     try:
         results = session.query(KPIValueDB).join(KPIDB, KPIValueDB.kpi_id == KPIDB.id).join(
             CityDB, KPIDB.city_id == CityDB.id).filter(func.lower(CityDB.name) == func.lower("torino"), KPIDB.id == id).order_by(KPIValueDB.timestamp).all()
-        results_list = []
+        
+        # Convert SQLAlchemy objects to Pydantic models
+        kpi_values = []
         for result in results:
-            res = dict()
-            attributes = inspect(result).attrs
-            for attr in attributes:
-                if attr.key.lower() == "values" or attr.key.lower() == "value":
-                    continue
-                res[attr.key] = getattr(result, attr.key)
-            results_list.append(res)
-
-        return results_list
+            kpi_value = KPIValue(
+                kpiValue=result.kpiValue,
+                timestamp=result.timestamp,
+                categoryLabel=result.categoryLabel if hasattr(result, 'categoryLabel') else ""
+            )
+            kpi_values.append(kpi_value)
+        
+        return kpi_values
     except Exception as e:
-        return [{'err': e}]
+        raise HTTPException(status_code=500, detail=str(e))
     
-@app.get("/cascais/kpi/", response_model=list[object], summary="get a KPI object", tags = ["KPI_Info"])
+@app.get("/cascais/kpi/", response_model=List[KPIValue], summary="get a KPI object", tags = ["KPI_Info"])
 async def get_kpi_cascais(id: int):
     try:
         results = session.query(KPIValueDB).join(KPIDB, KPIValueDB.kpi_id == KPIDB.id).join(
             CityDB, KPIDB.city_id == CityDB.id).filter(func.lower(CityDB.name) == func.lower("cascais"), KPIDB.id == id).order_by(KPIValueDB.timestamp).all()
-        results_list = []
+        
+        # Convert SQLAlchemy objects to Pydantic models
+        kpi_values = []
         for result in results:
-            res = dict()
-            attributes = inspect(result).attrs
-            for attr in attributes:
-                if attr.key.lower() == "values" or attr.key.lower() == "value":
-                    continue
-                res[attr.key] = getattr(result, attr.key)
-            results_list.append(res)
-
-        return results_list
+            kpi_value = KPIValue(
+                kpiValue=result.kpiValue,
+                timestamp=result.timestamp,
+                categoryLabel=result.categoryLabel if hasattr(result, 'categoryLabel') else ""
+            )
+            kpi_values.append(kpi_value)
+        
+        return kpi_values
     except Exception as e:
-        return [{'err': e}]
+        raise HTTPException(status_code=500, detail=str(e))
     
-@app.get("/sofia/kpi/", response_model=list[object], summary="get a KPI object", tags = ["KPI_Info"])
+@app.get("/sofia/kpi/", response_model=List[KPIValue], summary="get a KPI object", tags = ["KPI_Info"])
 async def get_kpi_sofia(id: int):
     try:
         results = session.query(KPIValueDB).join(KPIDB, KPIValueDB.kpi_id == KPIDB.id).join(
             CityDB, KPIDB.city_id == CityDB.id).filter(func.lower(CityDB.name) == func.lower("sofia"), KPIDB.id == id).order_by(KPIValueDB.timestamp).all()
-        results_list = []
+        
+        # Convert SQLAlchemy objects to Pydantic models
+        kpi_values = []
         for result in results:
-            res = dict()
-            attributes = inspect(result).attrs
-            for attr in attributes:
-                if attr.key.lower() == "values" or attr.key.lower() == "value":
-                    continue
-                res[attr.key] = getattr(result, attr.key)
-            results_list.append(res)
-
-        return results_list
+            kpi_value = KPIValue(
+                kpiValue=result.kpiValue,
+                timestamp=result.timestamp,
+                categoryLabel=result.categoryLabel if hasattr(result, 'categoryLabel') else ""
+            )
+            kpi_values.append(kpi_value)
+        
+        return kpi_values
     except Exception as e:
-        return [{'err': e}]
+        raise HTTPException(status_code=500, detail=str(e))
     
 
 
