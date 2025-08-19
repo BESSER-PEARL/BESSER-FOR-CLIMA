@@ -66,7 +66,7 @@ function getLatestKpiValues(items) {
   const latestValues = {};
   items.forEach(item => {
     // Use the latest KPI value for each category/standing
-    latestValues[item.currentStanding] = item.kpiValue;
+    latestValues[item.categoryLabel] = item.kpiValue;
   });
   return latestValues;
 }
@@ -95,7 +95,7 @@ async function getItems() {
 
     data.forEach(item => {
       items.value.push(item);
-      stands.value.push(item.currentStanding);
+      stands.value.push(item.categoryLabel);
       lastTimestamp.value = formatDate(item.timestamp);
     });
     

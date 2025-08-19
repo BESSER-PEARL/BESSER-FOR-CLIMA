@@ -387,8 +387,8 @@ async def add_kpi_values(
     - List of KPIValue objects, each containing:
       - timestamp (datetime, required): The date/time for the KPI measurement.
       - kpiValue (float, required): The measured value for the KPI at the specified timestamp.
-      - currentStanding (Optional[float]): The overall standing/progress (optional field).
-    
+      - categoryLabel (Optional[str]): The overall standing/progress (optional field).
+
     Returns:
     - List of created or updated KPIValue objects.
     
@@ -415,7 +415,7 @@ async def add_kpi_values(
             
             if existing_entry:
                 existing_entry.kpiValue = kpi_value.kpiValue
-                existing_entry.currentStanding = kpi_value.currentStanding
+                existing_entry.categoryLabel = kpi_value.categoryLabel
                 session.commit()
                 session.refresh(existing_entry)
                 db_entries.append(existing_entry)

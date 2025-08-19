@@ -58,8 +58,8 @@ KPI.attributes={KPI_id_kpi, KPI_name, KPI_category, KPI_description, KPI_provide
 # KPIValue class attributes and methods
 KPIValue_kpiValue: Property = Property(name="kpiValue", type=int_type)
 KPIValue_timestamp: Property = Property(name="timestamp", type=datetime_type)
-KPIValue_currentStanding: Property = Property(name="currentStanding", type=str_type)
-KPIValue.attributes={KPIValue_kpiValue, KPIValue_timestamp, KPIValue_currentStanding}
+KPIValue_categoryLabel: Property = Property(name="categoryLabel", type=str_type)
+KPIValue.attributes={KPIValue_kpiValue, KPIValue_timestamp, KPIValue_categoryLabel}
 
 # KPITemp class attributes and methods
 KPITemp_threshold: Property = Property(name="threshold", type=int_type)

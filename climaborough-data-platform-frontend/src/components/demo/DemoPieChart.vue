@@ -45,13 +45,13 @@ async function getItems() {
     try {
         // Generate mock data
         const mockData = Array.from({ length: 20 }, () => ({
-            currentStanding: ['Good', 'Fair', 'Poor', 'Excellent', 'Average'][Math.floor(Math.random() * 5)],
+            categoryLabel: ['Good', 'Fair', 'Poor', 'Excellent', 'Average'][Math.floor(Math.random() * 5)],
             timestamp: new Date(Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000).toISOString()
         }));
 
         mockData.forEach(item => {
             items.value.push(item);
-            stands.value.push(item.currentStanding);
+            stands.value.push(item.categoryLabel);
             lastTimestamp.value = formatDate(item.timestamp);
         });
 

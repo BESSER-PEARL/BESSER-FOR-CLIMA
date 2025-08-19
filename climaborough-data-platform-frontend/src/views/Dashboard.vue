@@ -886,38 +886,43 @@ const toggleChat = () => {
             </div>
             <div class="container">
                 <div class="widget-bar">
-                    <div class="widget-bar-content" style="margin: 10px">
-                        <a style="display: flex">Choose widgets</a>
-                        <br>
-                        <a>Charts</a>
+                    <div class="widget-bar-content" style="margin: 10px; padding-top: 5px;">
+                        <a style="display: flex; margin-bottom: 15px; font-weight: bold; font-size: 18px;">Choose widgets</a>
+                        
                         <div class="widget-icon" draggable="true" unselectable="on" @drag="drag('LineChart')"
                             @dragend="dragEnd('LineChart')">
                             <img src="/LineChart.png" class="icon" style="width: 80px" @click="toggleKPIForm('LineChart')">
+                            <a style="font-weight: bold; color: #ffffff; margin-top: 2px; display: block; font-size: 14px;">Line Charts</a>
                         </div>
-                        <a>Pie Charts</a>
+                        
                         <div class="widget-icon" draggable="true" unselectable="on" @drag="drag('PieChart')"
                             @dragend="dragEnd('PieChart')">
                             <img src="/PieChart.png" class="icon" style="width: 80px" @click="toggleKPIForm('PieChart')">
+                            <a style="font-weight: bold; color: #ffffff; margin-top: 2px; display: block; font-size: 14px;">Pie Charts</a>
                         </div>
-                        <a>Bar Charts</a>
+                        
                         <div class="widget-icon" draggable="true" unselectable="on" @drag="drag('BarChart')"
                             @dragend="dragEnd('BarChart')">
                             <img src="/BarChart.png" class="icon" style="width: 80px" @click="toggleKPIForm('BarChart')">
+                            <a style="font-weight: bold; color: #ffffff; margin-top: 2px; display: block; font-size: 14px;">Bar Charts</a>
                         </div>
-                        <a>Stats Charts</a>
+                        
                         <div class="widget-icon" draggable="true" unselectable="on" @drag="drag('StatChart')"
                             @dragend="dragEnd('StatChart')">
                             <img src="/StatChart.png" class="icon" style="width: 80px" @click="toggleKPIForm('StatChart')">
+                            <a style="font-weight: bold; color: #ffffff; margin-top: 2px; display: block; font-size: 14px;">Stat Charts</a>
                         </div>
-                        <a>Tables</a>
+                        
                         <div class="widget-icon" draggable="true" unselectable="on" @drag="drag('Table')"
                             @dragend="dragEnd('Table')">
                             <img src="/Table.png" class="icon" style="width: 80px" @click="toggleKPIForm('Table')">
+                            <a style="font-weight: bold; color: #ffffff; margin-top: 2px; display: block; font-size: 14px;">Tables</a>
                         </div>
-                        <a>Maps</a>
+                        
                         <div class="widget-icon" draggable="true" unselectable="on" @drag="drag('Map')"
                             @dragend="dragEnd('Map')">
                             <img src="/Map.png" class="icon" style="width: 80px" @click="createVisualisation('1', 'Map', 'Map', {})">
+                            <a style="font-weight: bold; color: #ffffff; margin-top: 2px; display: block; font-size: 14px;">Maps</a>
                         </div>
                     </div>
                 </div>

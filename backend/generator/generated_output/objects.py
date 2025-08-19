@@ -1,8 +1,8 @@
 from classes import *
 
-tempValue1 = KPIValue(kpiValue = "22", timestamp = "2025-07-07 10:00:00", currentStanding = "Good")
+tempValue1 = KPIValue(kpiValue = "22", timestamp = "2025-07-07 10:00:00", categoryLabel = "Good")
 
-moneyValue1 = KPIValue(kpiValue = "1200", timestamp = "2025-07-07 10:00:00", currentStanding = "Good")
+moneyValue1 = KPIValue(kpiValue = "1200", timestamp = "2025-07-07 10:00:00", categoryLabel = "Good")
 
 kpiTrafficCongestion_Sofia = KPI(id_kpi = "traffic001", name = "Traffic Congestion Level", category = "Transport", description = "Measures the level of traffic congestion", provider = "TransportDepartment", calculationFrequency = "Hourly", unitText = "Number of Cars", minThreshold = "10", maxThreshold = "50")
 
