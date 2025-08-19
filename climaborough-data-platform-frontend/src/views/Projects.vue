@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import AuthRequired from '../components/AuthRequired.vue';
 import { useAuth } from '../composables/useAuth';
@@ -8,6 +8,10 @@ const router = useRouter();
 
 // Use authentication composable
 const auth = useAuth();
+
+const isAdmin = computed(() => {
+  return auth.userType.value === 'admin';
+});
 
 const isCityUser = computed(() => {
   if (!auth.userInfo.value) return false;
@@ -25,6 +29,16 @@ const keycloakLoginSuccessHandler = () => {
   if (auth.isAuthenticated.value && isCityUser.value) {
     console.log('City user logged in:', auth.userCity.value);
   }
+  
+  // Debug information
+  // console.log('Authentication state:', {
+  //   isAuthenticated: auth.isAuthenticated.value,
+  //   userInfo: auth.userInfo.value,
+  //   userType: auth.userType.value,
+  //   userCity: auth.userCity.value,
+  //   isAdmin: isAdmin.value,
+  //   isCityUser: isCityUser.value
+  // });
 };
 
 function updateCSSVariable() {
@@ -47,6 +61,16 @@ onMounted(() => {
   
   // Listen for authentication changes
   window.addEventListener('keycloak-login-success', keycloakLoginSuccessHandler);
+  
+  // Watch for authentication changes
+  watch(() => auth.isAuthenticated.value, (newVal) => {
+    // console.log('Auth state changed:', newVal);
+    keycloakLoginSuccessHandler();
+  }, { immediate: true });
+  
+  watch(() => auth.userCity.value, (newVal) => {
+    // console.log('User city changed:', newVal);
+  }, { immediate: true });
 });
 
 onBeforeUnmount(() => {
@@ -71,13 +95,68 @@ const projects = [
     <div class="body" :class="{ 'mobile': isMobile }">
       <a class="main-title">{{ $t('projectview.title') }}</a>
       
-      <!-- Affichage pour les comptes ville -->
-      <template v-if="isCityUser">
+      <!-- Display for administrators - global view -->
+      <template v-if="isAdmin">
+        <div class="hub">
+          <h1 style="margin-left: 80px; margin-top: 30px">{{ $t('projectview.hub1') }}</h1>
+          <div class="icon-container">
+            <div v-for="project in projects" :key="project.id">
+              <div v-if="project.hub == 1" class="icon">
+                <RouterLink :to='"Dashboard/" + project.title'>
+                  <div>
+                    <img class="imagebutton" :src="project.image"><br>
+                  </div>
+                </RouterLink>
+                <div class="info">
+                  <img :src="project.imageball">
+                  {{ project.title }}
+                </div>
+                <div class="grey">
+                  {{ project.type }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hub">
+          <h1 style="margin-left: 80px; margin-top: 30px">{{ $t('projectview.hub2') }}</h1>
+          <div class="icon-container">
+            <div v-for="project in projects" :key="project.id">
+              <div v-if="project.hub == 2" class="icon">
+                <RouterLink :to='"Dashboard/" + project.title'>
+                  <div>
+                    <img class="imagebutton" :src="project.image"><br>
+                  </div>
+                </RouterLink>
+                <div class="info">
+                  <img :src="project.imageball">
+                  {{ project.title }}
+                </div>
+                <div class="grey">
+                  {{ project.type }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
+      
+      <!-- Display for city accounts -->
+      <template v-else-if="isCityUser">
+        <!-- Debug information for city users -->
+        <!-- <div style="background: #f0f0f0; padding: 10px; margin: 10px; border-radius: 5px;" v-if="auth.userInfo.value">
+          <h4>Debug Info:</h4>
+          <p>User City: {{ auth.userCity.value }}</p>
+          <p>Available Projects: {{ projects.map(p => p.title).join(', ') }}</p>
+          <p>Matching Project: {{ projects.find(p => p.title === auth.userCity.value)?.title || 'None found' }}</p>
+        </div> -->
+        
         <div class="hub">
           <h1>My Project</h1>
           <div class="icon-container">
             <div v-for="project in projects" :key="project.id">
-              <div v-if="project.title === cityName" class="icon">
+              <div v-if="project.title === auth.userCity.value" class="icon">
                 <RouterLink :to='"Dashboard/" + project.title'>
                   <div>
                     <img class="imagebutton" :src="project.image"><br>
@@ -118,7 +197,7 @@ const projects = [
         </div>
       </template>
 
-      <!-- Affichage original pour les autres types de comptes -->
+      <!-- Default display for other account types -->
       <template v-else>
         <div class="hub">
           <h1 style="margin-left: 80px; margin-top: 30px">{{ $t('projectview.hub1') }}</h1>
