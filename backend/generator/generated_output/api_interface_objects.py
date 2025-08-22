@@ -45,7 +45,13 @@ logger = logging.getLogger('uvicorn.error')
 logger.setLevel(logging.DEBUG)
 
 
-app = FastAPI()
+app = FastAPI(
+    title="Climaborough API",
+    version="0.1.0",
+    docs_url="/api/docs",
+    redoc_url="/api/redoc",
+    openapi_url="/api/openapi.json",
+)
 
 # Authentication endpoints for API users
 @app.post("/auth/token", summary="Get access token", tags=["Authentication"])
@@ -967,33 +973,52 @@ async def add_kpi_values(
     if not kpi:
         raise HTTPException(status_code=404, detail=f"KPI {kpi_id} not found for city {city_name}")
     db_entries = []
-    for kpi_value in kpis:
-        try:
-            existing_entry = session.query(KPIValueDB).filter_by(
-                timestamp=kpi_value.timestamp,
-                kpi_id=kpi.id
-            ).first()
+    try:
+        for kpi_value in kpis:
+            # Determine lookup strategy based on whether the KPI uses category labels
+            if getattr(kpi, "hasCategoryLabel", False):
+                # KPI with categories: lookup by (timestamp, kpi_id, categoryLabel)
+                existing_entry = session.query(KPIValueDB).filter_by(
+                    timestamp=kpi_value.timestamp,
+                    kpi_id=kpi.id,
+                    categoryLabel=kpi_value.categoryLabel
+                ).first()
+            else:
+                # KPI without categories: lookup by (timestamp, kpi_id) only
+                existing_entry = session.query(KPIValueDB).filter_by(
+                    timestamp=kpi_value.timestamp,
+                    kpi_id=kpi.id
+                ).first()
             
             if existing_entry:
+                # Update existing entry
                 existing_entry.kpiValue = kpi_value.kpiValue
-                existing_entry.categoryLabel = kpi_value.categoryLabel
-                session.commit()
-                session.refresh(existing_entry)
+                if getattr(kpi, "hasCategoryLabel", False):
+                    existing_entry.categoryLabel = kpi_value.categoryLabel
                 db_entries.append(existing_entry)
             else:
+                # Create a new entry
                 db_entry = KPIValueDB(**kpi_value.dict())
                 db_entry.kpi_id = kpi.id
+                # If the KPI does not use categories, do not set categoryLabel
+                if not getattr(kpi, "hasCategoryLabel", False):
+                    db_entry.categoryLabel = None
                 session.add(db_entry)
-                session.commit()
-                session.refresh(db_entry)
                 db_entries.append(db_entry)
-                
-        except IntegrityError:
-            session.rollback()
-            raise HTTPException(status_code=400, detail="Integrity error occurred")
-        except Exception as e:
-            session.rollback()
-            raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+        
+        # Single commit for the whole batch
+        session.commit()
+        
+        # Refresh all objects after commit
+        for entry in db_entries:
+            session.refresh(entry)
+            
+    except IntegrityError:
+        session.rollback()
+        raise HTTPException(status_code=400, detail="Integrity error occurred")
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
             
     return db_entries
 
@@ -1300,6 +1325,7 @@ async def delete_visualizations_ioannina(ids: List[int], dependencies=[Depends(K
         # Delete rows using ORM
         rows_to_delete = session.query(VisualisationDB).filter(~VisualisationDB.id.in_(ids)).all()
         for row in rows_to_delete:
+            print({key: value for key, value in row.__dict__.items() if not key.startswith('_')})
             if row.consistOf and row.consistOf.code == "ioannina":
                 session.delete(row)
         # Delete the row
@@ -4646,9 +4672,9 @@ async def get_visualizations_sofia():
     
     
     
-    
-    
-    
+
+
+     
 @app.get("/ioannina/kpi/", response_model=List[KPIValue], summary="get a KPI object", tags = ["KPI_Info"])
 async def get_kpi_ioannina(id: int):
     try:
@@ -4844,11 +4870,13 @@ origins = [
     "http://localhost",
     "http://localhost:3002",
     "http://localhost:8080",
+    "https://climaplatform.eu",
+    "https://climaplatform.eu/"
 ]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )

@@ -67,6 +67,12 @@ const router = createRouter({
       name: 'login',
       component: () => import('../views/Login.vue')
     },
+    {
+      path: '/admin/kpis',
+      name: 'admin-kpis',
+      component: () => import('../views/AdminKPIView.vue'),
+      meta: { requiresAuth: true, requiresAdmin: true }
+    },
   ]
 })
 
@@ -79,6 +85,25 @@ router.beforeEach(async (to, from, next) => {
     sessionStorage.setItem('postLoginRedirect', to.fullPath);
     // Redirect to login page
     next('/login');
+  } else if (to.meta.requiresAdmin) {
+    // Enhanced admin check - prioritize admin roles over city roles
+    const hasAdminRole = authService.hasRole('admin') || 
+                        authService.hasRole('realm-admin') || 
+                        authService.hasRole('climaborough-admin');
+    
+    const userInfo = authService.getUserInfo();
+    const hasAdminGroup = userInfo?.group_membership?.some(group => 
+      group.includes('admin') || group.includes('Admin')
+    );
+
+    
+    if (!hasAdminRole && !hasAdminGroup) {
+      // Not an admin, redirect to projects
+      next('/projects');
+    } else {
+      // User is an admin, allow access
+      next();
+    }
   } else {
     next();
   }

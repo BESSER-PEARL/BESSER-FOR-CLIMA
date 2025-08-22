@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import LoginForm from './forms/LoginForm.vue';
@@ -17,9 +17,25 @@ locale.value = "en"
 const loginBool = ref(false)
 const menu = ref(false)
 
+// Enhanced admin check - same logic as router
+const isAdmin = computed(() => {
+  if (!auth.isAuthenticated.value) return false;
+  
+  const hasAdminRole = auth.hasRole('admin') || 
+                      auth.hasRole('realm-admin') || 
+                      auth.hasRole('climaborough-admin');
+  
+  const userInfo = auth.userInfo.value;
+  const hasAdminGroup = userInfo?.group_membership?.some(group => 
+    group.includes('admin') || group.includes('Admin')
+  );
+  
+  return hasAdminRole || hasAdminGroup;
+});
+
 // Navigation handler that checks authentication before navigating
 const handleNavigation = (path) => {
-  const protectedRoutes = ['/projects', '/bot', '/datacatalogue'];
+  const protectedRoutes = ['/projects', '/bot', '/datacatalogue', '/admin/kpis'];
   
   if (protectedRoutes.includes(path) && !auth.isAuthenticated.value) {
     // Don't navigate, just show login popup
@@ -152,6 +168,11 @@ const toggleMobileMenu = () => {
           <a @click="handleNavigation('/projects')" class="nav-link">Dashboard</a>
           <a @click="handleNavigation('/bot')" class="nav-link">Clima Agent</a>
           <a @click="handleNavigation('/datacatalogue')" class="nav-link">Data Catalogue</a>
+          <!-- Admin link - only show for admin users -->
+          <a v-if="isAdmin" @click="handleNavigation('/admin/kpis')" class="nav-link admin-link">
+            <Icon icon="mdi:shield-account" width="20" height="20" style="margin-right: 5px;" />
+            Admin
+          </a>
           <RouterLink @click="closeMobileMenu" to="/about">{{ $t('header.About') }}</RouterLink>
           <div class="user" @click="toggleLogin">
             <div v-if="!auth.isAuthenticated.value" class="unauthenticated">
@@ -482,5 +503,24 @@ header {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Admin link styling */
+.admin-link {
+  background: linear-gradient(45deg, #ff6b35, #ff8e35) !important;
+  border-radius: 4px !important;
+  padding: 8px 12px !important;
+  margin: 0 5px !important;
+  display: flex !important;
+  align-items: center !important;
+  font-weight: 600 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+  transition: all 0.3s ease !important;
+}
+
+.admin-link:hover {
+  background: linear-gradient(45deg, #ff5722, #ff7722) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3) !important;
 }
 </style>

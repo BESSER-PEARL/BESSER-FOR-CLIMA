@@ -236,16 +236,19 @@ onMounted(() => {
   height: 100%;
   overflow: hidden;
 }
+#chart {
+  height: 98%;
+}
 
 .update {
   display: flex;
-  /* Add flex display */
   justify-content: flex-end;
-  /* Align items to the right */
   align-items: center;
-  /* Center items vertically */
   flex-shrink: 0;
-  /* Prevents the update element from shrinking */
-  padding: 5px;
+  padding: 2px 5px;
+  font-size: 10px;
+  color: #666;
+  height: 5%;
+  min-height: 20px;
 }
 </style>

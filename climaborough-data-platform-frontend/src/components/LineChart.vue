@@ -167,7 +167,11 @@ watch(() => [props.title, props.xtitle, props.ytitle, props.color], () => {
   justify-content: flex-end;
   align-items: center;
   flex-shrink: 0;
-  padding: 5px;
+  padding: 2px 5px;
+  font-size: 10px;
+  color: #666;
+  height: 5%;
+  min-height: 20px;
 }
 
 .chart-select {

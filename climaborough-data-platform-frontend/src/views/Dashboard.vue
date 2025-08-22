@@ -102,7 +102,7 @@ const getVisualisations = () => {
                 sections.value = []
                 data.forEach(item => {
 
-                    var vis = { x: item.xposition, y: item.yposition, w: item.width, h: item.height, i: item.i, id: item.i, chart: item.chartType, attributes: { city: city.value, title: item.title, tableId: item.kpi_id } }
+                    var vis = { x: item.xposition, y: item.yposition, w: item.width, h: item.height,x: parseInt(item.xposition) || 0, y: parseInt(item.yposition) || 0, w: parseInt(item.width) || 4, h: parseInt(item.height) || 8,  i: item.i, id: item.i, chart: item.chartType, attributes: { city: city.value, title: item.title, tableId: item.kpi_id } }
                     if (item.chartType == "LineChart") {
                         vis.attributes.xtitle = item.xtitle
                         vis.attributes.ytitle = item.ytitle
@@ -324,8 +324,8 @@ const createVisualisation = (tableId, tableName, chart, kpi) => {
     var y = 0
     console.log(kpi)
     if (dragItemStop.value.chart == chart) {
-        x = dragItemStop.value.x
-        y = dragItemStop.value.y
+        x = parseInt(dragItemStop.value.x) || 0
+        y = parseInt(dragItemStop.value.y) || 0
         selectedSection.layout = selectedSection.layout.filter(item => item.i !== dropId);
     }
     var vis = { x: x, y: y, w: 4, h: 8, i: uid(), chart: chart, attributes: { city: city.value, tableId: tableId, title: tableName }, id: uid() }
@@ -1102,8 +1102,8 @@ const toggleChat = () => {
     /* Rounded corners */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     /* Shadow effect */
-    padding: 20px;
-    /* Padding inside the card */
+    padding: 8px;
+    /* Reduced padding inside the card */
 }
 
 .test {
@@ -1113,8 +1113,8 @@ const toggleChat = () => {
     /* Rounded corners */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     /* Shadow effect */
-    padding: 20px;
-    /* Padding inside the card */
+    padding: 8px;
+    /* Reduced padding inside the card */
     border: 3px dashed #cccccc;
     /* Dashed border for edit mode */
 }
