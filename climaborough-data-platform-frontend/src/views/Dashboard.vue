@@ -201,7 +201,7 @@ const deleteVisualisations = async (idList) => {
             return response.json();
         })
         .then(data => {
-            console.log('Success:', data);
+            //console.log('Success:', data);
             // Only refresh visualizations after successful delete
             getVisualisations();
             // Now toggle edit mode if needed
@@ -239,7 +239,7 @@ async function storeVisualisations() {
                 i: item.i,
                 section: sections.value[i].name
             };
-            console.log(jsonObj)
+            //console.log(jsonObj)
             if (item.chart === "LineChart") {
                 jsonObj.xtitle = item.attributes.xtitle;
                 jsonObj.ytitle = item.attributes.ytitle;
@@ -265,7 +265,7 @@ async function storeVisualisations() {
 
                 const data = await response.json();
                 idList.push(data);
-                console.log('Success:', data);
+                //console.log('Success:', data);
             } catch (error) {
                 console.error('Error:', error);
                 window.alert(error);
@@ -322,7 +322,7 @@ const toggleKPIForm = (chart) => {
 const createVisualisation = (tableId, tableName, chart, kpi) => {
     var x = 0
     var y = 0
-    console.log(kpi)
+    //console.log(kpi)
     if (dragItemStop.value.chart == chart) {
         x = parseInt(dragItemStop.value.x) || 0
         y = parseInt(dragItemStop.value.y) || 0
@@ -356,8 +356,8 @@ const createVisualisation = (tableId, tableName, chart, kpi) => {
         vis.w = 7;
         vis.h = 13; 
     }
-    console.log(vis)
-    console.log(kpi)
+    //console.log(vis)
+    //console.log(kpi)
     selectedSection.layout.push(vis)
     tableForm.value = false
 
@@ -627,15 +627,15 @@ function deleteSection(item, event) {
 
 function editSection(item, event) {
     item.edit = !item.edit
-    console.log("item")
-    console.log(item.name)
+    //console.log("item")
+    //console.log(item.name)
     tempName.value = item.name
     event.stopPropagation();
 }
 
 function renameSection(item, event) {
-    console.log("renaming")
-    console.log(item.name)
+    //console.log("renaming")
+    //console.log(item.name)
     item.edit = !item.edit
     if (item.name == selectedSection.name) {
         selectedSection.name = tempName.value
@@ -936,7 +936,7 @@ const toggleChat = () => {
                                 <Icon class="edit" icon="material-symbols-light:delete-outline" width="30" height="30"
                                     style="color: red" @click="deleteVisualisation(item)" />
                             </div>
-                            <div class="item" style="height: 95%; width: 95%;">
+                            <div class="item" style="height: calc(100% - 40px); width: 100%;">
                                 <LineChart v-if="item.chart == 'LineChart'" :city="item.attributes.city"
                                     :tableId="item.attributes.tableId" :title="item.attributes.title" :xtitle="item.attributes.xtitle"
                                     :ytitle="item.attributes.ytitle" :color="item.attributes.color" :target="item.attributes.target" />
@@ -1044,7 +1044,7 @@ const toggleChat = () => {
                         :vertical-compact="false" style="min-height: 800px;">
                         <GridItem v-for="item in selectedSection.layout" :key="item.i" :x="item.x" :y="item.y"
                             :w="item.w" :h="item.h" :i="item.i" :id="item.id">
-                            <div class="item" style="height: 95%; width: 95%;">
+                            <div class="item" style="height: 100%; width: 100%;">
                                 <LineChart v-if="item.chart == 'LineChart'" :city="item.attributes.city"
                                     :tableId="item.attributes.tableId" :title="item.attributes.title"
                                     :xtitle="item.attributes.xtitle" :ytitle="item.attributes.ytitle"

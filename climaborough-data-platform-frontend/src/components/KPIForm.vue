@@ -41,9 +41,9 @@ const sortKPIsForChart = (kpis, chartType) => {
 
     return kpis.sort((a, b) => {
         if (isBarOrPieChart) {
-          console.log("Sorting for Bar/Pie chart");
-          console.log("KPI A:", a);
-          console.log("KPI B:", b);
+          //console.log("Sorting for Bar/Pie chart");
+          //console.log("KPI A:", a);
+          //console.log("KPI B:", b);
             // For Bar/Pie charts, prioritize KPIs with hasCategoryLabel
             if (a.hasCategoryLabel && !b.hasCategoryLabel) return -1;
             if (!a.hasCategoryLabel && b.hasCategoryLabel) return 1;

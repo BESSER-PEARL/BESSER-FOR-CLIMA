@@ -25,7 +25,7 @@ const initKeycloak = () => {
     pkceMethod: 'S256' // Use PKCE for better security
     // silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html', // Removed due to X-Frame-Options issue
   }).then((authenticated) => {
-    console.log('Keycloak initialized, authenticated:', authenticated);
+    //console.log('Keycloak initialized, authenticated:', authenticated);
     
     // Set up token refresh
     if (authenticated) {
@@ -50,7 +50,7 @@ const setupTokenRefresh = () => {
     if (keycloak.authenticated) {
       keycloak.updateToken(300).then((refreshed) => {
         if (refreshed) {
-          console.log('Token refreshed');
+          //console.log('Token refreshed');
           // Dispatch event for other components to listen to
           window.dispatchEvent(new CustomEvent('keycloak-token-refreshed', {
             detail: { token: keycloak.token }
@@ -122,7 +122,7 @@ export const authService = {
     keysToRemove.forEach(key => {
       if (localStorage.getItem(key)) {
         localStorage.removeItem(key);
-        console.log(`Cleaned up old auth data: ${key}`);
+        //console.log(`Cleaned up old auth data: ${key}`);
       }
     });
   },

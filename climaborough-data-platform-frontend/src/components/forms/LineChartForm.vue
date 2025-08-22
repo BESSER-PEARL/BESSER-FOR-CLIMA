@@ -44,7 +44,7 @@ const updateChart = () => {
     obj["ytitle"] = ytitle.value
   }
   if (color.value != "") {
-  console.log(color.value)
+  //console.log(color.value)
     obj["color"] = color.value
   }
   emit("updateChart", obj)

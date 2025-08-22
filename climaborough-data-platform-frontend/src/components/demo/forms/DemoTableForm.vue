@@ -20,8 +20,8 @@ const props = defineProps({
 
 const title = ref(props.title)
 const refColumns = ref(props.columns)
-console.log("lklkslklsklsk")
-console.log(refColumns.value)
+//console.log("lklkslklsklsk")
+//console.log(refColumns.value)
 const error = ref(false)
 const updateChart = () => {
   const obj = {}
@@ -67,9 +67,9 @@ getItems()
 const selected = ref([])
 
 const printt = () => {
-  console.log("kjjkf")
-  console.log(items.value)
-  console.log(refColumns.value)
+  //console.log("kjjkf")
+  //console.log(items.value)
+  //console.log(refColumns.value)
 }
 
 </script>

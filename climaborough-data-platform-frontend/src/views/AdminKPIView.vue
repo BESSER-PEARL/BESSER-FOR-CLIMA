@@ -80,7 +80,7 @@ const fetchKPIs = async () => {
     const data = await response.json();
     
     // Log for debugging
-    console.log(`Fetched ${data.length} KPIs for ${selectedCity.value}:`, data);
+    //console.log(`Fetched ${data.length} KPIs for ${selectedCity.value}:`, data);
     
     // Transform the data to include latest values if available
     kpis.value = data.map(kpi => ({
@@ -89,7 +89,7 @@ const fetchKPIs = async () => {
       latest_timestamp: null
     }));
     
-    console.log('KPIs grouped by category:', kpisByCategory.value);
+    //console.log('KPIs grouped by category:', kpisByCategory.value);
     
   } catch (err) {
     error.value = err.message;
@@ -222,14 +222,14 @@ const onCityChange = () => {
 
 onMounted(() => {
   // Debug admin access
-  console.log('AdminKPIView - Debug Info:');
-  console.log('isAuthenticated:', auth.isAuthenticated.value);
-  console.log('userInfo:', auth.userInfo.value);
-  console.log('hasRole(admin):', auth.hasRole('admin'));
-  console.log('hasRole(realm-admin):', auth.hasRole('realm-admin'));
-  console.log('hasRole(climaborough-admin):', auth.hasRole('climaborough-admin'));
-  console.log('group_membership:', auth.userInfo.value?.group_membership);
-  console.log('isAdmin computed:', isAdmin.value);
+  //console.log('AdminKPIView - Debug Info:');
+  //console.log('isAuthenticated:', auth.isAuthenticated.value);
+  //console.log('userInfo:', auth.userInfo.value);
+  //console.log('hasRole(admin):', auth.hasRole('admin'));
+  //console.log('hasRole(realm-admin):', auth.hasRole('realm-admin'));
+  //console.log('hasRole(climaborough-admin):', auth.hasRole('climaborough-admin'));
+  //console.log('group_membership:', auth.userInfo.value?.group_membership);
+  //console.log('isAdmin computed:', isAdmin.value);
   
   // Check if user is admin, if not redirect
   if (!isAdmin.value) {

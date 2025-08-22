@@ -38,7 +38,7 @@ const sendMessage = () => {
 
 const onMessageReceived = (message) => {
   let response = JSON.parse(message)["message"]
-  console.log(response)
+  //console.log(response)
   let bot_response = response["answer"]
   let docs = response["docs"]
   docs = docs.map(obj => {

@@ -97,7 +97,7 @@ async function getItems() {
     });
     value.value = values.value[values.value.length - 1]
     if (value.value == 0){
-      console.log("value is 0, finding last good value")
+      //console.log("value is 0, finding last good value")
       for (var i=values.value.length-1; i>=0;i--){
         if(values.value[i] != 0){
           value.value = values.value[i]
@@ -181,7 +181,7 @@ async function getItems() {
         }
       }
     };
-    console.log(document.querySelector(`[id='${props.id}mydiv']`).parentElement.clientHeight)
+    //console.log(document.querySelector(`[id='${props.id}mydiv']`).parentElement.clientHeight)
     Plotly.newPlot(props.id + "mydiv", data.value, layout.value, { displaylogo: false });
   } catch (error) {
     window.alert(error)

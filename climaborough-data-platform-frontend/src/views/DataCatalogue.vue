@@ -72,7 +72,7 @@ onMounted(async () => {
     if (event.origin !== 'https://ui.climaplatform.eu') return;
 
     const { type, data } = event.data;
-    console.log("Message from iframe:", type, data);
+    //console.log("Message from iframe:", type, data);
 
     if (type === 'CMP_ERROR') {
       console.warn('Consent data error:', data);

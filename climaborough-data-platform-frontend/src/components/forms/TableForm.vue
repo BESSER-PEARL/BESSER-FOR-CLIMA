@@ -24,8 +24,8 @@ const props = defineProps({
 
 const title = ref(props.title)
 const refColumns = ref(props.columns)
-console.log("lklkslklsklsk")
-console.log(refColumns.value)
+//console.log("lklkslklsklsk")
+//console.log(refColumns.value)
 const error = ref(false)
 const updateChart = () => {
   const obj = {}
@@ -43,10 +43,9 @@ async function getItems() {
   try {
     const response = await fetch('http://localhost:8000/' + props.city.toLowerCase() + '/kpi?id=' + props.tableId)
     const data = await response.json();
-    console.log(props.columns)
+    //console.log(props.columns)
     // Iterate over the list of strings and log each string
     if (props.columns.length > 0) {
-      console.log("empl")
       if (data != []) {
         for (const [key, value] of Object.entries(data[0])) {
           items.value.push(key)
@@ -54,7 +53,6 @@ async function getItems() {
         }
       }
     } else {
-      console.log("empl")
       if (data != []) {
         for (const [key, value] of Object.entries(data[0])) {
           items.value.push(key)
@@ -66,8 +64,8 @@ async function getItems() {
 
     }
 
-    console.log(items.value)
-    console.log(refColumns.value)
+    //console.log(items.value)
+    //console.log(refColumns.value)
   } catch (error) {
     window.alert(error)
   }
@@ -78,9 +76,8 @@ getItems()
 const selected = ref([])
 
 const printt = () => {
-  console.log("kjjkf")
-  console.log(items.value)
-  console.log(refColumns.value)
+  //console.log(items.value)
+  //console.log(refColumns.value)
 }
 
 </script>

@@ -258,7 +258,7 @@ const getVisualisations = () => {
 getVisualisations();
 
 async function storeVisualisations() {
-    console.log('Saving dashboard...');
+    //console.log('Saving dashboard...');
     saveTolocalStorage();
     setTimeout(() => {
         edit();
@@ -623,15 +623,15 @@ function deleteSection(item, event) {
 
 function editSection(item, event) {
     item.edit = !item.edit
-    console.log("item")
-    console.log(item.name)
+    //console.log("item")
+    //console.log(item.name)
     tempName.value = item.name
     event.stopPropagation();
 }
 
 function renameSection(item, event) {
-    console.log("renaming")
-    console.log(item.name)
+    //console.log("renaming")
+    //console.log(item.name)
     item.edit = !item.edit
     if (item.name == selectedSection.name) {
         selectedSection.name = tempName.value

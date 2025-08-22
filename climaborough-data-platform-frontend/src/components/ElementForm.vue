@@ -16,7 +16,7 @@ const addElement = () => {
   error.value = false
   if (textValue.value == ""){
     error.value = true
-    console.log("erm herrro")
+    //console.log("erm herrro")
   } else {
     error.value = false
     emit("addElement", textValue.value)

@@ -144,7 +144,7 @@ async function fetchKpiMetadata() {
     // Find the KPI metadata for our tableId
     const kpiMeta = kpisData.find(kpi => kpi.id === props.tableId);
     kpiMetadata.value = kpiMeta;
-    console.log('KPI Metadata:', kpiMeta);
+    //console.log('KPI Metadata:', kpiMeta);
   } catch (error) {
     console.warn('Could not fetch KPI metadata:', error);
     kpiMetadata.value = null;
@@ -158,7 +158,7 @@ async function getItems() {
     
     const response = await fetch('http://localhost:8000/' + props.city.toLowerCase() + '/kpi/?id=' + props.tableId)
     const data = await response.json();
-    console.log(data);
+    //console.log(data);
 
     data.forEach(item => {
       items.value.push(item);
@@ -175,7 +175,7 @@ async function getItems() {
 
     // Check if we have categoryLabelDictionary for ordered display
     if (kpiMetadata.value?.categoryLabelDictionary) {
-      console.log('Using categoryLabelDictionary for ordering:', kpiMetadata.value.categoryLabelDictionary);
+      //console.log('Using categoryLabelDictionary for ordering:', kpiMetadata.value.categoryLabelDictionary);
       
       // Process in the order defined by categoryLabelDictionary
       Object.entries(kpiMetadata.value.categoryLabelDictionary).forEach(([key, labelName]) => {
@@ -229,7 +229,7 @@ async function getItems() {
       });
     } else {
       // Fallback to original behavior when no categoryLabelDictionary (sorted alphabetically)
-      console.log('No categoryLabelDictionary found, using alphabetical ordering');
+      //console.log('No categoryLabelDictionary found, using alphabetical ordering');
       
       const sortedEntries = getSortedEntries(mapping.value);
       sortedEntries.forEach(([key, value]) => {
@@ -265,8 +265,8 @@ async function getItems() {
       labels: labels.value
     };
     
-    console.log(series.value)
-    console.log(labels.value)
+    //console.log(series.value)
+    //console.log(labels.value)
 
   } catch (error) {
     window.alert(error)

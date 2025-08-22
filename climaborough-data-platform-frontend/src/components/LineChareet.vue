@@ -174,7 +174,7 @@ async function getItems() {
 }
 
 getItems()
-console.log(valuemappedtotime.value)
+//console.log(valuemappedtotime.value)
 
 const series = ref([{
   name: "Current Value", data: valuemappedtotime.value, color: props.color,

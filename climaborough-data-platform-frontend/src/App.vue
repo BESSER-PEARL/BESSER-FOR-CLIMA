@@ -13,7 +13,7 @@ const initError = ref(null);
 
 onMounted(async () => {
   try {
-    console.log('Starting authentication initialization...');
+    //console.log('Starting authentication initialization...');
     
     // Initialize Keycloak with robust error handling
     const authenticated = await authService.init({
@@ -23,14 +23,14 @@ onMounted(async () => {
     // Clean up any old localStorage tokens
     authService.cleanupLocalStorage();
     
-    console.log('Authentication initialized, user authenticated:', authenticated);
+    //console.log('Authentication initialized, user authenticated:', authenticated);
     
     // Handle post-login redirect if user was authenticated during init
     if (authenticated) {
       const redirectPath = sessionStorage.getItem('postLoginRedirect');
       if (redirectPath) {
         sessionStorage.removeItem('postLoginRedirect');
-        console.log('Redirecting to:', redirectPath);
+        //console.log('Redirecting to:', redirectPath);
         router.push(redirectPath);
       }
       
@@ -50,7 +50,7 @@ onMounted(async () => {
     }
   } finally {
     isInitializing.value = false;
-    console.log('Authentication initialization complete');
+    //console.log('Authentication initialization complete');
   }
 });
 

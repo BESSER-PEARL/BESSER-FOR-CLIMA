@@ -34,11 +34,11 @@ async function getItems() {
 
         const response = await fetch('http://localhost:8000/' + props.city.toLowerCase() + '/kpi/?id=' + props.tableId)
         const data = await response.json();
-        console.log(data)
+        //console.log(data)
         // Iterate over the list of strings and log each string
         if (props.columns.length > 0) {
-            console.log("we got some column boys")
-            console.log(props.columns)
+            //console.log("we got some column boys")
+            //console.log(props.columns)
             items.value = []
             items.value = data.map(obj => {
                 const newObj = {}
@@ -82,8 +82,8 @@ async function getItems() {
             })
 
         }
-        console.log("tmestmao")
-        console.log(timestamps.value)
+        //console.log("tmestmao")
+        //console.log(timestamps.value)
     } catch (error) {
         window.alert(error)
     }
