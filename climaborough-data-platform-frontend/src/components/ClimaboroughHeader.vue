@@ -19,18 +19,29 @@ const menu = ref(false)
 
 // Enhanced admin check - same logic as router
 const isAdmin = computed(() => {
-  if (!auth.isAuthenticated.value) return false;
+  // First check if user is authenticated and auth is initialized
+  if (!auth.isAuthenticated.value || !auth.isInitialized.value) return false;
   
+  // Check for admin roles
   const hasAdminRole = auth.hasRole('admin') || 
                       auth.hasRole('realm-admin') || 
                       auth.hasRole('climaborough-admin');
   
+  // Check for specific admin groups (be more strict)
   const userInfo = auth.userInfo.value;
   const hasAdminGroup = userInfo?.group_membership?.some(group => 
-    group.includes('admin') || group.includes('Admin')
+    group === '/Administrator' || 
+    group === '/admin' || 
+    group === '/Admin' ||
+    group.endsWith('/Administrator') ||
+    group.endsWith('/admin') ||
+    group.endsWith('/Admin')
   );
   
-  return hasAdminRole || hasAdminGroup;
+  // Only check userType if it's specifically 'admin' (not 'cityuser')
+  const isAdminType = auth.userType?.value === 'admin';
+  
+  return hasAdminRole || hasAdminGroup || isAdminType;
 });
 
 // Navigation handler that checks authentication before navigating

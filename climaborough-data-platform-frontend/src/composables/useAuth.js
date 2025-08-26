@@ -58,6 +58,10 @@ export const useAuth = () => {
     return authService.hasRole(role);
   };
 
+  const getUserRoles = () => {
+    return authService.getUserRoles();
+  };
+
   const getAccessToken = async () => {
     return await authService.getAccessToken();
   };
@@ -95,6 +99,7 @@ export const useAuth = () => {
     login,
     logout,
     hasRole,
+    getUserRoles,
     getAccessToken,
     updateAuthState
   };

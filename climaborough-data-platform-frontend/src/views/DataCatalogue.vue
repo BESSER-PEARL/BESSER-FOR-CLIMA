@@ -9,7 +9,7 @@
           allow="fullscreen"
           class="dashboard-iframe"
           ref="dataIframe"
-          sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-storage-access-by-user-activation">
+          sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-storage-access-by-user-activation allow-downloads">
         </iframe>
       </div>
       <!-- Optional fullscreen toggle -->
