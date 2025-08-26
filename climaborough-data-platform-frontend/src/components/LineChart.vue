@@ -25,6 +25,10 @@ const props = defineProps({
     type: String,
     default: '#086494'
   },
+  globalMonthFilter: {
+    type: String,
+    default: ""
+  }
 })
 
 const chartType = ref('line'); // Reactive chart type
@@ -70,6 +74,22 @@ const values = ref([]);
 const baseline = ref([]);
 const valuemappedtotime = ref([]);
 const timestamps = ref([]);
+const rawData = ref([]);
+const localMonthFilter = ref(props.globalMonthFilter || "");
+
+// Computed property to filter data based on selected month
+const filteredData = computed(() => {
+  if (!localMonthFilter.value || !rawData.value.length) {
+    return rawData.value;
+  }
+  
+  return rawData.value.filter(item => {
+    const itemDate = new Date(item.timestamp);
+    const filterDate = new Date(localMonthFilter.value + '-01');
+    return itemDate.getFullYear() === filterDate.getFullYear() && 
+           itemDate.getMonth() === filterDate.getMonth();
+  });
+});
 
 const formatDate = (dateString) => {
   const date = new Date(dateString);
@@ -91,15 +111,39 @@ async function getItems() {
   try {
     const response = await fetch('http://localhost:8000/' + props.city.toLowerCase() + '/kpi/?id=' + props.tableId);
     const data = await response.json();
-    data.forEach(item => {
-      values.value.push(item.kpiValue);
-      timestamps.value.push(item.timestamp);
-      valuemappedtotime.value.push({ x: item.timestamp, y: item.kpiValue });
-      baseline.value.push({ x: item.timestamp, y: Math.max(0, item.kpiValue - 10) }); // Example baseline
-    });
+    rawData.value = data; // Store raw data
+    processFilteredData();
   } catch (error) {
     window.alert(error);
   }
+}
+
+function processFilteredData() {
+  values.value = [];
+  timestamps.value = [];
+  valuemappedtotime.value = [];
+  baseline.value = [];
+  
+  filteredData.value.forEach(item => {
+    values.value.push(item.kpiValue);
+    timestamps.value.push(item.timestamp);
+    valuemappedtotime.value.push({ x: item.timestamp, y: item.kpiValue });
+    baseline.value.push({ x: item.timestamp, y: Math.max(0, item.kpiValue - 10) });
+  });
+  
+  // Update series
+  series.value = [
+    {
+      name: "KPI Values",
+      data: valuemappedtotime.value,
+      color: props.color,
+    },
+    {
+      name: "Baseline",
+      data: baseline.value,
+      color: "#FFB800",
+    }
+  ];
 }
 
 getItems();
@@ -118,13 +162,16 @@ const series = ref([
 ]);
 
 watch(() => [props.title, props.xtitle, props.ytitle, props.color], () => {
-  series.value = [
-    {
-      name: "KPI Values",
-      data: valuemappedtotime.value,
-      color: props.color
-    }
-  ];
+  processFilteredData();
+});
+
+watch(() => props.globalMonthFilter, (newFilter) => {
+  localMonthFilter.value = newFilter;
+  processFilteredData();
+});
+
+watch(filteredData, () => {
+  processFilteredData();
 });
 </script>
 
@@ -162,18 +209,6 @@ watch(() => [props.title, props.xtitle, props.ytitle, props.color], () => {
   height: 100%;
 }
 
-.update {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  flex-shrink: 0;
-  padding: 2px 5px;
-  font-size: 10px;
-  color: #666;
-  height: 5%;
-  min-height: 20px;
-}
-
 .chart-select {
   padding: 8px 12px;
   border: 2px solid #086494;
@@ -184,6 +219,7 @@ watch(() => [props.title, props.xtitle, props.ytitle, props.color], () => {
   cursor: pointer;
   transition: all 0.3s;
   outline: none;
+  min-width: 120px;
 
   &:hover {
     border-color: #064d6a;
@@ -204,11 +240,16 @@ watch(() => [props.title, props.xtitle, props.ytitle, props.color], () => {
   gap: 10px;
 }
 
-.chart-select {
-  min-width: 120px;
-}
-
 .update {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 2px 5px;
+  font-size: 10px;
+  color: #666;
+  height: 5%;
+  min-height: 20px;
   margin-left: auto;
 }
 </style>

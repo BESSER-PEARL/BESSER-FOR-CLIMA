@@ -19,6 +19,7 @@ import BarChart from '../components/BarChart.vue'
 import StatChart from '../components/StatChart.vue'
 import Table from '../components/Table.vue'
 import Map from '../components/Map.vue'
+import MonthFilter from '../components/MonthFilter.vue'
 import { uid } from "uid"
 
 import { throttle } from '@vexip-ui/utils'
@@ -801,9 +802,14 @@ const exportToPDF = async () => {
 };
 
 const chatMode = ref(false);
+const globalMonthFilter = ref('');
 
 const toggleChat = () => {
   chatMode.value = !chatMode.value;
+};
+
+const handleGlobalMonthChange = (monthValue) => {
+  globalMonthFilter.value = monthValue;
 };
 
 </script>
@@ -830,7 +836,7 @@ const toggleChat = () => {
                             <v-list>
                                 <v-list-item v-for="(item, index) in sections" :key="index" :value="index" @click="setSection(item)"
                                     style="display: flex; align-items: center">
-                                    <v-list-item-content v-if="!item.edit" class="list-item-wrapper">
+                                    <div v-if="!item.edit" class="list-item-wrapper">
                                         <div class="list-item-content">
                                             <span>{{ item.name }}</span>
                                             <div class="icon-group">
@@ -840,8 +846,8 @@ const toggleChat = () => {
                                                     style="color: red" @click="deleteSection(item, $event)" />
                                             </div>
                                         </div>
-                                    </v-list-item-content>
-                                    <v-list-item-content v-else style="display: flex;">
+                                    </div>
+                                    <div v-else style="display: flex; width: 100%;">
                                         <v-text-field @click="cancelClick($event)" @keydown.space="cancelClick($event)" v-model="tempName"
                                             style="width: 200px">
                                         </v-text-field>
@@ -849,7 +855,7 @@ const toggleChat = () => {
                                             style="color: #aec326; margin-top: 10px;" />
                                         <Icon class="edit" icon="material-symbols-light:delete-outline" width="30" height="30"
                                             style="color: red" @click="deleteSection(item, $event)" />
-                                    </v-list-item-content>
+                                    </div>
                                 </v-list-item>
                                 <v-spacer></v-spacer>
                                 <v-btn variant="text" @click="menu = false">Cancel</v-btn>
@@ -939,14 +945,18 @@ const toggleChat = () => {
                             <div class="item" style="height: calc(100% - 40px); width: 100%;">
                                 <LineChart v-if="item.chart == 'LineChart'" :city="item.attributes.city"
                                     :tableId="item.attributes.tableId" :title="item.attributes.title" :xtitle="item.attributes.xtitle"
-                                    :ytitle="item.attributes.ytitle" :color="item.attributes.color" :target="item.attributes.target" />
+                                    :ytitle="item.attributes.ytitle" :color="item.attributes.color" :target="item.attributes.target"
+                                    :global-month-filter="globalMonthFilter" />
                                 <PieChart v-if="item.chart == 'PieChart'" :city="item.attributes.city"
-                                    :tableId="item.attributes.tableId" :title="item.attributes.title" />
+                                    :tableId="item.attributes.tableId" :title="item.attributes.title" 
+                                    :global-month-filter="globalMonthFilter" />
                                 <BarChart v-if="item.chart == 'BarChart'" :city="item.attributes.city"
-                                    :tableId="item.attributes.tableId" :title="item.attributes.title" />
+                                    :tableId="item.attributes.tableId" :title="item.attributes.title" 
+                                    :global-month-filter="globalMonthFilter" />
                                 <StatChart v-if="item.chart == 'StatChart'" :city="item.attributes.city"
                                     :tableId="item.attributes.tableId" :title="item.attributes.title"
-                                    :suffix="item.attributes.suffix" :id="item.id" :target="item.attributes.target" />
+                                    :suffix="item.attributes.suffix" :id="item.id" :target="item.attributes.target"
+                                    :global-month-filter="globalMonthFilter" />
                                 <Table v-if="item.chart == 'Table'" :city="item.attributes.city"
                                     :tableId="item.attributes.tableId" :title="item.attributes.title"
                                     :columns="item.attributes.columns" />
@@ -989,9 +999,7 @@ const toggleChat = () => {
                             <v-list>
                                 <v-list-item v-for="(item, index) in sections" :key="index" :value="index"
                                     @click="setSection(item)" style="display: flex; align-items: center">
-                                    <v-list-item-content>
-                                        <span>{{ item.name }}</span>
-                                    </v-list-item-content>
+                                    <span>{{ item.name }}</span>
                                 </v-list-item>
                                 <v-spacer></v-spacer>
 
@@ -1002,6 +1010,11 @@ const toggleChat = () => {
                         </v-menu>
                     </div>
                     <div class="right" style="display: flex; gap: 10px;">
+                        <MonthFilter 
+                          v-model="globalMonthFilter"
+                          @month-change="handleGlobalMonthChange"
+                          style="margin-right: 10px;"
+                        />
                         <v-menu>
                             <template v-slot:activator="{ props }">
                                 <v-btn rounded="0" size="x-large" color="#0177a9" class="button" v-bind="props">
@@ -1048,14 +1061,18 @@ const toggleChat = () => {
                                 <LineChart v-if="item.chart == 'LineChart'" :city="item.attributes.city"
                                     :tableId="item.attributes.tableId" :title="item.attributes.title"
                                     :xtitle="item.attributes.xtitle" :ytitle="item.attributes.ytitle"
-                                    :color="item.attributes.color" :target="item.attributes.target" />
+                                    :color="item.attributes.color" :target="item.attributes.target" 
+                                    :global-month-filter="globalMonthFilter" />
                                 <PieChart v-if="item.chart == 'PieChart'" :city="item.attributes.city"
-                                    :tableId="item.attributes.tableId" :title="item.attributes.title" />
+                                    :tableId="item.attributes.tableId" :title="item.attributes.title" 
+                                    :global-month-filter="globalMonthFilter" />
                                 <BarChart v-if="item.chart == 'BarChart'" :city="item.attributes.city"
-                                    :tableId="item.attributes.tableId" :title="item.attributes.title" />
+                                    :tableId="item.attributes.tableId" :title="item.attributes.title" 
+                                    :global-month-filter="globalMonthFilter" />
                                 <StatChart v-if="item.chart == 'StatChart'" :city="item.attributes.city"
                                     :tableId="item.attributes.tableId" :title="item.attributes.title"
-                                    :suffix="item.attributes.suffix" :id="item.id" :target="item.attributes.target" />
+                                    :suffix="item.attributes.suffix" :id="item.id" :target="item.attributes.target"
+                                    :global-month-filter="globalMonthFilter" />
                                 <Table v-if="item.chart == 'Table'" :city="item.attributes.city"
                                     :tableId="item.attributes.tableId" :title="item.attributes.title"
                                     :columns="item.attributes.columns" />

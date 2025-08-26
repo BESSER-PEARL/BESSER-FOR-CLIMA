@@ -27,7 +27,7 @@ const checkMobile = () => {
 
 const keycloakLoginSuccessHandler = () => {
   if (auth.isAuthenticated.value && isCityUser.value) {
-    console.log('City user logged in:', auth.userCity.value);
+    // console.log('City user logged in:', auth.userCity.value);
   }
   
   // Debug information
