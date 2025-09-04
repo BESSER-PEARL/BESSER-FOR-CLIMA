@@ -1,7 +1,8 @@
 <script setup>
 import Plotly, { get } from "plotly.js-dist"
+import MonthFilter from './MonthFilter.vue'
 
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
 
 const props = defineProps({
   tableId: {
@@ -27,13 +28,63 @@ const props = defineProps({
   target: {
     type: Number,
     required: true
+  },
+  globalMonthFilter: {
+    type: String,
+    default: ""
   }
 })
 
 const values = ref([])
+const rawData = ref([])
 const value = ref(0)
 const data = ref({})
 const layout = ref({})
+const localMonthFilter = ref(props.globalMonthFilter || "")
+
+// Computed property to filter data based on selected month
+const filteredData = computed(() => {
+  if (!localMonthFilter.value || !rawData.value.length) {
+    return rawData.value;
+  }
+  
+  return rawData.value.filter(item => {
+    const date = new Date(item.timestamp);
+    const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    return monthYear === localMonthFilter.value;
+  });
+});
+
+// Computed property for the current KPI value based on filtered data
+const currentValue = computed(() => {
+  const data = filteredData.value;
+  if (!data.length) return 0;
+  
+  const latestValue = data[data.length - 1]?.kpiValue || 0;
+  if (latestValue === 0) {
+    // Find last non-zero value
+    for (let i = data.length - 1; i >= 0; i--) {
+      if (data[i].kpiValue !== 0) {
+        return data[i].kpiValue;
+      }
+    }
+  }
+  return latestValue;
+});
+
+// Computed property for the previous value for delta calculation
+const previousValue = computed(() => {
+  const data = filteredData.value;
+  if (data.length < 2) return null;
+  return data[data.length - 2]?.kpiValue;
+});
+
+// Computed property for the last timestamp
+const lastTimestamp = computed(() => {
+  const data = filteredData.value;
+  if (!data.length) return "No updates available";
+  return formatDate(data[data.length - 1].timestamp);
+});
 const resizeObserver = new ResizeObserver(entries => {
   for (let entry of entries) {
     // When the element is resized, log a message
@@ -83,55 +134,55 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-const lastTimestamp = ref("No updates available");
-
 async function getItems() {
   try {
     const response = await fetch('http://localhost:8000/' + props.city.toLowerCase() + '/kpi/?id=' + props.tableId)
     const dataf = await response.json();
-    // Iterate over the list of strings and log each string
-    dataf.forEach(item => {
-      values.value.push(item.kpiValue)
-      lastTimestamp.value = formatDate(item.timestamp)
-      // Do whatever you want with each item here
-    });
-    value.value = values.value[values.value.length - 1]
-    if (value.value == 0){
-      //console.log("value is 0, finding last good value")
-      for (var i=values.value.length-1; i>=0;i--){
-        if(values.value[i] != 0){
-          value.value = values.value[i]
-          break;
-        }
-      }
+    
+    // Store all raw data
+    rawData.value = dataf;
+    console.log('StatChart raw data for tableId', props.tableId, ':', dataf);
+    
+    // Process data for visualization
+    updateChart();
+  } catch (error) {
+    window.alert(error)
+  }
+}
 
-    }
-    const prev = values.value[values.value.length - 2]
-    var delta = 3
-    if(value.value > 50 && value.value <100 ){
-      delta = 13
-    } else if (value.value >100 && value.value <1000) {
-      delta = 23
-    } else if (value.value >1000 && value.value <10000){
-      delta = 123
-    } else if (value.value >10000 && value.value <100000){
-      delta = 1230
-    }else if (value.value >100000){
-      delta = 12300
-    }
-    if (prev || prev >= 0){
-      data.value = [
+function updateChart() {
+  const filteredItems = filteredData.value;
+  values.value = filteredItems.map(item => item.kpiValue);
+  value.value = currentValue.value;
+  
+  var delta = 3;
+  if(value.value > 50 && value.value < 100) {
+    delta = 13;
+  } else if (value.value > 100 && value.value < 1000) {
+    delta = 23;
+  } else if (value.value > 1000 && value.value < 10000) {
+    delta = 123;
+  } else if (value.value > 10000 && value.value < 100000) {
+    delta = 1230;
+  } else if (value.value > 100000) {
+    delta = 12300;
+  }
+  
+  const prev = previousValue.value;
+  
+  if (prev !== null && prev >= 0) {
+    data.value = [
       {
         type: "indicator",
         mode: "number+delta",
         value: value.value,
-        number: { suffix: " " + props.suffix  },
-        delta: { position: "right", reference: value.value-delta, relative: true, valueformat: ".2%", suffix: " (comparison to previous period) "},
+        number: { suffix: " " + props.suffix },
+        delta: { position: "right", reference: prev, relative: true, valueformat: ".2%", suffix: " (comparison to previous period) "},
         domain: { x: [0, 1.0], y: [0, 1] }
       },
     ];
-    } else {
-      data.value = [
+  } else {
+    data.value = [
       {
         type: "indicator",
         mode: "number+delta",
@@ -141,65 +192,84 @@ async function getItems() {
         domain: { x: [0, 1.0], y: [0, 1] }
       },
     ];
-    }
+  }
 
-
-    if (props.target && props.target != 0) {
-      data.value.push({
-        type: "indicator",
-        mode: "number",
-        value: props.target,
-        number: {
-          suffix: " " + props.suffix, prefix: "Target: ", font: {
-            weight: "normal",
-            size: 30
-          }
-        },
-        domain: { x: [0, 1], y: [0.20, 0.3] }
-
-      })
-    }
-    layout.value = {
-      font: {
-        family: "Metropolis, sans-serif",
-        weight: 'bold'
-      },
-      paper_bgcolor: "white",
-      margin: { t: 40, b: 0, l: 0, r: 0 }, // Added top margin for title
-      width: document.querySelector(`[id='${props.id}mydiv']`).parentElement.clientWidth,
-      height: document.querySelector(`[id='${props.id}mydiv']`).parentElement.clientHeight,
-      autosize: true,
-      title: {
-        text: props.title,
-        x: 0.02, // Slight padding from left
-        y: 0.98, // Position from top
-        xanchor: 'left',
-        yanchor: 'top',
+  if (props.target && props.target != 0) {
+    data.value.push({
+      type: "indicator",
+      mode: "number",
+      value: props.target,
+      number: {
+        suffix: " " + props.suffix, 
+        prefix: "Target: ", 
         font: {
-          size: 20,
-          weight: 'bold',
+          weight: "normal",
+          size: 30
         }
+      },
+      domain: { x: [0, 1], y: [0.20, 0.3] }
+    });
+  }
+  
+  layout.value = {
+    font: {
+      family: "Metropolis, sans-serif",
+      weight: 'bold'
+    },
+    paper_bgcolor: "white",
+    margin: { t: 40, b: 0, l: 0, r: 0 },
+    width: document.querySelector(`[id='${props.id}mydiv']`)?.parentElement?.clientWidth || 400,
+    height: document.querySelector(`[id='${props.id}mydiv']`)?.parentElement?.clientHeight || 300,
+    autosize: true,
+    title: {
+      text: props.title,
+      x: 0.02,
+      y: 0.98,
+      xanchor: 'left',
+      yanchor: 'top',
+      font: {
+        size: 20,
+        weight: 'bold',
       }
-    };
-    //console.log(document.querySelector(`[id='${props.id}mydiv']`).parentElement.clientHeight)
+    }
+  };
+  
+  if (document.querySelector(`[id='${props.id}mydiv']`)) {
     Plotly.newPlot(props.id + "mydiv", data.value, layout.value, { displaylogo: false });
-  } catch (error) {
-    window.alert(error)
   }
 }
 
 
 
+// Handle month filter changes
+const handleMonthChange = (monthValue) => {
+  localMonthFilter.value = monthValue;
+  updateChart();
+};
+
 getItems()
 
-
 watch(() => [props.title, props.suffix], () => {
-
   getItems()
 })
 
+watch(() => props.globalMonthFilter, (newFilter) => {
+  localMonthFilter.value = newFilter;
+  updateChart();
+})
+
+// Watch filtered data to update chart when filter changes
+watch(filteredData, () => {
+  updateChart();
+})
+
 onMounted(() => {
-  resizeObserver.observe(document.querySelector(`[id='${props.id}mydiv']`).parentElement)
+  const element = document.querySelector(`[id='${props.id}mydiv']`);
+  if (element && element.parentElement) {
+    resizeObserver.observe(element.parentElement);
+  } else {
+    console.warn(`StatChart: Could not find element with id '${props.id}mydiv'`);
+  }
 })
 
 
@@ -207,8 +277,17 @@ onMounted(() => {
 
 <template>
   <div id="container">
+    <!-- <MonthFilter 
+      v-if="!globalMonthFilter"
+      v-model="localMonthFilter"
+      @month-change="handleMonthChange"
+      class="month-filter-component"
+    /> -->
     <div class="content">
-      <div :id="id + 'mydiv'"></div>
+      <div v-if="filteredData.length === 0" class="no-data-message">
+        No data
+      </div>
+      <div v-else :id="id + 'mydiv'"></div>
     </div>
     <div class="update">
       Last Update: {{ lastTimestamp }}
@@ -218,16 +297,21 @@ onMounted(() => {
         style="margin-left: 5px;color: black" />
     </div>
   </div>
-
 </template>
 
 
 
 <style lang="scss" scoped>
+.month-filter-component {
+  padding: 5px;
+  background: #f8f9fa;
+  border-radius: 5px;
+  margin-bottom: 5px;
+}
+
 .content {
   display: flex;
-
-  height: 90%;
+  height: calc(90% - 30px); // Adjust height to account for month filter
 }
 
 #container {
@@ -236,6 +320,7 @@ onMounted(() => {
   height: 100%;
   overflow: hidden;
 }
+
 #chart {
   height: 98%;
 }

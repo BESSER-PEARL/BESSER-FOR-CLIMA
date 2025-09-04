@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
 const props = defineProps({
   tableId: {
     type: Number,
@@ -12,6 +12,10 @@ const props = defineProps({
   title: {
     type: String,
     default: "Title"
+  },
+  globalMonthFilter: {
+    type: String,
+    default: ""
   }
 })
 
@@ -114,6 +118,22 @@ const mapping = ref({});
 const series = ref([]);
 const labels = ref([]);
 const kpiMetadata = ref(null);
+const rawData = ref([]);
+const localMonthFilter = ref(props.globalMonthFilter || "");
+
+// Computed property to filter data based on selected month
+const filteredData = computed(() => {
+  if (!localMonthFilter.value || !rawData.value.length) {
+    return rawData.value;
+  }
+  
+  return rawData.value.filter(item => {
+    const itemDate = new Date(item.timestamp);
+    const filterDate = new Date(localMonthFilter.value + '-01');
+    return itemDate.getFullYear() === filterDate.getFullYear() && 
+           itemDate.getMonth() === filterDate.getMonth();
+  });
+});
 
 const formatDate = (dateString) => {
   const date = new Date(dateString);
@@ -170,16 +190,35 @@ async function getItems() {
     
     const response = await fetch('http://localhost:8000/' + props.city.toLowerCase() + '/kpi/?id=' + props.tableId)
     const data = await response.json();
-    //console.log(data);
-
-    data.forEach(item => {
-      items.value.push(item);
-      stands.value.push(item.categoryLabel);
-      lastTimestamp.value = formatDate(item.timestamp);
-    });
     
-    items.value = data
-    mapping.value = getLatestKpiValues(data);    
+    rawData.value = data; // Store raw data
+    updateChart(); // Process filtered data
+  } catch (error) {
+    window.alert(error);
+  }
+}
+
+function updateChart() {
+  const data = filteredData.value;
+  
+  // Clear existing data
+  items.value = [];
+  stands.value = [];
+  labels.value = [];
+  series.value = [];
+  
+  if (data.length === 0) {
+    return; // No data to process
+  }
+
+  data.forEach(item => {
+    items.value.push(item);
+    stands.value.push(item.categoryLabel);
+    lastTimestamp.value = formatDate(item.timestamp);
+  });
+  
+  items.value = data
+  mapping.value = getLatestKpiValues(data);    
     
     // Calculate total for percentage conversion
     const totalValue = Object.values(mapping.value).reduce((sum, value) => sum + value, 0);
@@ -292,9 +331,6 @@ async function getItems() {
 
     //console.log(series.value);
     //console.log(labels.value);
-  } catch (error) {
-    window.alert(error);
-  }
 }
 
 getItems();
@@ -413,6 +449,15 @@ watch(() => [props.title], () => {
   }
 });
 
+watch(() => props.globalMonthFilter, (newFilter) => {
+  localMonthFilter.value = newFilter;
+  updateChart();
+});
+
+watch(filteredData, () => {
+  updateChart();
+});
+
 const alert = ref(false);
 const toggleAlert = () => {
   alert.value = !alert.value;
@@ -422,7 +467,10 @@ const toggleAlert = () => {
 <template>
   <div id="container">
     <div id="chart">
-      <VueApexCharts type="bar" height="100%" :options="chartOptions" :series="[ { data: series } ]"></VueApexCharts>
+      <div v-if="filteredData.length === 0" class="no-data-message">
+        No data
+      </div>
+      <VueApexCharts v-else type="bar" height="100%" :options="chartOptions" :series="[ { data: series } ]"></VueApexCharts>
     </div>
     <div class="update">
       Last Update: {{ lastTimestamp }}
@@ -456,5 +504,15 @@ const toggleAlert = () => {
   color: #666;
   height: 5%;
   min-height: 20px;
+}
+
+.no-data-message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  color: #666;
+  font-size: 16px;
+  font-weight: 500;
 }
 </style>

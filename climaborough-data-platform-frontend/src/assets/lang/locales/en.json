@@ -43,16 +43,6 @@
   },
   "denied_header": "Access Denied",
   "denied_subheader": "You need to login if you want to access the Climaborough dashboards.",
-  "login": {
-    "title": "Sign In",
-    "sign_in": "Sign In with Keycloak",
-    "cancel": "Cancel",
-    "login": "Log in to see more",
-    "email": "Email Address",
-    "email_message": "Please enter an email address!",
-    "password": "Password",
-    "submit": "Submit"
-  },
   "auth": {
     "access_required": "Access Required",
     "please_login": "Please login to access this page.",
@@ -60,5 +50,17 @@
     "logout_error": "Logout error, please try again.",
     "unauthorized": "You are not authorized to access this resource.",
     "forbidden": "Access forbidden. You do not have permission to view this page."
+  },
+  "login": {
+    "title": "Login",
+    "welcome": "Welcome to Climaborough",
+    "description": "Login with Keycloak",
+    "sign_in": "Sign In",
+    "secure_auth": "Secure authentication to see more",
+    "back_home": "Back to Home",
+    "email_message": "Please enter an email address!",
+    "password": "Password",
+    "submit": "Submit",
+    "cancel": "Cancel"
   }
 }
