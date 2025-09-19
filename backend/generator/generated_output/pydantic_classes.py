@@ -62,7 +62,7 @@ class BarChart(Visualisation):
 class KPIValue(BaseModel):
     kpiValue: float
     timestamp: datetime
-    categoryLabel: str
+    categoryLabel: Optional[str] = None
     
 class MapData(ABC, BaseModel):
     title: str
