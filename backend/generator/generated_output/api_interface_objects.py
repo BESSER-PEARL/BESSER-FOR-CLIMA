@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 # Database related imports
 import psycopg2
 from sqlalchemy import create_engine, func, inspect, MetaData, select
-from sqlalchemy.orm import sessionmaker, aliased
+from sqlalchemy.orm import sessionmaker, aliased, Session
 from sqlalchemy.exc import IntegrityError
 
 # Type hints and data validation
@@ -183,6 +183,14 @@ engine = create_engine("postgresql://" + db_host + "/" + db_name +
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base.metadata.create_all(bind=engine)
+
+# Dependency for getting database session
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 session = SessionLocal()
 
@@ -861,6 +869,7 @@ geojson_alias = aliased(GeoJsonDB)
 async def create_kpi(
     city_name: str,
     kpi: KPI = Body(...),
+    db: Session = Depends(get_db)
 ):
     """
     Create a new Key Performance Indicator (KPI) for a specified city.
@@ -897,12 +906,17 @@ async def create_kpi(
     - 500: Internal server error
     """
     # Get city object
-    city = session.query(CityDB).filter(func.lower(CityDB.name) == func.lower(city_name)).first()
+    city = db.query(CityDB).filter(func.lower(CityDB.name) == func.lower(city_name)).first()
     if not city:
         raise HTTPException(status_code=404, detail=f"City {city_name} not found")
     
     # Create the generic KPI DB object
     try:
+        # Coerce categoryLabelDictionary keys to integers if provided
+        category_label_dict = None
+        if kpi.categoryLabelDictionary:
+            category_label_dict = {int(k): v for k, v in kpi.categoryLabelDictionary.items()}
+        
         kpi_db = KPIDB(
             id_kpi=kpi.id_kpi,
             name=kpi.name,
@@ -914,33 +928,34 @@ async def create_kpi(
             minThreshold=kpi.minThreshold,
             maxThreshold=kpi.maxThreshold,
             hasCategoryLabel=kpi.hasCategoryLabel,
-            categoryLabelDictionary=kpi.categoryLabelDictionary,
+            categoryLabelDictionary=category_label_dict,
             city_id=city.id
         )
         
-        session.add(kpi_db)
-        session.commit()
-        session.refresh(kpi_db)
+        db.add(kpi_db)
+        db.commit()
+        db.refresh(kpi_db)
         return kpi_db.id
     
     except IntegrityError:
-        session.rollback()
+        db.rollback()
         raise HTTPException(status_code=400, detail="Integrity error occurred. KPI with this ID might already exist.")
     except Exception as e:
-        session.rollback()
+        db.rollback()
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
-@app.post("/city/{city_name}/kpi/{kpi_id}", dependencies=[Depends(KeycloakBearer())], response_model=List[KPIValue], summary="Add KPI values", tags=["KPI"])
+@app.post("/city/{city_name}/kpi/{kpi_id}", dependencies=[Depends(KeycloakBearer())], summary="Add KPI values", tags=["KPI"])
 async def add_kpi_values(
     city_name: str,
     kpi_id: int,
-    kpis: List[KPIValue] = Body(...),
+    kpi_values: List[KPIValue] = Body(...),
+    db: Session = Depends(get_db)
 ):
     """
-    Add or update KPI values for a specified city and KPI.
+    Add KPI values for a specified city and KPI.
     
-    This endpoint allows adding or updating time-series data for an existing KPI. If values already 
-    exist for the specified timestamps, they will be updated; otherwise, new entries will be created.
+    This endpoint allows adding time-series data for an existing KPI. Duplicate entries 
+    (same timestamp for the same KPI) will be skipped to prevent integrity errors.
     
     Authentication:
     - Requires JWT token in the header: `Authorization: Bearer <token>`
@@ -948,84 +963,97 @@ async def add_kpi_values(
     Path Parameters:
     - city_name (str): The name of the city (case-insensitive). Must already exist in the system. Supported cities include:
     Torino, Cascais, Differdange, Sofia, Athens, Grenoble-Alpes, Maribor, Ioannina
-    - kpi_id (int): The ID of the KPI to update with new values.
+    - kpi_id (int): The ID of the KPI to add values to.
     
     Request Body Fields:
     - List of KPIValue objects, each containing:
       - kpiValue (float, required): The measured value for the KPI at the specified timestamp.
       - timestamp (datetime, required): The date/time for the KPI measurement.
-      - categoryLabel (str, required): The category label for the KPI measurement.
+      - categoryLabel (str, optional): The category label for the KPI measurement.
     
     Returns:
-    - List of created or updated KPIValue objects.
+    - Summary of the operation including counts of added and skipped entries.
     
     Errors:
     - 404: City or KPI not found
-    - 400: Integrity error or invalid data format
+    - 400: KPI does not belong to city or database integrity error
     - 500: Internal server error
     """
-    # Get city object
-    city = session.query(CityDB).filter(func.lower(CityDB.name) == func.lower(city_name)).first()
-    if not city:
-        raise HTTPException(status_code=404, detail=f"City {city_name} not found")
-    # Get KPI object
-    kpi = session.query(KPIDB).filter_by(id=kpi_id, city_id=city.id).first()
-    if not kpi:
-        raise HTTPException(status_code=404, detail=f"KPI {kpi_id} not found for city {city_name}")
-    db_entries = []
     try:
-        for kpi_value in kpis:
-            # Determine lookup strategy based on whether the KPI uses category labels
-            if getattr(kpi, "hasCategoryLabel", False):
-                # KPI with categories: lookup by (timestamp, kpi_id, categoryLabel)
-                existing_entry = session.query(KPIValueDB).filter_by(
-                    timestamp=kpi_value.timestamp,
-                    kpi_id=kpi.id,
-                    categoryLabel=kpi_value.categoryLabel
-                ).first()
-            else:
-                # KPI without categories: lookup by (timestamp, kpi_id) only
-                existing_entry = session.query(KPIValueDB).filter_by(
-                    timestamp=kpi_value.timestamp,
-                    kpi_id=kpi.id
-                ).first()
-            
-            if existing_entry:
-                # Update existing entry
-                existing_entry.kpiValue = kpi_value.kpiValue
-                if getattr(kpi, "hasCategoryLabel", False):
-                    existing_entry.categoryLabel = kpi_value.categoryLabel
-                db_entries.append(existing_entry)
-            else:
-                # Create a new entry
-                db_entry = KPIValueDB(**kpi_value.dict())
-                db_entry.kpi_id = kpi.id
-                # If the KPI does not use categories, do not set categoryLabel
-                if not getattr(kpi, "hasCategoryLabel", False):
-                    db_entry.categoryLabel = None
-                session.add(db_entry)
-                db_entries.append(db_entry)
+        # Check if the city exists
+        city = db.query(CityDB).filter(func.lower(CityDB.name) == func.lower(city_name)).first()
+        if not city:
+            raise HTTPException(status_code=404, detail=f"City {city_name} not found")
         
-        # Single commit for the whole batch
-        session.commit()
+        # Check if the KPI exists
+        kpi = db.query(KPIDB).filter_by(id=kpi_id).first()
+        if not kpi:
+            raise HTTPException(status_code=404, detail=f"KPI {kpi_id} not found")
         
-        # Refresh all objects after commit
-        for entry in db_entries:
-            session.refresh(entry)
+        # Check if the KPI belongs to the city
+        if kpi.city_id != city.id:
+            raise HTTPException(status_code=400, detail="KPI does not belong to this city")
+        
+        added_count = 0
+        skipped_count = 0
+        
+        for kpi_value in kpi_values:
+            # Handle empty categoryLabel
+            category_label = kpi_value.categoryLabel
+            if category_label == "":
+                category_label = None
             
-    except IntegrityError:
-        session.rollback()
-        raise HTTPException(status_code=400, detail="Integrity error occurred")
+            # Check if this timestamp already exists for this KPI
+            existing_value = db.query(KPIValueDB).filter_by(
+                kpi_id=kpi_id,
+                timestamp=kpi_value.timestamp
+            ).first()
+            
+            if existing_value:
+                # Skip duplicate entries
+                skipped_count += 1
+                logger.warning(f"Skipping duplicate KPI value for timestamp {kpi_value.timestamp}")
+                continue
+            
+            # Create new KPI value
+            new_kpi_value = KPIValueDB(
+                kpiValue=kpi_value.kpiValue,
+                timestamp=kpi_value.timestamp,
+                categoryLabel=category_label,
+                kpi_id=kpi_id
+            )
+            
+            db.add(new_kpi_value)
+            added_count += 1
+        
+        # Commit all changes
+        db.commit()
+        
+        return {
+            "message": f"Successfully processed {len(kpi_values)} KPI values",
+            "added": added_count,
+            "skipped": skipped_count,
+            "kpi_id": kpi_id,
+            "city": city_name
+        }
+        
+    except HTTPException:
+        db.rollback()
+        raise
+    except IntegrityError as e:
+        db.rollback()
+        logger.error(f"Integrity error: {str(e)}")
+        raise HTTPException(status_code=400, detail=f"Database integrity error: {str(e)}")
     except Exception as e:
-        session.rollback()
-        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
-            
-    return db_entries
+        db.rollback()
+        logger.error(f"Unexpected error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 @app.delete("/city/{city_name}/kpi/{kpi_id}", dependencies=[Depends(KeycloakBearer())], summary="Delete a KPI", tags=["KPI"])
 async def delete_kpi(
     city_name: str,
-    kpi_id: int
+    kpi_id: int,
+    db: Session = Depends(get_db)
 ):
     """
     Delete a KPI and all its associated values for a specified city.
@@ -1051,35 +1079,35 @@ async def delete_kpi(
     """
     try:
         # Get city object
-        city = session.query(CityDB).filter(func.lower(CityDB.name) == func.lower(city_name)).first()
+        city = db.query(CityDB).filter(func.lower(CityDB.name) == func.lower(city_name)).first()
         if not city:
             raise HTTPException(status_code=404, detail=f"City {city_name} not found")
         
         # Get KPI object
-        kpi = session.query(KPIDB).filter_by(id=kpi_id, city_id=city.id).first()
+        kpi = db.query(KPIDB).filter_by(id=kpi_id, city_id=city.id).first()
         if not kpi:
             raise HTTPException(status_code=404, detail=f"KPI {kpi_id} not found for city {city_name}")
         
         # First, delete all visualizations that reference this KPI
         # This prevents foreign key constraint violations
-        session.query(VisualisationDB).filter_by(kpi_id=kpi.id).delete()
+        db.query(VisualisationDB).filter_by(kpi_id=kpi.id).delete()
         
         # Delete all KPI values (due to foreign key constraint)
-        session.query(KPIValueDB).filter_by(kpi_id=kpi.id).delete()
+        db.query(KPIValueDB).filter_by(kpi_id=kpi.id).delete()
         
         # Delete the KPI itself
-        session.delete(kpi)
-        session.commit()
+        db.delete(kpi)
+        db.commit()
         
         return {"message": f"KPI {kpi_id} and all associated values and visualizations deleted successfully from city {city_name}"}
         
     except Exception as e:
-        session.rollback()
+        db.rollback()
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
 
 @app.get("/city/{city_name}/kpis", response_model=list[object], summary="Get all KPI objects, Value: Torino,Cascais,Differdange,Sofia,Athens,Grenoble-Alpes,Maribor,Ioannina", tags=["KPI"])
-async def get_kpis(city_name: str):
+async def get_kpis(city_name: str, db: Session = Depends(get_db)):
     """
     Retrieve all KPIs for a specific city.
     
@@ -1100,12 +1128,12 @@ async def get_kpis(city_name: str):
     """
     try:
         # Get city object
-        city = session.query(CityDB).filter(func.lower(CityDB.name) == func.lower(city_name)).first()
+        city = db.query(CityDB).filter(func.lower(CityDB.name) == func.lower(city_name)).first()
         if not city:
             raise HTTPException(status_code=404, detail=f"City {city_name} not found")
             
         # Query for all KPIs for this city
-        kpis = session.query(KPIDB).filter(KPIDB.city_id == city.id).all()
+        kpis = db.query(KPIDB).filter(KPIDB.city_id == city.id).all()
         
         # Convert SQLAlchemy objects to dictionaries
         results_list = []
@@ -1128,7 +1156,6 @@ async def get_kpis(city_name: str):
             
         return results_list
     except Exception as e:
-        session.rollback()
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
 

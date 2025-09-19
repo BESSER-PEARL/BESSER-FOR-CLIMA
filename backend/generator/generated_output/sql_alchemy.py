@@ -127,7 +127,7 @@ class KPIValue(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     kpiValue: Mapped[float] = mapped_column(Float)
     timestamp: Mapped[datetime] = mapped_column(DateTime)
-    categoryLabel: Mapped[str] = mapped_column(String(100))
+    categoryLabel: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
 
 class MapData(Base):
     

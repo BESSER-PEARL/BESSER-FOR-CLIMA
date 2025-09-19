@@ -85,7 +85,7 @@ const projects = [
   { id: 4, image: 'mari.svg', title: "Maribor", country: "Slovenia", imageball: "sloveniaball.svg", type: "Bio-waste", hub: 2 },
   { id: 5, image: 'Athen.svg', title: "Athens", country: "Greece", imageball: "greeceball.svg", type: "Energy Community", hub: 1 },
   { id: 6, image: 'mari.svg', title: "Ioannina", country: "Greece", imageball: "greeceball.svg", type: "Waste", hub: 2 },
-  { id: 7, image: 'Grenoble.svg', title: "Grenoble-Alpes", country: "France", imageball: "franceball.svg", type: "Public building simulation", hub: 1 },
+  { id: 7, image: 'Grenoble.svg', title: "Grenoble", country: "France", imageball: "franceball.svg", type: "Public building simulation", hub: 1 },
   { id: 8, image: 'torino.svg', title: "Torino", country: "Italy", imageball: "italyball.svg", type: "Waste", hub: 2 }
 ]
 </script>

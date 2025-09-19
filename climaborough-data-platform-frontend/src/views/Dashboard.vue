@@ -89,194 +89,308 @@ const selectedSection = reactive({
     "layout": sections.value[0]["layout"]
 })
 
-const getVisualisations = () => {
+const getVisualisations = async () => {
     try {
-        fetch('http://localhost:8000/' + city.value.toLowerCase() + '/visualizations').then(response => response.json()).then(data => {
-            // Iterate over the list of strings and log each string
-
-            var sectionsObjects = {}
-            layout.value = []
-            if (data.length > 0) {
-                var selectedSectionName = selectedSection.name
-                // ugly way to do what i want to do
-                selectedSection.edit = true
-                sections.value = []
-                data.forEach(item => {
-
-                    var vis = { x: item.xposition, y: item.yposition, w: item.width, h: item.height,x: parseInt(item.xposition) || 0, y: parseInt(item.yposition) || 0, w: parseInt(item.width) || 4, h: parseInt(item.height) || 8,  i: item.i, id: item.i, chart: item.chartType, attributes: { city: city.value, title: item.title, tableId: item.kpi_id } }
-                    if (item.chartType == "LineChart") {
-                        vis.attributes.xtitle = item.xtitle
-                        vis.attributes.ytitle = item.ytitle
-                        vis.attributes.color = item.color
-                        if (item.target && item.target != "") {
-                            vis.attributes.target = item.target
-                        } else {
-                            vis.attributes.target = 0
-                        }
-
-                    } else if (item.chartType == "StatChart") {
-                        vis.attributes.suffix = item.unit
-                        vis.attributes.target = item.target
-                        if (item.target != null && item.target != "") {
-                            vis.attributes.target = item.target
-                        } else {
-                            vis.attributes.target = 0
-                        }
-                    } else if (item.chartType == "PieChart") {
-
-                    } else if (item.chartType == "Table") {
-
-                    } else if (item.chartType == "Map") {
-
-                    } else {
-
-                    }
-                    if (item.section == null) {
-                        if (!("Section 1" in sectionsObjects)) {
-                            sectionsObjects["Section 1"] = []
-                        }
-                        sectionsObjects["Section 1"].push(vis)
-                    } else {
-                        if (!(item.section in sectionsObjects)) {
-                            sectionsObjects[item.section] = []
-                        }
-                        sectionsObjects[item.section].push(vis)
-                    }
-
-                });
-                Object.keys(sectionsObjects).forEach(key => {
-                    var newObj = {
-                        "name": key,
-                        "layout": sectionsObjects[key],
-                        "edit": false
-                    }
-                    sections.value.push(newObj)
-                })
-            } else {
-
-            }
-            sections.value.forEach(object => {
-                if (selectedSectionName == "Section 1") {
-                    if (object.name == selectedSectionName || object.name.includes("Pilot Overview")) {
-                        selectedSection.name = object.name
-                        selectedSection.edit = object.edit
-                        selectedSection.layout = object.layout
-                    }
-
-                } else {
-                    if (object.name == selectedSectionName) {
-                        selectedSection.name = object.name
-                        selectedSection.edit = object.edit
-                        selectedSection.layout = object.layout
-                    }
+        console.log('Loading visualizations...');
+        const response = await fetch('http://localhost:8000/' + city.value.toLowerCase() + '/visualizations');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        console.log('Visualizations loaded:', data.length);
+        
+        var sectionsObjects = {}
+        layout.value = []
+        
+        if (data.length > 0) {
+            var selectedSectionName = selectedSection.name
+            // Clear sections to rebuild from server data
+            selectedSection.edit = true
+            sections.value = []
+            
+            data.forEach(item => {
+                var vis = { 
+                    x: parseInt(item.xposition) || 0, 
+                    y: parseInt(item.yposition) || 0, 
+                    w: parseInt(item.width) || 4, 
+                    h: parseInt(item.height) || 8,  
+                    i: item.i, 
+                    id: item.i, 
+                    chart: item.chartType, 
+                    attributes: { 
+                        city: city.value, 
+                        title: item.title, 
+                        tableId: item.kpi_id 
+                    } 
                 }
-
+                
+                // Add chart-specific attributes
+                if (item.chartType == "LineChart") {
+                    vis.attributes.xtitle = item.xtitle
+                    vis.attributes.ytitle = item.ytitle
+                    vis.attributes.color = item.color
+                    vis.attributes.target = (item.target && item.target != "") ? item.target : 0
+                } else if (item.chartType == "StatChart") {
+                    vis.attributes.suffix = item.unit
+                    vis.attributes.target = (item.target != null && item.target != "") ? item.target : 0
+                } else if (item.chartType == "PieChart") {
+                    // Add PieChart specific attributes if needed
+                } else if (item.chartType == "Table") {
+                    // Add Table specific attributes if needed
+                } else if (item.chartType == "Map") {
+                    // Add Map specific attributes if needed
+                }
+                
+                // Organize into sections
+                const sectionName = item.section || "Section 1";
+                if (!(sectionName in sectionsObjects)) {
+                    sectionsObjects[sectionName] = []
+                }
+                sectionsObjects[sectionName].push(vis)
+            });
+            
+            // Convert sections object to array
+            Object.keys(sectionsObjects).forEach(key => {
+                var newObj = {
+                    "name": key,
+                    "layout": sectionsObjects[key],
+                    "edit": false
+                }
+                sections.value.push(newObj)
             })
-            if (selectedSection.edit) {
-                selectedSection.name = sections.value[0].name
-                selectedSection.edit = sections.value[0].edit
-                selectedSection.layout = sections.value[0].layout
+        } else {
+            // No data, create default section
+            sections.value = [{ "name": "Section 1", "edit": false, "layout": [] }]
+        }
+        
+        // Restore selected section or use first available
+        let sectionFound = false;
+        sections.value.forEach(object => {
+            if (selectedSectionName == "Section 1") {
+                if (object.name == selectedSectionName || object.name.includes("Pilot Overview")) {
+                    selectedSection.name = object.name
+                    selectedSection.edit = object.edit
+                    selectedSection.layout = object.layout
+                    sectionFound = true;
+                }
+            } else {
+                if (object.name == selectedSectionName) {
+                    selectedSection.name = object.name
+                    selectedSection.edit = object.edit
+                    selectedSection.layout = object.layout
+                    sectionFound = true;
+                }
             }
-
         })
+        
+        // If no matching section found, use first section
+        if (!sectionFound && sections.value.length > 0) {
+            selectedSection.name = sections.value[0].name
+            selectedSection.edit = sections.value[0].edit
+            selectedSection.layout = sections.value[0].layout
+        }
+        
+        console.log('Visualizations loaded successfully');
+        
     } catch (error) {
-        console.log(error)
+        console.error('Error loading visualizations:', error);
+        window.alert(`Failed to load dashboard: ${error.message}`);
+        
+        // Set default state on error
+        sections.value = [{ "name": "Section 1", "edit": false, "layout": [] }]
+        selectedSection.name = "Section 1"
+        selectedSection.edit = false
+        selectedSection.layout = []
     }
 }
+
+// Load visualizations on component mount
 getVisualisations()
 
-const deleteVisualisations = async (idList) => {
+const deleteVisualisations = async (idList, shouldToggleEditMode = true) => {
     try {
         const token = await auth.getAccessToken();
-        fetch('http://localhost:8000/' + city.value.toLowerCase() + '/visualizations', {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token
-            },
-            body: JSON.stringify(idList)
-        }).then(response => {
+        
+        // Special case: if idList is empty, we want to delete ALL existing visualizations
+        if (!idList || idList.length === 0) {
+            console.log('Deleting all existing visualizations...');
+            const response = await fetch('http://localhost:8000/' + city.value.toLowerCase() + '/visualizations', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify([]) // Empty array signals to delete all
+            });
+
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                const errorText = await response.text();
+                throw new Error(`Failed to clear dashboard: HTTP ${response.status} - ${errorText}`);
             }
-            return response.json();
-        })
-        .then(data => {
-            //console.log('Success:', data);
-            // Only refresh visualizations after successful delete
-            getVisualisations();
-            // Now toggle edit mode if needed
-            edit();
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
+
+            console.log('All visualizations deleted successfully');
+        } else {
+            console.log('Deleting old visualizations, keeping new ones...');
+            const response = await fetch('http://localhost:8000/' + city.value.toLowerCase() + '/visualizations', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify(idList)
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Failed to delete old visualizations: HTTP ${response.status} - ${errorText}`);
+            }
+
+            const data = await response.json();
+            console.log('Old visualizations deleted successfully:', data);
+        }
+        
+        // Refresh visualizations to get the updated state
+        await getVisualisations();
+        
+        // Only toggle edit mode if requested (default behavior)
+        if (shouldToggleEditMode) {
+            editMode.value = !editMode.value;
+        }
+        
     } catch (error) {
-        console.error('Authentication error:', error);
-        window.alert('Authentication failed. Please log in again.');
+        console.error('Error deleting visualizations:', error);
+        window.alert(`Failed to delete old visualizations: ${error.message}`);
+        
+        // Still refresh to maintain consistency
+        await getVisualisations();
     }
 }
 
 async function storeVisualisations() {
-    for (var i = 0; i < sections.value.length; i++) {
-        if (selectedSection.name == sections.value[i].name) {
-            sections.value[i].layout = selectedSection.layout
-            break;
-        }
+    if (isSaving.value) {
+        console.log('Save already in progress...');
+        return;
     }
-
-    const idList = [];
-    for (let i = 0; i < sections.value.length; i++) {
-        let layout = sections.value[i].layout
-        for (let k = 0; k < layout.length; k++) {
-            const item = layout[k];
-            const jsonObj = {
-                chartType: item.chart,
-                title: item.attributes.title,
-                xposition: item.x,
-                yposition: item.y,
-                width: item.w,
-                height: item.h,
-                i: item.i,
-                section: sections.value[i].name
-            };
-            //console.log(jsonObj)
-            if (item.chart === "LineChart") {
-                jsonObj.xtitle = item.attributes.xtitle;
-                jsonObj.ytitle = item.attributes.ytitle;
-                jsonObj.color = item.attributes.color;
-                jsonObj.target = item.attributes.target
-            } else if (item.chart === "StatChart") {
-                jsonObj.unit = item.attributes.suffix;
-                jsonObj.target = item.attributes.target
+    
+    isSaving.value = true;
+    
+    try {
+        console.log('Saving dashboard...');
+        
+        // Sync current section with sections array
+        for (var i = 0; i < sections.value.length; i++) {
+            if (selectedSection.name == sections.value[i].name) {
+                sections.value[i].layout = selectedSection.layout
+                break;
             }
-            try {
-                const response = await fetch(`http://localhost:8000/${city.value.toLowerCase()}/visualization/${item.chart}/${item.attributes.tableId}`, {
+        }
+
+        const idList = [];
+        const savePromises = [];
+        let hasVisualizations = false;
+
+        // Check if we have any visualizations to save
+        for (let i = 0; i < sections.value.length; i++) {
+            if (sections.value[i].layout && sections.value[i].layout.length > 0) {
+                hasVisualizations = true;
+                break;
+            }
+        }
+
+        // If no visualizations, just delete all existing ones and exit edit mode
+        if (!hasVisualizations) {
+            console.log('No visualizations to save, clearing dashboard...');
+            await deleteVisualisations([], false); // Don't toggle edit mode automatically
+            console.log('Empty dashboard saved successfully!');
+            // Manually exit edit mode
+            editMode.value = false;
+            return; // isSaving.value will be set to false in finally block
+        }
+
+        // Collect all save operations as promises
+        for (let i = 0; i < sections.value.length; i++) {
+            let layout = sections.value[i].layout
+            if (!layout || layout.length === 0) {
+                console.log(`Skipping empty section: ${sections.value[i].name}`);
+                continue;
+            }
+            
+            for (let k = 0; k < layout.length; k++) {
+                const item = layout[k];
+                const jsonObj = {
+                    chartType: item.chart,
+                    title: item.attributes.title,
+                    xposition: item.x,
+                    yposition: item.y,
+                    width: item.w,
+                    height: item.h,
+                    i: item.i,
+                    section: sections.value[i].name
+                };
+
+                // Add chart-specific properties
+                if (item.chart === "LineChart") {
+                    jsonObj.xtitle = item.attributes.xtitle;
+                    jsonObj.ytitle = item.attributes.ytitle;
+                    jsonObj.color = item.attributes.color;
+                    jsonObj.target = item.attributes.target
+                } else if (item.chart === "StatChart") {
+                    jsonObj.unit = item.attributes.suffix;
+                    jsonObj.target = item.attributes.target
+                }
+
+                // Create promise for this save operation
+                const savePromise = fetch(`http://localhost:8000/${city.value.toLowerCase()}/visualization/${item.chart}/${item.attributes.tableId}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': 'Bearer ' + await auth.getAccessToken()
                     },
                     body: JSON.stringify(jsonObj)
+                }).then(async (response) => {
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`HTTP ${response.status}: ${errorText}`);
+                    }
+                    return response.json();
                 });
 
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-
-                const data = await response.json();
-                idList.push(data);
-                //console.log('Success:', data);
-            } catch (error) {
-                console.error('Error:', error);
-                window.alert(error);
-                return
+                savePromises.push(savePromise);
             }
         }
-    }
 
-    // Now that all API calls are processed, you can perform any further actions with the idList here
-    deleteVisualisations(idList);
+        // Wait for all save operations to complete
+        if (savePromises.length > 0) {
+            const results = await Promise.all(savePromises);
+            idList.push(...results);
+            console.log('All visualizations saved successfully:', results.length);
+            
+            // Only proceed to delete old visualizations if we have new ones to replace them
+            await deleteVisualisations(idList, false); // Don't toggle edit mode automatically
+        } else {
+            // This shouldn't happen due to the hasVisualizations check above, but just in case
+            console.log('No save operations to perform');
+            await deleteVisualisations([], false); // Don't toggle edit mode automatically
+        }
+        
+        // Success feedback
+        console.log('Dashboard saved successfully!');
+        
+        // Manually exit edit mode after successful save
+        editMode.value = false;
+        
+    } catch (error) {
+        console.error('Error saving dashboard:', error);
+        window.alert(`Failed to save dashboard: ${error.message}`);
+        
+        // Refresh visualizations to restore consistent state
+        console.log('Refreshing dashboard state...');
+        await getVisualisations();
+    } finally {
+        isSaving.value = false;
+    }
 }
 
 const lineChartBool = ref(false)
@@ -289,12 +403,19 @@ const currentItem = ref({})
 const visualisations = []
 const editMode = ref(false)
 const tableForm = ref(false)
+const isSaving = ref(false)
 
 const currentSelectedChart = ref("")
 
-const edit = () => {
-    getVisualisations()
-    editMode.value = !editMode.value
+const edit = async () => {
+    try {
+        // Always reload visualizations when entering/exiting edit mode
+        await getVisualisations()
+        editMode.value = !editMode.value
+        console.log('Edit mode toggled to:', editMode.value)
+    } catch (error) {
+        console.error('Error toggling edit mode:', error);
+    }
 }
 
 const toggleForm = () => {
@@ -471,10 +592,14 @@ watchEffect(() => {
     console.log('AuthRequired component will handle authentication');
 });
 
-const handleKeycloakLoginSuccess = () => {
+const handleKeycloakLoginSuccess = async () => {
     if (auth.isAuthenticated.value) {
         console.log('User logged in, refreshing dashboard');
-        getVisualisations();
+        try {
+            await getVisualisations();
+        } catch (error) {
+            console.error('Error refreshing dashboard after login:', error);
+        }
     }
 };
 
@@ -867,8 +992,8 @@ const handleGlobalMonthChange = (monthValue) => {
                         <v-btn size="x-large" @click="edit" color="red" class="button">
                             Turn off edit mode
                         </v-btn>
-                        <v-btn size="x-large" @click="storeVisualisations" class="button" style="background-color: #aec326; color: white;">
-                            Save Dashboard
+                        <v-btn size="x-large" @click="storeVisualisations" :loading="isSaving" :disabled="isSaving" class="button" style="background-color: #aec326; color: white;">
+                            {{ isSaving ? 'Saving...' : 'Save Dashboard' }}
                         </v-btn>
                         <v-btn size="x-large" @click="organizeVisualisations(false)" color="#0177a9" class="button">
                             <Icon icon="material-symbols:border-all" width="30" height="30" style="color: #FFFFFF" />
