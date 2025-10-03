@@ -339,6 +339,10 @@ async function storeVisualisations() {
                 } else if (item.chart === "StatChart") {
                     jsonObj.unit = item.attributes.suffix;
                     jsonObj.target = item.attributes.target
+                } else if (item.chart === "Map") {
+                    // Add Map specific properties - maps don't need additional attributes
+                    // but we ensure the basic properties are preserved
+                    jsonObj.city = item.attributes.city;
                 }
 
                 // Create promise for this save operation
@@ -432,9 +436,31 @@ const deleteVisualisation = (item) => {
     selectedSection.layout = selectedSection.layout.filter((visualisation) => visualisation.id !== item.id)
 }
 
-const toggleKPIForm = (chart) => {
+const toggleKPIForm = async (chart) => {
     if (chart == "Map") {
-        createVisualisation('1', 'Map', 'Map', {});
+        // For Map widgets, we need to get a valid KPI ID from the city
+        try {
+            const response = await fetch(`http://localhost:8000/city/${city.value}/kpis`);
+            if (response.ok) {
+                const kpis = await response.json();
+                if (kpis && kpis.length > 0) {
+                    // Use the first available KPI ID
+                    createVisualisation(kpis[0].id.toString(), 'Map', 'Map', {});
+                } else {
+                    // Fallback: create a generic KPI for maps if none exist
+                    window.alert('No KPIs available for this city. Please create a KPI first.');
+                    return;
+                }
+            } else {
+                console.error('Failed to fetch KPIs for city:', city.value);
+                window.alert('Failed to load city KPIs. Please try again.');
+                return;
+            }
+        } catch (error) {
+            console.error('Error fetching KPIs:', error);
+            window.alert('Error loading city data. Please try again.');
+            return;
+        }
         return
     }
     tableForm.value = !tableForm.value
@@ -721,52 +747,97 @@ function dragEnd(chart) {
 
 function addSection(event) {
     var currLength = sections.value.length + 1
-    sections.value.push({ "name": "Section " + currLength, "edit": false, layout: [] })
+    const newSection = { "name": "Section " + currLength, "edit": false, layout: [] }
+    sections.value.push(newSection)
+    
+    // Automatically switch to the new section
+    setSection(newSection)
+    
     event.stopPropagation();
-
 }
 
-
-
-
 function setSection(section) {
+    // Save current section changes before switching
     for (var i = 0; i < sections.value.length; i++) {
         if (selectedSection.name == sections.value[i].name) {
             sections.value[i].layout = selectedSection.layout
+            sections.value[i].edit = selectedSection.edit
             break;
         }
     }
-    selectedSection["name"] = section["name"]
-    selectedSection["edit"] = section["edit"]
-    selectedSection["layout"] = section["layout"]
-}
-
-
-if (sections.value.length > 0) {
-    selectedSection.value = sections.value[0]
+    
+    // Switch to new section
+    selectedSection.name = section.name
+    selectedSection.edit = section.edit
+    selectedSection.layout = [...section.layout] // Create a copy to avoid reference issues
 }
 
 function deleteSection(item, event) {
+    // Prevent deleting the last section
+    if (sections.value.length <= 1) {
+        window.alert('Cannot delete the last section. At least one section is required.');
+        event.stopPropagation();
+        return;
+    }
+    
+    // If we're deleting the currently selected section, switch to another one first
+    const isCurrentSection = selectedSection.name === item.name;
+    
+    // Remove the section
     sections.value = sections.value.filter((section) => section.name !== item.name)
+    
+    // If we deleted the current section, switch to the first available section
+    if (isCurrentSection && sections.value.length > 0) {
+        setSection(sections.value[0]);
+    }
+    
     event.stopPropagation();
 }
 
 function editSection(item, event) {
     item.edit = !item.edit
-    //console.log("item")
-    //console.log(item.name)
     tempName.value = item.name
     event.stopPropagation();
 }
 
 function renameSection(item, event) {
-    //console.log("renaming")
-    //console.log(item.name)
-    item.edit = !item.edit
-    if (item.name == selectedSection.name) {
-        selectedSection.name = tempName.value
+    // Validate that the name is not empty and not duplicate
+    if (!tempName.value || tempName.value.trim() === '') {
+        window.alert('Section name cannot be empty.');
+        item.edit = true; // Keep editing mode
+        event.stopPropagation();
+        return;
     }
-    item.name = tempName.value
+    
+    // Check for duplicate names
+    const duplicateExists = sections.value.some(section => 
+        section.name.toLowerCase() === tempName.value.trim().toLowerCase() && section.name !== item.name
+    );
+    
+    if (duplicateExists) {
+        window.alert('A section with this name already exists.');
+        item.edit = true; // Keep editing mode
+        event.stopPropagation();
+        return;
+    }
+    
+    const oldName = item.name;
+    const newName = tempName.value.trim();
+    
+    item.edit = false;
+    item.name = newName;
+    
+    // Update selectedSection if it was the renamed section
+    if (selectedSection.name === oldName) {
+        selectedSection.name = newName;
+    }
+    
+    event.stopPropagation();
+}
+
+function cancelEdit(item, event) {
+    item.edit = false;
+    tempName.value = "";
     event.stopPropagation();
 }
 
@@ -1052,7 +1123,7 @@ const handleGlobalMonthChange = (monthValue) => {
                         
                         <div class="widget-icon" draggable="true" unselectable="on" @drag="drag('Map')"
                             @dragend="dragEnd('Map')">
-                            <img src="/Map.png" class="icon" style="width: 80px" @click="createVisualisation('1', 'Map', 'Map', {})">
+                            <img src="/Map.png" class="icon" style="width: 80px" @click="toggleKPIForm('Map')">
                             <a style="font-weight: bold; color: #ffffff; margin-top: 2px; display: block; font-size: 14px;">Maps</a>
                         </div>
                     </div>

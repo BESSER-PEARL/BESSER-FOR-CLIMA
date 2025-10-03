@@ -6,11 +6,17 @@ const emit = defineEmits(["cancel","addElement", "createVisualisation"])
 const props = defineProps({
     label: {
         type: String,
-        required: true
+        required: false,
+        default: 'Data source'
     },
     city: {
         type: String,
         required: true
+    },
+    cityId: {
+        type: Number,
+        required: false,
+        default: null
     },
     chart: {
         type: String,
@@ -35,7 +41,7 @@ const items = ref([])
 const itemObjects = ref([])
 const table = ref("")
 
-// Function to sort KPIs based on chart type using hasCategoryLabel
+// Function to sort KPIs based on chart type using has_category_label
 const sortKPIsForChart = (kpis, chartType) => {
     const isBarOrPieChart = chartType.toLowerCase() === 'barchart' || chartType.toLowerCase() === 'piechart';
 
@@ -44,25 +50,25 @@ const sortKPIsForChart = (kpis, chartType) => {
           //console.log("Sorting for Bar/Pie chart");
           //console.log("KPI A:", a);
           //console.log("KPI B:", b);
-            // For Bar/Pie charts, prioritize KPIs with hasCategoryLabel
-            if (a.hasCategoryLabel && !b.hasCategoryLabel) return -1;
-            if (!a.hasCategoryLabel && b.hasCategoryLabel) return 1;
+            // For Bar/Pie charts, prioritize KPIs with has_category_label
+            if (a.has_category_label && !b.has_category_label) return -1;
+            if (!a.has_category_label && b.has_category_label) return 1;
         } else {
-            // For other charts, prioritize KPIs without hasCategoryLabel
-            if (!a.hasCategoryLabel && b.hasCategoryLabel) return -1;
-            if (a.hasCategoryLabel && !b.hasCategoryLabel) return 1;
+            // For other charts, prioritize KPIs without has_category_label
+            if (!a.has_category_label && b.has_category_label) return -1;
+            if (a.has_category_label && !b.has_category_label) return 1;
         }
         // Secondary sort by name
         return a.name.localeCompare(b.name);
     });
 }
 
-// Function to add recommendation labels using hasCategoryLabel
+// Function to add recommendation labels using has_category_label
 const addRecommendationLabels = (kpis, chartType) => {
     const isBarOrPieChart = chartType.toLowerCase() === 'barchart' || chartType.toLowerCase() === 'piechart';
 
     return kpis.map(kpi => {
-        const hasCategoryLabel = kpi.hasCategoryLabel;
+        const hasCategoryLabel = kpi.has_category_label;
         let recommendation = '';
 
         if (isBarOrPieChart) {
@@ -88,7 +94,16 @@ const addRecommendationLabels = (kpis, chartType) => {
 
 async function getItem(){
     try{
-        const response = await fetch('http://localhost:8000/' +props.city.toLowerCase()+'/kpis')
+        if (!props.cityId) {
+            console.warn('KPIForm: No cityId provided');
+            items.value = [];
+            itemObjects.value = [];
+            return;
+        }
+        const response = await fetch(`http://localhost:8000/kpis/?city_id=${props.cityId}`);
+        if (!response.ok) {
+            throw new Error(`API request failed: ${response.status}`);
+        }
         const data = await response.json();
 
         // Sort and add recommendation labels based on chart type
@@ -98,7 +113,9 @@ async function getItem(){
         items.value = labeledKPIs;
         itemObjects.value = data;
     } catch (error) {
-        window.alert(error)
+        console.error('Error fetching KPIs:', error);
+        items.value = [];
+        itemObjects.value = [];
     }
 }
 getItem()
@@ -120,9 +137,9 @@ const createVisualisation = () => {
         item-title="displayName"
         item-value="id"
         density="comfortable"
-        label="Data source"
+        :label="label"
         style="margin-top:10px"
-        menu="true"
+        :menu="true"
         return-object
       ></v-select>
         <p v-if="error" style="color: red;"> Please choose a value! </p>

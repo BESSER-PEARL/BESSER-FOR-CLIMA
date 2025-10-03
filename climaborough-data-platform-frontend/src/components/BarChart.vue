@@ -1,5 +1,7 @@
 <script setup>
 import { ref, watch, computed } from "vue";
+import apiService from '@/services/apiService';
+
 const props = defineProps({
   tableId: {
     type: Number,
@@ -13,7 +15,7 @@ const props = defineProps({
     type: String,
     default: "Title"
   },
-  globalMonthFilter: {
+  monthFilter: {
     type: String,
     default: ""
   }
@@ -105,9 +107,15 @@ const refTitle = ref(props.title);
 function getLatestKpiValues(items) {
   const latestValues = {};
   items.forEach(item => {
-    // Use the latest KPI value for each category/standing
-    latestValues[item.categoryLabel] = item.kpiValue;
+    // Backend returns: value (not kpiValue) and category_label (not categoryLabel)
+    const categoryLabel = item.category_label || item.categoryLabel; // Support both
+    const kpiValue = item.value !== undefined ? item.value : item.kpiValue; // Support both
+    
+    if (categoryLabel !== undefined && categoryLabel !== null) {
+      latestValues[categoryLabel] = kpiValue;
+    }
   });
+  console.log('BarChart - Latest KPI values mapping:', latestValues);
   return latestValues;
 }
 
@@ -119,20 +127,12 @@ const series = ref([]);
 const labels = ref([]);
 const kpiMetadata = ref(null);
 const rawData = ref([]);
-const localMonthFilter = ref(props.globalMonthFilter || "");
+const localMonthFilter = ref(props.monthFilter || "");
 
-// Computed property to filter data based on selected month
+// Computed property - simplified since filtering is now done server-side
 const filteredData = computed(() => {
-  if (!localMonthFilter.value || !rawData.value.length) {
-    return rawData.value;
-  }
-  
-  return rawData.value.filter(item => {
-    const itemDate = new Date(item.timestamp);
-    const filterDate = new Date(localMonthFilter.value + '-01');
-    return itemDate.getFullYear() === filterDate.getFullYear() && 
-           itemDate.getMonth() === filterDate.getMonth();
-  });
+  // Server-side filtering handles the month filter, so just return raw data
+  return rawData.value;
 });
 
 const formatDate = (dateString) => {
@@ -169,12 +169,11 @@ const getSortedEntries = (mapping) => {
 }
 
 async function fetchKpiMetadata() {
+  if (!props.tableId) return;
+  
   try {
-    const response = await fetch('http://localhost:8000/' + props.city.toLowerCase() + '/kpis');
-    const kpisData = await response.json();
-    
-    // Find the KPI metadata for our tableId
-    const kpiMeta = kpisData.find(kpi => kpi.id === props.tableId);
+    // Use new API endpoint to get KPI metadata
+    const kpiMeta = await apiService.getKPIById(props.tableId);
     kpiMetadata.value = kpiMeta;
     //console.log('KPI Metadata:', kpiMeta);
   } catch (error) {
@@ -188,12 +187,16 @@ async function getItems() {
     // First fetch KPI metadata
     await fetchKpiMetadata();
     
-    const response = await fetch('http://localhost:8000/' + props.city.toLowerCase() + '/kpi/?id=' + props.tableId)
-    const data = await response.json();
+    // Use server-side filtering if month filter is active
+    const data = localMonthFilter.value
+      ? await apiService.getKPIValuesByMonth(props.tableId, localMonthFilter.value)
+      : await apiService.getKPIValues(props.tableId);
     
+    console.log('BarChart - Raw data from API:', data.slice(0, 3)); // Log first 3 items
     rawData.value = data; // Store raw data
     updateChart(); // Process filtered data
   } catch (error) {
+    console.error('Error fetching KPI data:', error);
     window.alert(error);
   }
 }
@@ -213,7 +216,10 @@ function updateChart() {
 
   data.forEach(item => {
     items.value.push(item);
-    stands.value.push(item.categoryLabel);
+    const categoryLabel = item.category_label || item.categoryLabel; // Support both naming conventions
+    if (categoryLabel) {
+      stands.value.push(categoryLabel);
+    }
     lastTimestamp.value = formatDate(item.timestamp);
   });
   
@@ -229,11 +235,11 @@ function updateChart() {
     const colors = [];
     const usedColors = new Set(); // Track used colors
 
-    // Check if we have categoryLabelDictionary for ordered display
-    if (kpiMetadata.value?.categoryLabelDictionary) {
+    // Check if we have category_label_dictionary for ordered display
+    if (kpiMetadata.value?.category_label_dictionary) {
       
-      // Process in the order defined by categoryLabelDictionary
-      Object.entries(kpiMetadata.value.categoryLabelDictionary).forEach(([key, labelName]) => {
+      // Process in the order defined by category_label_dictionary
+      Object.entries(kpiMetadata.value.category_label_dictionary).forEach(([key, labelName]) => {
         if (mapping.value.hasOwnProperty(labelName)) {
           const value = mapping.value[labelName];
           const formattedLabel = formatLabelName(labelName);
@@ -282,8 +288,8 @@ function updateChart() {
         usedColors.add(color);
       });
     } else {
-      // Fallback to original behavior when no categoryLabelDictionary (sorted alphabetically)
-      //console.log('No categoryLabelDictionary found, using alphabetical ordering');
+      // Fallback to original behavior when no category_label_dictionary (sorted alphabetically)
+      //console.log('No category_label_dictionary found, using alphabetical ordering');
       
       const sortedEntries = getSortedEntries(mapping.value);
       sortedEntries.forEach(([key, value]) => {
@@ -449,14 +455,16 @@ watch(() => [props.title], () => {
   }
 });
 
-watch(() => props.globalMonthFilter, (newFilter) => {
+// Watch for monthFilter changes and re-fetch data with server-side filtering
+watch(() => props.monthFilter, (newFilter) => {
   localMonthFilter.value = newFilter;
-  updateChart();
+  getItems(); // Re-fetch data from server with new filter
 });
 
-watch(filteredData, () => {
-  updateChart();
-});
+// No longer need to watch filteredData since we fetch filtered data from server
+// watch(filteredData, () => {
+//   updateChart();
+// });
 
 const alert = ref(false);
 const toggleAlert = () => {

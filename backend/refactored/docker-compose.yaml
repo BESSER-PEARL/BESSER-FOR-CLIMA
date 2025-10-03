@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16.3
+    container_name: postgres_enhanced_container
+    environment:
+      POSTGRES_DB: climaborough_enhanced
+      POSTGRES_USER: aaron
+      POSTGRES_PASSWORD: aaron
+      PGDATA: /var/lib/postgresql/data
+    volumes:
+      - postgres_enhanced_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aaron -d climaborough_enhanced"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  enhanced-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: enhanced_backend_container
+    environment: 
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: aaron
+      DB_PASSWORD: aaron
+      DB_NAME: climaborough_enhanced
+      KEYCLOAK_SERVER_URL: https://auth.climaplatform.eu
+      KEYCLOAK_REALM: climaborough
+      KEYCLOAK_CLIENT_ID: climaborough-platform
+      DEBUG: "true"
+      ALLOWED_ORIGINS: '["http://localhost:3002","http://localhost:8080","http://localhost:3000"]'
+      PYTHONPATH: /app
+    ports:
+      - "8000:8000"
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    command: >
+      bash -c "
+        echo 'Waiting for database...' &&
+        sleep 10 &&
+        echo 'Initializing database...' &&
+        python /code/init_db.py &&
+        echo 'Starting server...' &&
+        python /code/run.py
+      "
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin_enhanced_container
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "82:80"
+    restart: unless-stopped
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_enhanced_data:
+
+networks:
+  default:
+    name: climaborough_enhanced

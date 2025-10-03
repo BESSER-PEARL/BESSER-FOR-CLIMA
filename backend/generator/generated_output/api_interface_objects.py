@@ -1210,6 +1210,22 @@ async def add_or_update_Map_ioannina(id: int, chart: Map= Body(..., description=
         db_entry = MapDB(**chart.dict())
         db_entry.consistOf = dashboard_ioannina
         db_entry.kpi_id = id
+        
+        # Ensure we have a MapData entry for this city
+        existing_mapdata = session.query(MapDataDB).filter(MapDataDB.city_id == ioannina.id).first()
+        if not existing_mapdata:
+            # Create a default GeoJSON MapData entry for this city
+            default_mapdata = GeoJsonDB(
+                title="Default Map Data",
+                data='{"type":"FeatureCollection","features":[]}',
+                city_id=ioannina.id
+            )
+            session.add(default_mapdata)
+            session.flush()  # Flush to get the ID
+            db_entry.mapdata_id = default_mapdata.id
+        else:
+            db_entry.mapdata_id = existing_mapdata.id
+            
         try:
             session.add(db_entry)
             session.commit()
@@ -1416,6 +1432,22 @@ async def add_or_update_Map_maribor(id: int, chart: Map= Body(..., description="
         db_entry = MapDB(**chart.dict())
         db_entry.consistOf = dashboard_maribor
         db_entry.kpi_id = id
+        
+        # Ensure we have a MapData entry for this city
+        existing_mapdata = session.query(MapDataDB).filter(MapDataDB.city_id == maribor.id).first()
+        if not existing_mapdata:
+            # Create a default GeoJSON MapData entry for this city
+            default_mapdata = GeoJsonDB(
+                title="Default Map Data",
+                data='{"type":"FeatureCollection","features":[]}',
+                city_id=maribor.id
+            )
+            session.add(default_mapdata)
+            session.flush()  # Flush to get the ID
+            db_entry.mapdata_id = default_mapdata.id
+        else:
+            db_entry.mapdata_id = existing_mapdata.id
+            
         try:
             session.add(db_entry)
             session.commit()
@@ -1622,6 +1654,22 @@ async def add_or_update_Map_grenoble(id: int, chart: Map= Body(..., description=
         db_entry = MapDB(**chart.dict())
         db_entry.consistOf = dashboard_grenoble
         db_entry.kpi_id = id
+        
+        # Ensure we have a MapData entry for this city
+        existing_mapdata = session.query(MapDataDB).filter(MapDataDB.city_id == grenoble.id).first()
+        if not existing_mapdata:
+            # Create a default GeoJSON MapData entry for this city
+            default_mapdata = GeoJsonDB(
+                title="Default Map Data",
+                data='{"type":"FeatureCollection","features":[]}',
+                city_id=grenoble.id
+            )
+            session.add(default_mapdata)
+            session.flush()  # Flush to get the ID
+            db_entry.mapdata_id = default_mapdata.id
+        else:
+            db_entry.mapdata_id = existing_mapdata.id
+            
         try:
             session.add(db_entry)
             session.commit()
@@ -1828,6 +1876,22 @@ async def add_or_update_Map_athens(id: int, chart: Map= Body(..., description="C
         db_entry = MapDB(**chart.dict())
         db_entry.consistOf = dashboard_athens
         db_entry.kpi_id = id
+        
+        # Ensure we have a MapData entry for this city
+        existing_mapdata = session.query(MapDataDB).filter(MapDataDB.city_id == athens.id).first()
+        if not existing_mapdata:
+            # Create a default GeoJSON MapData entry for this city
+            default_mapdata = GeoJsonDB(
+                title="Default Map Data",
+                data='{"type":"FeatureCollection","features":[]}',
+                city_id=athens.id
+            )
+            session.add(default_mapdata)
+            session.flush()  # Flush to get the ID
+            db_entry.mapdata_id = default_mapdata.id
+        else:
+            db_entry.mapdata_id = existing_mapdata.id
+            
         try:
             session.add(db_entry)
             session.commit()
@@ -2034,6 +2098,22 @@ async def add_or_update_Map_differdange(id: int, chart: Map= Body(..., descripti
         db_entry = MapDB(**chart.dict())
         db_entry.consistOf = dashboard_differdange
         db_entry.kpi_id = id
+        
+        # Ensure we have a MapData entry for this city
+        existing_mapdata = session.query(MapDataDB).filter(MapDataDB.city_id == differdange.id).first()
+        if not existing_mapdata:
+            # Create a default GeoJSON MapData entry for this city
+            default_mapdata = GeoJsonDB(
+                title="Default Map Data",
+                data='{"type":"FeatureCollection","features":[]}',
+                city_id=differdange.id
+            )
+            session.add(default_mapdata)
+            session.flush()  # Flush to get the ID
+            db_entry.mapdata_id = default_mapdata.id
+        else:
+            db_entry.mapdata_id = existing_mapdata.id
+            
         try:
             session.add(db_entry)
             session.commit()
@@ -2240,6 +2320,22 @@ async def add_or_update_Map_torino(id: int, chart: Map= Body(..., description="C
         db_entry = MapDB(**chart.dict())
         db_entry.consistOf = dashboard_torino
         db_entry.kpi_id = id
+        
+        # Ensure we have a MapData entry for this city
+        existing_mapdata = session.query(MapDataDB).filter(MapDataDB.city_id == torino.id).first()
+        if not existing_mapdata:
+            # Create a default GeoJSON MapData entry for this city
+            default_mapdata = GeoJsonDB(
+                title="Default Map Data",
+                data='{"type":"FeatureCollection","features":[]}',
+                city_id=torino.id
+            )
+            session.add(default_mapdata)
+            session.flush()  # Flush to get the ID
+            db_entry.mapdata_id = default_mapdata.id
+        else:
+            db_entry.mapdata_id = existing_mapdata.id
+            
         try:
             session.add(db_entry)
             session.commit()
@@ -2446,6 +2542,22 @@ async def add_or_update_Map_cascais(id: int, chart: Map= Body(..., description="
         db_entry = MapDB(**chart.dict())
         db_entry.consistOf = dashboard_cascais
         db_entry.kpi_id = id
+        
+        # Ensure we have a MapData entry for this city
+        existing_mapdata = session.query(MapDataDB).filter(MapDataDB.city_id == cascais.id).first()
+        if not existing_mapdata:
+            # Create a default GeoJSON MapData entry for this city
+            default_mapdata = GeoJsonDB(
+                title="Default Map Data",
+                data='{"type":"FeatureCollection","features":[]}',
+                city_id=cascais.id
+            )
+            session.add(default_mapdata)
+            session.flush()  # Flush to get the ID
+            db_entry.mapdata_id = default_mapdata.id
+        else:
+            db_entry.mapdata_id = existing_mapdata.id
+            
         try:
             session.add(db_entry)
             session.commit()
@@ -2652,6 +2764,22 @@ async def add_or_update_Map_sofia(id: int, chart: Map= Body(..., description="Ch
         db_entry = MapDB(**chart.dict())
         db_entry.consistOf = dashboard_sofia
         db_entry.kpi_id = id
+        
+        # Ensure we have a MapData entry for this city
+        existing_mapdata = session.query(MapDataDB).filter(MapDataDB.city_id == sofia.id).first()
+        if not existing_mapdata:
+            # Create a default GeoJSON MapData entry for this city
+            default_mapdata = GeoJsonDB(
+                title="Default Map Data",
+                data='{"type":"FeatureCollection","features":[]}',
+                city_id=sofia.id
+            )
+            session.add(default_mapdata)
+            session.flush()  # Flush to get the ID
+            db_entry.mapdata_id = default_mapdata.id
+        else:
+            db_entry.mapdata_id = existing_mapdata.id
+            
         try:
             session.add(db_entry)
             session.commit()

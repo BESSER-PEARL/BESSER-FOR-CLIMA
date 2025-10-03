@@ -1,6 +1,7 @@
 <script setup>
 import Plotly, { get } from "plotly.js-dist"
 import MonthFilter from './MonthFilter.vue'
+import apiService from '@/services/apiService';
 
 import { ref, onMounted, watch, computed } from "vue";
 
@@ -29,7 +30,7 @@ const props = defineProps({
     type: Number,
     required: true
   },
-  globalMonthFilter: {
+  monthFilter: {
     type: String,
     default: ""
   }
@@ -40,19 +41,13 @@ const rawData = ref([])
 const value = ref(0)
 const data = ref({})
 const layout = ref({})
-const localMonthFilter = ref(props.globalMonthFilter || "")
+const localMonthFilter = ref(props.monthFilter || "")
 
 // Computed property to filter data based on selected month
+// Computed property - simplified since filtering is now done server-side
 const filteredData = computed(() => {
-  if (!localMonthFilter.value || !rawData.value.length) {
-    return rawData.value;
-  }
-  
-  return rawData.value.filter(item => {
-    const date = new Date(item.timestamp);
-    const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-    return monthYear === localMonthFilter.value;
-  });
+  // Server-side filtering handles the month filter, so just return raw data
+  return rawData.value;
 });
 
 // Computed property for the current KPI value based on filtered data
@@ -136,8 +131,10 @@ function getRandomInt(min, max) {
 
 async function getItems() {
   try {
-    const response = await fetch('http://localhost:8000/' + props.city.toLowerCase() + '/kpi/?id=' + props.tableId)
-    const dataf = await response.json();
+    // Use server-side filtering if month filter is active
+    const dataf = localMonthFilter.value
+      ? await apiService.getKPIValuesByMonth(props.tableId, localMonthFilter.value)
+      : await apiService.getKPIValues(props.tableId);
     
     // Store all raw data
     rawData.value = dataf;
@@ -146,6 +143,7 @@ async function getItems() {
     // Process data for visualization
     updateChart();
   } catch (error) {
+    console.error('Error fetching KPI data:', error);
     window.alert(error)
   }
 }
@@ -253,15 +251,16 @@ watch(() => [props.title, props.suffix], () => {
   getItems()
 })
 
-watch(() => props.globalMonthFilter, (newFilter) => {
+// Watch for monthFilter changes and re-fetch data with server-side filtering
+watch(() => props.monthFilter, (newFilter) => {
   localMonthFilter.value = newFilter;
-  updateChart();
+  getItems(); // Re-fetch data from server with new filter
 })
 
-// Watch filtered data to update chart when filter changes
-watch(filteredData, () => {
-  updateChart();
-})
+// No longer need to watch filteredData since we fetch filtered data from server
+// watch(filteredData, () => {
+//   updateChart();
+// })
 
 onMounted(() => {
   const element = document.querySelector(`[id='${props.id}mydiv']`);
@@ -278,7 +277,7 @@ onMounted(() => {
 <template>
   <div id="container">
     <!-- <MonthFilter 
-      v-if="!globalMonthFilter"
+      v-if="!monthFilter"
       v-model="localMonthFilter"
       @month-change="handleMonthChange"
       class="month-filter-component"

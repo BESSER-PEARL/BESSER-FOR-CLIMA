@@ -1,9 +1,12 @@
 <script setup>
 import { ref, computed, watch } from "vue";
+import apiService from '@/services/apiService';
+
 const props = defineProps({
   tableId: {
     type: Number,
-    required: true
+    required: false,
+    default: null
   },
   city: {
     type: String,
@@ -25,7 +28,7 @@ const props = defineProps({
     type: String,
     default: '#086494'
   },
-  globalMonthFilter: {
+  monthFilter: {
     type: String,
     default: ""
   }
@@ -75,20 +78,26 @@ const baseline = ref([]);
 const valuemappedtotime = ref([]);
 const timestamps = ref([]);
 const rawData = ref([]);
-const localMonthFilter = ref(props.globalMonthFilter || "");
+const localMonthFilter = ref(props.monthFilter || "");
 
-// Computed property to filter data based on selected month
-const filteredData = computed(() => {
-  if (!localMonthFilter.value || !rawData.value.length) {
-    return rawData.value;
+// Initialize series ref BEFORE processFilteredData uses it
+const series = ref([
+  {
+    name: "KPI Values",
+    data: [],
+    color: props.color,
+  },
+  {
+    name: "Baseline",
+    data: [],
+    color: "#FFB800",
   }
-  
-  return rawData.value.filter(item => {
-    const itemDate = new Date(item.timestamp);
-    const filterDate = new Date(localMonthFilter.value + '-01');
-    return itemDate.getFullYear() === filterDate.getFullYear() && 
-           itemDate.getMonth() === filterDate.getMonth();
-  });
+]);
+
+// Computed property - simplified since filtering is now done server-side
+const filteredData = computed(() => {
+  // Server-side filtering handles the month filter, so just return raw data
+  return rawData.value;
 });
 
 const formatDate = (dateString) => {
@@ -109,12 +118,27 @@ const lastTimestamp = computed(() => {
 
 async function getItems() {
   try {
-    const response = await fetch('http://localhost:8000/' + props.city.toLowerCase() + '/kpi/?id=' + props.tableId);
-    const data = await response.json();
+    if (!props.tableId) {
+      console.warn('LineChart: No tableId (kpi_id) provided');
+      rawData.value = [];
+      processFilteredData();
+      return;
+    }
+    
+    console.log('LineChart getItems - localMonthFilter:', localMonthFilter.value);
+    
+    // Use server-side filtering if month filter is active
+    const data = localMonthFilter.value 
+      ? await apiService.getKPIValuesByMonth(props.tableId, localMonthFilter.value)
+      : await apiService.getKPIValues(props.tableId);
+    
+    console.log('LineChart fetched data count:', data.length);
     rawData.value = data; // Store raw data
     processFilteredData();
   } catch (error) {
-    window.alert(error);
+    console.error('Error fetching KPI values:', error);
+    rawData.value = [];
+    processFilteredData();
   }
 }
 
@@ -124,11 +148,17 @@ function processFilteredData() {
   valuemappedtotime.value = [];
   baseline.value = [];
   
+  if (!filteredData.value || !Array.isArray(filteredData.value)) {
+    return;
+  }
+  
   filteredData.value.forEach(item => {
-    values.value.push(item.kpiValue);
+    // API returns 'value' field, not 'kpiValue'
+    const val = item.value ?? item.kpiValue ?? 0;
+    values.value.push(val);
     timestamps.value.push(item.timestamp);
-    valuemappedtotime.value.push({ x: item.timestamp, y: item.kpiValue });
-    baseline.value.push({ x: item.timestamp, y: Math.max(0, item.kpiValue - 10) });
+    valuemappedtotime.value.push({ x: item.timestamp, y: val });
+    baseline.value.push({ x: item.timestamp, y: Math.max(0, val - 10) });
   });
   
   // Update series
@@ -148,31 +178,21 @@ function processFilteredData() {
 
 getItems();
 
-const series = ref([
-  {
-    name: "KPI Values",
-    data: valuemappedtotime.value,
-    color: props.color,
-  },
-  {
-    name: "Baseline",
-    data: baseline.value,
-    color: "#FFB800",
-  }
-]);
-
 watch(() => [props.title, props.xtitle, props.ytitle, props.color], () => {
   processFilteredData();
 });
 
-watch(() => props.globalMonthFilter, (newFilter) => {
+// Watch for monthFilter changes and re-fetch data with server-side filtering
+watch(() => props.monthFilter, (newFilter) => {
+  console.log('LineChart watch triggered - monthFilter changed to:', newFilter);
   localMonthFilter.value = newFilter;
-  processFilteredData();
+  getItems(); // Re-fetch data from server with new filter
 });
 
-watch(filteredData, () => {
-  processFilteredData();
-});
+// Remove the filteredData watcher as we now fetch filtered data from server
+// watch(filteredData, () => {
+//   processFilteredData();
+// });
 </script>
 
 <template>

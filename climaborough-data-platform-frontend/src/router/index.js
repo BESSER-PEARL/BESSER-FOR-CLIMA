@@ -42,7 +42,7 @@ const router = createRouter({
       // route level code-splitting
       // this generates a separate chunk (About.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
-      component: () => import('../views/Dashboard.vue'),
+      component: () => import('../views/Dashboard-improved.vue'),
       meta: { requiresAuth: true }
     },
     {

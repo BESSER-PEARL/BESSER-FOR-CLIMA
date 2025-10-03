@@ -73,23 +73,31 @@ const fetchKPIs = async () => {
   error.value = '';
   
   try {
-    const response = await fetch(`http://localhost:8000/city/${selectedCity.value}/kpis`);
-    if (!response.ok) {
+    // Step 1: Get city by code to retrieve city ID
+    const cityCode = selectedCity.value.toLowerCase().replace(/\s+/g, '-');
+    const cityResponse = await fetch(`http://localhost:8000/cities/code/${cityCode}`);
+    
+    if (!cityResponse.ok) {
+      throw new Error(`Failed to fetch city: ${selectedCity.value}`);
+    }
+    const city = await cityResponse.json();
+    
+    console.log(`Found city:`, city);
+    
+    // Step 2: Get KPIs using city ID
+    const kpisResponse = await fetch(`http://localhost:8000/kpis/?city_id=${city.id}`);
+    
+    if (!kpisResponse.ok) {
       throw new Error('Failed to fetch KPIs');
     }
-    const data = await response.json();
+    const data = await kpisResponse.json();
     
-    // Log for debugging
-    //console.log(`Fetched ${data.length} KPIs for ${selectedCity.value}:`, data);
+    console.log(`Fetched ${data.length} KPIs for ${selectedCity.value}:`, data);
     
-    // Transform the data to include latest values if available
-    kpis.value = data.map(kpi => ({
-      ...kpi,
-      latest_value: null, // Will be fetched separately if needed
-      latest_timestamp: null
-    }));
+    // Store KPIs with snake_case properties from backend
+    kpis.value = data;
     
-    //console.log('KPIs grouped by category:', kpisByCategory.value);
+    console.log('KPIs grouped by category:', kpisByCategory.value);
     
   } catch (err) {
     error.value = err.message;
@@ -108,9 +116,8 @@ const fetchKpiValues = async (kpi) => {
   selectedKpi.value = kpi;
   
   try {
-    // Use the city-specific KPI values endpoint
-    const cityName = selectedCity.value.toLowerCase();
-    const response = await fetch(`http://localhost:8000/${cityName}/kpi/?id=${kpi.id}`);
+    // Use the new refactored API endpoint - kpi.id is the database ID
+    const response = await fetch(`http://localhost:8000/kpis/${kpi.id}/values`);
     
     if (!response.ok) {
       throw new Error('Failed to fetch KPI values');
@@ -118,6 +125,7 @@ const fetchKpiValues = async (kpi) => {
     
     const data = await response.json();
     kpiValues.value = data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Sort by timestamp descending
+    console.log('Fetched KPI values:', data.slice(0, 5)); // Log first 5 for debugging
     showKpiValuesDialog.value = true;
     
   } catch (err) {
@@ -146,15 +154,18 @@ const deleteKPI = async (kpiId) => {
   
   try {
     const token = await auth.getAccessToken();
-    const response = await fetch(`http://localhost:8000/city/${selectedCity.value}/kpi/${kpiId}`, {
+    // Use kpi.id (database ID) not kpi.id_kpi
+    const response = await fetch(`http://localhost:8000/kpis/${kpiId}`, {
       method: 'DELETE',
       headers: {
-        'Authorization': 'Bearer ' + token
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
       }
     });
     
     if (!response.ok) {
-      throw new Error('Failed to delete KPI');
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || errorData.detail || 'Failed to delete KPI');
     }
     
     // Refresh KPIs list
@@ -186,13 +197,13 @@ const getStatusColor = (kpi) => {
 
 // Get value status based on thresholds
 const getValueStatus = (value) => {
-  if (!selectedKpi.value || selectedKpi.value.minThreshold === null || selectedKpi.value.maxThreshold === null) {
+  if (!selectedKpi.value || selectedKpi.value.min_threshold === null || selectedKpi.value.max_threshold === null) {
     return 'Normal';
   }
   
   const numValue = parseFloat(value);
-  const min = parseFloat(selectedKpi.value.minThreshold);
-  const max = parseFloat(selectedKpi.value.maxThreshold);
+  const min = parseFloat(selectedKpi.value.min_threshold);
+  const max = parseFloat(selectedKpi.value.max_threshold);
   
   if (numValue < min) return 'Below Min';
   if (numValue > max) return 'Above Max';
@@ -201,13 +212,13 @@ const getValueStatus = (value) => {
 
 // Get value status color
 const getValueStatusColor = (value) => {
-  if (!selectedKpi.value || selectedKpi.value.minThreshold === null || selectedKpi.value.maxThreshold === null) {
+  if (!selectedKpi.value || selectedKpi.value.min_threshold === null || selectedKpi.value.max_threshold === null) {
     return 'grey';
   }
   
   const numValue = parseFloat(value);
-  const min = parseFloat(selectedKpi.value.minThreshold);
-  const max = parseFloat(selectedKpi.value.maxThreshold);
+  const min = parseFloat(selectedKpi.value.min_threshold);
+  const max = parseFloat(selectedKpi.value.max_threshold);
   
   if (numValue < min || numValue > max) return 'error';
   return 'success';
@@ -317,7 +328,7 @@ onMounted(() => {
                     class="kpi-card"
                     elevation="2"
                   >
-                    <v-card-header>
+                    <v-card-title>
                       <div class="kpi-header">
                         <div class="kpi-title-section">
                           <h4 class="kpi-name">{{ kpi.name }}</h4>
@@ -327,7 +338,7 @@ onMounted(() => {
                             variant="flat"
                             class="status-chip"
                           >
-                            {{ kpi.unitText || 'No Unit' }}
+                            {{ kpi.unit_text || 'No Unit' }}
                           </v-chip>
                         </div>
                         <div class="kpi-actions">
@@ -346,12 +357,12 @@ onMounted(() => {
                             color="error"
                             variant="text"
                             :loading="deleteLoading"
-                            @click="deleteKPI(kpi.id_kpi)"
+                            @click="deleteKPI(kpi.id)"
                             title="Delete KPI"
                           ></v-btn>
                         </div>
                       </div>
-                    </v-card-header>
+                    </v-card-title>
 
                     <v-card-text>
                       <div class="kpi-details">
@@ -372,35 +383,35 @@ onMounted(() => {
                         
                         <div class="detail-row">
                           <span class="label">Frequency:</span>
-                          <span class="value">{{ kpi.calculationFrequency || 'N/A' }}</span>
+                          <span class="value">{{ kpi.calculation_frequency || 'N/A' }}</span>
                         </div>
                         
                         <div class="detail-row">
                           <span class="label">Unit:</span>
-                          <span class="value">{{ kpi.unitText || 'N/A' }}</span>
+                          <span class="value">{{ kpi.unit_text || 'N/A' }}</span>
                         </div>
                         
                         <div class="detail-row">
                           <span class="label">Min Threshold:</span>
-                          <span class="value">{{ formatThreshold(kpi.minThreshold) }}</span>
+                          <span class="value">{{ formatThreshold(kpi.min_threshold) }}</span>
                         </div>
                         
                         <div class="detail-row">
                           <span class="label">Max Threshold:</span>
-                          <span class="value">{{ formatThreshold(kpi.maxThreshold) }}</span>
+                          <span class="value">{{ formatThreshold(kpi.max_threshold) }}</span>
                         </div>
                         
                         <div class="detail-row">
                           <span class="label">Has Category Label:</span>
-                          <span class="value">{{ kpi.hasCategoryLabel ? 'Yes' : 'No' }}</span>
+                          <span class="value">{{ kpi.has_category_label ? 'Yes' : 'No' }}</span>
                         </div>
                         
-                        <div class="detail-row" v-if="kpi.hasCategoryLabel && kpi.categoryLabelDictionary">
+                        <div class="detail-row" v-if="kpi.has_category_label && kpi.category_label_dictionary">
                           <span class="label">Category Labels:</span>
                           <span class="value">
-                            <div v-if="typeof kpi.categoryLabelDictionary === 'object'" class="category-labels">
+                            <div v-if="typeof kpi.category_label_dictionary === 'object'" class="category-labels">
                               <v-chip 
-                                v-for="(label, key) in kpi.categoryLabelDictionary" 
+                                v-for="(label, key) in kpi.category_label_dictionary" 
                                 :key="key" 
                                 size="x-small" 
                                 class="ma-1"
@@ -409,7 +420,7 @@ onMounted(() => {
                                 {{ key }}: {{ label }}
                               </v-chip>
                             </div>
-                            <span v-else>{{ kpi.categoryLabelDictionary }}</span>
+                            <span v-else>{{ kpi.category_label_dictionary }}</span>
                           </span>
                         </div>
                       </div>
@@ -450,7 +461,7 @@ onMounted(() => {
         <v-card-subtitle v-if="selectedKpi">
           <div class="kpi-info">
             <span><strong>ID:</strong> {{ selectedKpi.id_kpi }}</span>
-            <span><strong>Unit:</strong> {{ selectedKpi.unitText || 'N/A' }}</span>
+            <span><strong>Unit:</strong> {{ selectedKpi.unit_text || 'N/A' }}</span>
             <span><strong>Provider:</strong> {{ selectedKpi.provider || 'N/A' }}</span>
           </div>
         </v-card-subtitle>
@@ -476,7 +487,7 @@ onMounted(() => {
                 {{ kpiValues.length }} values found
               </v-chip>
               <v-chip v-if="kpiValues[0]" color="success" variant="outlined">
-                Latest: {{ kpiValues[0].kpiValue }} {{ selectedKpi?.unitText || '' }}
+                Latest: {{ kpiValues[0].value }} {{ selectedKpi?.unit_text || '' }}
               </v-chip>
             </div>
 
@@ -491,8 +502,8 @@ onMounted(() => {
                 </template>
 
                 <v-list-item-title>
-                  <span class="value-number">{{ value.kpiValue }}</span>
-                  <span class="value-unit">{{ selectedKpi?.unitText || '' }}</span>
+                  <span class="value-number">{{ value.value }}</span>
+                  <span class="value-unit">{{ selectedKpi?.unit_text || '' }}</span>
                 </v-list-item-title>
 
                 <v-list-item-subtitle>
@@ -501,9 +512,9 @@ onMounted(() => {
                       <v-icon size="small">mdi-clock-outline</v-icon>
                       {{ new Date(value.timestamp).toLocaleString() }}
                     </span>
-                    <span v-if="value.categoryLabel" class="category-label">
+                    <span v-if="value.category_label" class="category-label">
                       <v-chip size="x-small" variant="outlined">
-                        {{ value.categoryLabel }}
+                        {{ value.category_label }}
                       </v-chip>
                     </span>
                   </div>
@@ -511,11 +522,11 @@ onMounted(() => {
 
                 <template v-slot:append>
                   <v-chip 
-                    :color="getValueStatusColor(value.kpiValue)"
+                    :color="getValueStatusColor(value.value)"
                     size="small"
                     variant="flat"
                   >
-                    {{ getValueStatus(value.kpiValue) }}
+                    {{ getValueStatus(value.value) }}
                   </v-chip>
                 </template>
               </v-list-item>

@@ -6,7 +6,8 @@ docs/_build/
 *.bat
 *.env
 **/besser_venv/
-
+**/venv/
+**/venv/**
 # Backend
 backend/generator/generated_output/auth
 backend/Docker/
@@ -19,3 +20,4 @@ climaborough-data-platform-frontend/src/views/HomeView copy.vue
 # Clima Solutions Bot
 climasolutionsbot/config.ini
 *.log
+backend/refactored/venv/

@@ -1,7 +1,7 @@
 <template>
   <AuthRequired>
     <div class="data-catalogue">
-      <h1>Data Catalogue</h1>
+      <!-- <h1>Data Catalogue</h1> -->
       <div class="iframe-container" :class="{ fullscreen: isFullscreen }">
         <iframe 
           :src="dashboardUrl"
@@ -9,7 +9,7 @@
           allow="fullscreen"
           class="dashboard-iframe"
           ref="dataIframe"
-          sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-storage-access-by-user-activation allow-downloads">
+          sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-downloads allow-storage-access-by-user-activation">
         </iframe>
       </div>
       <!-- Optional fullscreen toggle -->
