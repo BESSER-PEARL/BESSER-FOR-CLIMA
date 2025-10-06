@@ -10,8 +10,10 @@ const cities = [
     id: 1, 
     name: "Athens", 
     country: "Greece", 
-    flag: "🇬🇷",
+    flag: "/landing_page/FLAGS/FLAG_Greece.jpg",
+    flagOff: "/landing_page/FLAGS/FLAG_Greece_OFF.jpg",
     code: "athens",
+    hub: 1,
     description: "Capital city of Greece, combining ancient heritage with modern urban development",
     features: ["Urban Mobility", "Air Quality", "Smart City"],
     hasDashboard: true,
@@ -21,8 +23,10 @@ const cities = [
     id: 2, 
     name: "Cascais", 
     country: "Portugal", 
-    flag: "🇵🇹",
+    flag: "/landing_page/FLAGS/FLAG_Portugal.jpg",
+    flagOff: "/landing_page/FLAGS/FLAG_Portugal_OFF.jpg",
     code: "cascais",
+    hub: 1,
     description: "Coastal municipality known for its sustainability initiatives and smart city projects",
     features: ["Waste Management", "Green Spaces", "Coastal Protection"],
     hasDashboard: true,
@@ -32,8 +36,10 @@ const cities = [
     id: 3, 
     name: "Issy-les-Moulineaux", 
     country: "France", 
-    flag: "🇫🇷",
+    flag: "/landing_page/FLAGS/FLAG_France.jpg",
+    flagOff: "/landing_page/FLAGS/FLAG_France_OFF.jpg",
     code: "issy-les-moulineaux",
+    hub: 1,
     description: "Smart city pioneer in the Paris metropolitan area",
     features: ["Digital Innovation", "Energy Efficiency", "Smart Buildings"],
     hasDashboard: true,
@@ -43,8 +49,10 @@ const cities = [
     id: 4, 
     name: "Grenoble", 
     country: "France", 
-    flag: "🇫🇷",
+    flag: "/landing_page/FLAGS/FLAG_France.jpg",
+    flagOff: "/landing_page/FLAGS/FLAG_France_OFF.jpg",
     code: "grenoble",
+    hub: 1,
     description: "Alpine city with focus on sustainable urban development",
     features: ["Climate Action", "Public Transport", "Innovation"],
     hasDashboard: true,
@@ -54,8 +62,10 @@ const cities = [
     id: 5, 
     name: "Ioannina", 
     country: "Greece", 
-    flag: "🇬🇷",
+    flag: "/landing_page/FLAGS/FLAG_Greece.jpg",
+    flagOff: "/landing_page/FLAGS/FLAG_Greece_OFF.jpg",
     code: "ioannina",
+    hub: 1,
     description: "Historic city in northwestern Greece with environmental initiatives",
     features: ["Lake Protection", "Cultural Heritage", "Sustainability"],
     hasDashboard: true,
@@ -65,8 +75,10 @@ const cities = [
     id: 6, 
     name: "Krk", 
     country: "Croatia", 
-    flag: "🇭🇷",
+    flag: "/landing_page/FLAGS/FLAG_Croatia.jpg",
+    flagOff: "/landing_page/FLAGS/FLAG_Croatia_OFF.jpg",
     code: "krk",
+    hub: 1,
     description: "Island city focused on tourism and environmental protection",
     features: ["Coastal Management", "Tourism", "Biodiversity"],
     hasDashboard: true,
@@ -76,8 +88,10 @@ const cities = [
     id: 7, 
     name: "Differdange", 
     country: "Luxembourg", 
-    flag: "🇱🇺",
+    flag: "/landing_page/FLAGS/FLAG_Luxembourg.jpg",
+    flagOff: "/landing_page/FLAGS/FLAG_Luxembourg_OFF.jpg",
     code: "differdange",
+    hub: 1,
     description: "Industrial heritage city transitioning to sustainable development",
     features: ["Urban Regeneration", "Air Quality", "Climate Data"],
     hasDashboard: true,
@@ -87,8 +101,10 @@ const cities = [
     id: 8, 
     name: "Maribor", 
     country: "Slovenia", 
-    flag: "🇸🇮",
+    flag: "/landing_page/FLAGS/FLAG_Slovenia.jpg",
+    flagOff: "/landing_page/FLAGS/FLAG_Slovenia_OFF.jpg",
     code: "maribor",
+    hub: 2,
     description: "Second largest city in Slovenia with smart city initiatives",
     features: ["Smart Mobility", "Waste Management", "Green Infrastructure"],
     hasDashboard: true,
@@ -98,8 +114,10 @@ const cities = [
     id: 9, 
     name: "Katowice", 
     country: "Poland", 
-    flag: "🇵🇱",
+    flag: "/landing_page/FLAGS/FLAG_Poland.jpg",
+    flagOff: "/landing_page/FLAGS/FLAG_Poland_OFF.jpg",
     code: "katowice",
+    hub: 2,
     description: "Industrial city transforming into a green urban center",
     features: ["Post-Industrial Transformation", "Air Quality", "Smart City"],
     hasDashboard: false,
@@ -109,8 +127,10 @@ const cities = [
     id: 10, 
     name: "Pilsen", 
     country: "Czech Republic", 
-    flag: "🇨🇿",
+    flag: "/landing_page/FLAGS/FLAG_CzechRepublic.jpg",
+    flagOff: "/landing_page/FLAGS/FLAG_CzechRepublic_OFF.jpg",
     code: "pilsen",
+    hub: 2,
     description: "Historic city with focus on sustainability and innovation",
     features: ["Smart Solutions", "Cultural Heritage", "Urban Development"],
     hasDashboard: false,
@@ -120,8 +140,10 @@ const cities = [
     id: 11, 
     name: "Sofia", 
     country: "Bulgaria", 
-    flag: "🇧🇬",
+    flag: "/landing_page/FLAGS/FLAG_Bulgaria.jpg",
+    flagOff: "/landing_page/FLAGS/FLAG_Bulgaria_OFF.jpg",
     code: "sofia",
+    hub: 2,
     description: "Capital city with environmental and digital transformation projects",
     features: ["Digital Services", "Air Quality", "Urban Mobility"],
     hasDashboard: false,
@@ -131,8 +153,10 @@ const cities = [
     id: 12, 
     name: "Torino", 
     country: "Italy", 
-    flag: "🇮🇹",
+    flag: "/landing_page/FLAGS/FLAG_Italy.jpg",
+    flagOff: "/landing_page/FLAGS/FLAG_Italy_OFF.jpg",
     code: "torino",
+    hub: 2,
     description: "Industrial city evolving into a sustainable urban hub",
     features: ["Innovation", "Circular Economy", "Smart Mobility"],
     hasDashboard: false,
@@ -142,8 +166,10 @@ const cities = [
     id: 13, 
     name: "Podgorica", 
     country: "Montenegro", 
-    flag: "🇲🇪",
+    flag: "/landing_page/FLAGS/FLAG_Montenegro.jpg",
+    flagOff: "/landing_page/FLAGS/FLAG_Montenegro_OFF.jpg",
     code: "podgorica",
+    hub: 2,
     description: "Capital city developing sustainable urban solutions",
     features: ["Urban Planning", "Environmental Protection", "Smart City"],
     hasDashboard: false,
@@ -153,14 +179,21 @@ const cities = [
     id: 14, 
     name: "Prijedor", 
     country: "Bosnia and Herzegovina", 
-    flag: "🇧🇦",
+    flag: "/landing_page/FLAGS/FLAG_BosniaAndHerzegovina.jpg",
+    flagOff: "/landing_page/FLAGS/FLAG_BosniaAndHerzegovina_OFF.jpg",
     code: "prijedor",
+    hub: 2,
     description: "City implementing sustainable development strategies",
     features: ["Environmental Management", "Urban Development", "Climate Action"],
     hasDashboard: false,
     hasInfo: true
   }
 ]
+
+// State for hover effects
+const hoveredCity = ref(null)
+const hoveredInfoButton = ref(null)
+const hoveredDashboardButton = ref(null)
 
 // Dialog state
 const showInfoDialog = ref(false)
@@ -217,10 +250,18 @@ const goToDashboard = (city) => {
               elevation="2"
               :class="{ 'has-dashboard': city.hasDashboard }"
               @click="city.hasDashboard ? goToDashboard(city) : null"
+              @mouseenter="hoveredCity = city.id"
+              @mouseleave="hoveredCity = null"
             >
               <div class="city-card-content">
                 <!-- Flag -->
-                <div class="city-flag">{{ city.flag }}</div>
+                <div class="city-flag">
+                  <img 
+                    :src="hoveredCity === city.id ? city.flag : city.flagOff" 
+                    :alt="`${city.country} flag`"
+                    class="flag-image"
+                  />
+                </div>
 
                 <!-- City Info -->
                 <div class="city-info">
@@ -230,32 +271,49 @@ const goToDashboard = (city) => {
 
                 <!-- Action Buttons -->
                 <div class="city-actions">
-                  <v-btn
-                    icon
-                    size="small"
-                    color="primary"
-                    variant="text"
+                  <!-- Hub Badge -->
+                  <div class="hub-badge">
+                    <img 
+                      :src="hoveredCity === city.id ? `/landing_page/ICONS/ICON_Hub${city.hub}.jpg` : `/landing_page/ICONS/ICON_Hub${city.hub}_OFF.jpg`" 
+                      :alt="`Hub ${city.hub}`"
+                      class="hub-icon"
+                    />
+                  </div>
+
+                  <!-- Info Button -->
+                  <div 
+                    class="action-icon-wrapper"
                     @click.stop="showCityInfo(city)"
+                    @mouseenter="hoveredInfoButton = city.id"
+                    @mouseleave="hoveredInfoButton = null"
                   >
-                    <v-icon>mdi-information-outline</v-icon>
+                    <img 
+                      :src="hoveredInfoButton === city.id ? '/landing_page/ICONS/ICON_Info.jpg' : '/landing_page/ICONS/ICON_Info_OFF.jpg'" 
+                      alt="Info"
+                      class="action-icon"
+                    />
                     <v-tooltip activator="parent" location="bottom">
                       View Information
                     </v-tooltip>
-                  </v-btn>
+                  </div>
 
-                  <v-btn
+                  <!-- Dashboard Button -->
+                  <div 
                     v-if="city.hasDashboard"
-                    icon
-                    size="small"
-                    color="success"
-                    variant="text"
+                    class="action-icon-wrapper"
                     @click.stop="goToDashboard(city)"
+                    @mouseenter="hoveredDashboardButton = city.id"
+                    @mouseleave="hoveredDashboardButton = null"
                   >
-                    <v-icon>mdi-view-dashboard-outline</v-icon>
+                    <img 
+                      :src="hoveredDashboardButton === city.id ? '/landing_page/ICONS/ICON_Dashboard.jpg' : '/landing_page/ICONS/ICON_Dashboard_OFF.jpg'" 
+                      alt="Dashboard"
+                      class="action-icon"
+                    />
                     <v-tooltip activator="parent" location="bottom">
                       View Dashboard
                     </v-tooltip>
-                  </v-btn>
+                  </div>
                   
                   <v-chip
                     v-else
@@ -277,8 +335,12 @@ const goToDashboard = (city) => {
     <v-dialog v-model="showInfoDialog" max-width="600">
       <v-card v-if="selectedCity">
         <v-card-title class="d-flex justify-space-between align-center">
-          <div>
-            <span class="city-flag-large">{{ selectedCity.flag }}</span>
+          <div class="d-flex align-center">
+            <img 
+              :src="selectedCity.flag" 
+              :alt="`${selectedCity.country} flag`"
+              class="flag-image-large"
+            />
             <span class="ml-3">{{ selectedCity.name }}</span>
           </div>
           <v-btn
@@ -298,6 +360,15 @@ const goToDashboard = (city) => {
         <v-divider></v-divider>
 
         <v-card-text>
+          <div class="mb-3 d-flex align-center">
+            <img 
+              :src="`/landing_page/ICONS/ICON_Hub${selectedCity.hub}.jpg`" 
+              :alt="`Hub ${selectedCity.hub}`"
+              class="hub-icon-dialog"
+            />
+            <span class="ml-2 text-h6">Hub {{ selectedCity.hub }}</span>
+          </div>
+
           <p class="mb-4">{{ selectedCity.description }}</p>
 
           <h4 class="mb-2">Key Focus Areas:</h4>
@@ -358,7 +429,8 @@ const goToDashboard = (city) => {
   text-align: center;
   height: 35vh;
   min-height: 320px;
-  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 25%, #7e8ba3 50%, #a8c0d4 75%, #b8d4e8 100%);
+  background: linear-gradient(135deg, rgba(30, 60, 114, 0.8) 0%, rgba(42, 82, 152, 0.8) 50%, rgba(184, 212, 232, 0.8) 100%),
+              url('/landing_page/IMG_Header_770x340px.jpg') center/cover no-repeat;
   color: white;
   overflow: hidden;
   
@@ -557,11 +629,20 @@ const goToDashboard = (city) => {
   }
 
   .city-flag {
-    font-size: 2.5rem;
     flex-shrink: 0;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
     width: 50px;
-    text-align: center;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    .flag-image {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      transition: all 0.3s ease;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    }
   }
 
   .city-info {
@@ -594,17 +675,61 @@ const goToDashboard = (city) => {
   .city-actions {
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
+    gap: 0.3rem;
     align-items: center;
     flex-shrink: 0;
     width: 40px;
   }
+
+  .hub-badge {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    .hub-icon {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      transition: all 0.3s ease;
+    }
+  }
+
+  .action-icon-wrapper {
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+
+    .action-icon {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      transition: all 0.3s ease;
+    }
+  }
 }
 
 /* Dialog Styles */
-.city-flag-large {
-  font-size: 3rem;
+.flag-image-large {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
   vertical-align: middle;
+}
+
+.hub-icon-dialog {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
 }
 
 .v-card-title {
@@ -657,8 +782,8 @@ const goToDashboard = (city) => {
     }
     
     .city-flag {
-      font-size: 2.2rem;
       width: 45px;
+      height: 45px;
     }
     
     .city-name {
@@ -671,6 +796,17 @@ const goToDashboard = (city) => {
 
     .city-actions {
       width: 36px;
+      gap: 0.25rem;
+    }
+
+    .hub-badge {
+      width: 24px;
+      height: 24px;
+    }
+
+    .action-icon-wrapper {
+      width: 28px;
+      height: 28px;
     }
   }
 }
@@ -689,8 +825,8 @@ const goToDashboard = (city) => {
     }
     
     .city-flag {
-      font-size: 2rem;
       width: 40px;
+      height: 40px;
     }
     
     .city-name {
@@ -703,8 +839,18 @@ const goToDashboard = (city) => {
 
     .city-actions {
       flex-direction: row;
-      gap: 0.25rem;
+      gap: 0.3rem;
       width: auto;
+    }
+
+    .hub-badge {
+      width: 22px;
+      height: 22px;
+    }
+
+    .action-icon-wrapper {
+      width: 26px;
+      height: 26px;
     }
   }
 }
