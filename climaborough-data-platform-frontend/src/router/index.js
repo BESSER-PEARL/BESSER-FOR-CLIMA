@@ -27,15 +27,13 @@ const router = createRouter({
       component: () => import('../views/LLMAgent.vue'),
       meta: { requiresAuth: true }
     },
-    {
-      path: '/projects',
-      name: 'projects',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/Projects.vue'),
-      meta: { requiresAuth: true }
-    },
+    // Projects route removed - users now access dashboards directly from home page
+    // {
+    //   path: '/projects',
+    //   name: 'projects',
+    //   component: () => import('../views/Projects.vue'),
+    //   meta: { requiresAuth: true }
+    // },
     {
       path: '/Dashboard/:city',
       name: 'Dashboard',
@@ -98,8 +96,8 @@ router.beforeEach(async (to, from, next) => {
 
     
     if (!hasAdminRole && !hasAdminGroup) {
-      // Not an admin, redirect to projects
-      next('/projects');
+      // Not an admin, redirect to home
+      next('/');
     } else {
       // User is an admin, allow access
       next();

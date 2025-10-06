@@ -16,8 +16,10 @@ RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 # Copy application code
 COPY ./app /code/app
 COPY ./run.py /code/run.py
+COPY ./startup.py /code/startup.py
 COPY ./init_db.py /code/init_db.py
 COPY ./migrate_sections.py /code/migrate_sections.py
+COPY ./create_minimal_kpis.py /code/create_minimal_kpis.py
 COPY ./create_differdange_kpis.py /code/create_differdange_kpis.py
 
 # Create .env file with default values (will be overridden by docker-compose)
@@ -30,5 +32,5 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8000/api/health || exit 1
 
-# Command to run the application
-CMD ["python", "run.py"]
+# Command to run the application (using startup script)
+CMD ["python", "startup.py"]

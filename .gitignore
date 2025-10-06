@@ -21,3 +21,5 @@ climaborough-data-platform-frontend/src/views/HomeView copy.vue
 climasolutionsbot/config.ini
 *.log
 backend/refactored/venv/
+
+savedold/

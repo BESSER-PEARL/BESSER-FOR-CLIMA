@@ -36,6 +36,10 @@ services:
       DEBUG: "true"
       ALLOWED_ORIGINS: '["http://localhost:3002","http://localhost:8080","http://localhost:3000"]'
       PYTHONPATH: /app
+      AUTO_CREATE_KPIS: "true"  # Auto-create 3 minimal KPIs on startup
+      HOST: "0.0.0.0"
+      PORT: "8000"
+      RELOAD: "false"
     ports:
       - "8000:8000"
     restart: always
@@ -48,15 +52,6 @@ services:
       timeout: 10s
       retries: 5
       start_period: 40s
-    command: >
-      bash -c "
-        echo 'Waiting for database...' &&
-        sleep 10 &&
-        echo 'Initializing database...' &&
-        python /code/init_db.py &&
-        echo 'Starting server...' &&
-        python /code/run.py
-      "
 
   pgadmin:
     image: dpage/pgadmin4

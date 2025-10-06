@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { Icon } from '@iconify/vue'
 
 const router = useRouter()
 
@@ -102,7 +103,7 @@ const cities = [
     code: "katowice",
     description: "Industrial city transforming into a green urban center",
     features: ["Post-Industrial Transformation", "Air Quality", "Smart City"],
-    hasDashboard: false,
+    hasDashboard: true,
     hasInfo: true
   },
   { 
@@ -185,15 +186,9 @@ const goToDashboard = (city) => {
   <div class="home">
     <!-- Hero Section -->
     <section class="hero">
-      <div class="hero-overlay">
-        <div class="hero-content">
-          <div class="logo-section">
-            <v-icon size="64" color="white">mdi-earth</v-icon>
-          </div>
-          <h1>CLIMABOROUGH DATA PLATFORM</h1>
-          <p class="hero-subtitle">A comprehensive data platform for climate adaptation and urban resilience.</p>
-          <p class="hero-description">Empowering European cities with real-time environmental data and analytics to drive sustainable development.</p>
-        </div>
+      <div class="hero-content">
+        <h1>CLIMABOROUGH DATA PLATFORM</h1>
+        <p>Explore climate and urban data from participating cities</p>
       </div>
     </section>
 
@@ -222,11 +217,9 @@ const goToDashboard = (city) => {
                 <!-- Flag -->
                 <div class="city-flag">{{ city.flag }}</div>
 
-                <!-- City Info -->
-                <div class="city-info">
-                  <h3 class="city-name">{{ city.name }}</h3>
-                  <p class="city-country">{{ city.country }}</p>
-                </div>
+                <!-- City Name and Country -->
+                <h3 class="city-name">{{ city.name }}</h3>
+                <p class="city-country">{{ city.country }}</p>
 
                 <!-- Action Buttons -->
                 <div class="city-actions">
@@ -341,6 +334,8 @@ const goToDashboard = (city) => {
   </div>
 </template>
 
+
+
 <style scoped lang="scss">
 .home {
   display: flex;
@@ -351,18 +346,15 @@ const goToDashboard = (city) => {
 
 /* Hero Section */
 .hero {
-  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
   text-align: center;
-  height: 35vh;
-  min-height: 320px;
-  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 25%, #7e8ba3 50%, #a8c0d4 75%, #b8d4e8 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  height: 40vh;
   color: white;
-  overflow: hidden;
+  position: relative;
   
-  // Animated background pattern
   &::before {
     content: '';
     position: absolute;
@@ -370,129 +362,40 @@ const goToDashboard = (city) => {
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: 
-      radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-      radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
-      radial-gradient(circle at 40% 20%, rgba(255, 255, 255, 0.06) 0%, transparent 50%);
-    animation: float 20s ease-in-out infinite;
-  }
-
-  @keyframes float {
-    0%, 100% {
-      transform: translate(0, 0);
-    }
-    50% {
-      transform: translate(20px, 20px);
-    }
-  }
-  
-  .hero-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: transparent;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    background-image: url('../assets/fake.png');
+    background-size: cover;
+    background-position: center;
+    opacity: 0.2;
   }
 
   .hero-content {
     position: relative;
     z-index: 1;
-    max-width: 900px;
-    padding: 40px 20px;
-
-    .logo-section {
-      margin-bottom: 1.5rem;
-      
-      .v-icon {
-        filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
-        animation: pulse 3s ease-in-out infinite;
-      }
-
-      @keyframes pulse {
-        0%, 100% {
-          transform: scale(1);
-        }
-        50% {
-          transform: scale(1.05);
-        }
-      }
-    }
+    padding: 20px;
 
     h1 {
-      font-size: 3.5rem;
-      font-weight: 700;
-      margin-bottom: 1.5rem;
-      text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
-      letter-spacing: 1px;
+      font-size: 3rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
     }
 
-    .hero-subtitle {
-      font-size: 1.4rem;
-      font-weight: 500;
-      margin-bottom: 0.8rem;
-      line-height: 1.6;
-      text-shadow: 1px 1px 4px rgba(0,0,0,0.2);
-    }
-
-    .hero-description {
-      font-size: 1.1rem;
-      font-weight: 300;
+    p {
+      font-size: 1.5rem;
       opacity: 0.95;
-      line-height: 1.6;
-      max-width: 800px;
-      margin: 0 auto;
-      text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
     }
   }
 
-  @media (max-width: 960px) {
+  @media (max-width: 768px) {
     height: 30vh;
-    min-height: 280px;
     
     .hero-content {
-      padding: 30px 15px;
-      
-      h1 {
-        font-size: 2.5rem;
-      }
-      
-      .hero-subtitle {
-        font-size: 1.2rem;
-      }
-      
-      .hero-description {
-        font-size: 1rem;
-      }
-    }
-  }
-
-  @media (max-width: 600px) {
-    height: 28vh;
-    min-height: 260px;
-    
-    .hero-content {
-      padding: 20px 15px;
-      
-      .logo-section .v-icon {
-        font-size: 48px !important;
-      }
-      
       h1 {
         font-size: 2rem;
-        margin-bottom: 1rem;
       }
       
-      .hero-subtitle {
-        font-size: 1rem;
-        margin-bottom: 0.6rem;
-      }
-      
-      .hero-description {
-        font-size: 0.9rem;
+      p {
+        font-size: 1.1rem;
       }
     }
   }
@@ -523,11 +426,11 @@ const goToDashboard = (city) => {
   }
 }
 
-/* City Card - More Rectangular */
+/* City Card */
 .city-card {
   height: 100%;
   transition: all 0.3s ease;
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
   cursor: default;
   
@@ -546,58 +449,39 @@ const goToDashboard = (city) => {
   }
 
   .city-card-content {
-    padding: 1.25rem;
+    padding: 2rem;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
-    text-align: left;
-    gap: 1rem;
-    min-height: 110px;
-    max-height: 110px;
+    text-align: center;
+    min-height: 200px;
   }
 
   .city-flag {
-    font-size: 2.5rem;
-    flex-shrink: 0;
+    font-size: 4rem;
+    margin-bottom: 1rem;
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
-    width: 50px;
-    text-align: center;
-  }
-
-  .city-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    min-width: 0;
-    overflow: hidden;
   }
 
   .city-name {
-    font-size: 1.15rem;
+    font-size: 1.5rem;
     font-weight: 600;
     color: #333;
-    line-height: 1.3;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    margin-bottom: 0.5rem;
   }
 
   .city-country {
-    font-size: 0.9rem;
+    font-size: 1rem;
     color: #666;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    margin-bottom: 1.5rem;
   }
 
   .city-actions {
     display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
+    gap: 0.5rem;
     align-items: center;
-    flex-shrink: 0;
-    width: 40px;
+    justify-content: center;
+    margin-top: auto;
   }
 }
 
@@ -650,27 +534,16 @@ const goToDashboard = (city) => {
   
   .city-card {
     .city-card-content {
-      padding: 1rem;
-      gap: 0.75rem;
-      min-height: 100px;
-      max-height: 100px;
+      padding: 1.5rem;
+      min-height: 180px;
     }
     
     .city-flag {
-      font-size: 2.2rem;
-      width: 45px;
+      font-size: 3rem;
     }
     
     .city-name {
-      font-size: 1.05rem;
-    }
-
-    .city-country {
-      font-size: 0.85rem;
-    }
-
-    .city-actions {
-      width: 36px;
+      font-size: 1.3rem;
     }
   }
 }
@@ -682,31 +555,243 @@ const goToDashboard = (city) => {
   
   .city-card {
     .city-card-content {
-      padding: 1rem;
-      gap: 0.75rem;
-      min-height: 90px;
-      max-height: 90px;
+      padding: 1.25rem;
+      min-height: 160px;
     }
     
     .city-flag {
-      font-size: 2rem;
-      width: 40px;
+      font-size: 2.5rem;
     }
     
     .city-name {
-      font-size: 1rem;
+      font-size: 1.2rem;
     }
     
     .city-country {
-      font-size: 0.8rem;
+      font-size: 0.9rem;
+    }
+  }
+}
+</style>
+  
+
+  .text-container {
+    background-color: rgba(255, 255, 255, 0.8); // Semi-transparent white
+    display: inline-block; // Adjust size to content
+    padding: 20px; // Add some padding around the text
+    border-radius: 8px; // Optional: adds rounded corners
+    margin: 20px; // Optional: adds margin around the text container
+    font-size: 1vw;
+  }
+
+  @media (max-width: 768px) {
+    height: 40vh;
+    
+    .text-container {
+      width: 90%;
+      margin: 10px;
+      padding: 15px;
+      font-size: 16px;
+      
+      h1 {
+        font-size: 24px;
+        margin-bottom: 10px;
+      }
+      
+      p {
+        font-size: 16px;
+        margin-bottom: 15px;
+      }
+    }
+  }
+
+}
+
+.carousel {
+  flex-grow: 1;
+  min-height: 70vh;
+
+  .text-container {
+    position: relative;
+    font-size: 16px;
+    max-height: 330px; // Adjust based on your design
+    overflow-y: auto; // Adds a vertical scrollbar if content exceeds max-height
+    text-align: left; // Align text to the left
+    padding: 20px; // Padding inside the text container
+    box-sizing: border-box; // Ensure padding is included in the max-height
+  }
+
+  @media (max-width: 768px) {
+    min-height: 60vh;
+
+    .carousel__item {
+      padding: 10px;
+      flex-direction: column;
+      
+      &.mobile-layout {
+        .image-container {
+          flex: 0 0 100%;
+          margin-bottom: 20px;
+          
+          img {
+            width: 100%;
+            max-width: 300px;
+          }
+        }
+        
+        .info-box {
+          flex: 0 0 100%;
+          margin-right: 0;
+          width: 100%;
+          
+          .text-container {
+            padding: 15px;
+            max-height: 250px;
+          }
+        }
+      }
     }
 
-    .city-actions {
-      flex-direction: row;
-      gap: 0.25rem;
-      width: auto;
+    .title {
+      font-size: 24px;
+    }
+
+    .subtitle {
+      font-size: 18px;
+    }
+
+    .description {
+      font-size: 14px;
+    }
+  }
+}
+
+
+.carousel__item {
+  background-color: rgb(255, 255, 255);
+  color: black; // Changed from white to black to match text visibility
+  min-height: 300px;
+  width: 100%;
+  font-size: 10px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 80px;
+  box-sizing: border-box; // Ensure padding is included in the width and height
+}
+
+.carousel__slide {
+  padding: 10px;
+}
+
+.carousel__prev,
+.carousel__next {
+  background-color: transparent;
+  border: none;
+}
+
+.image-container {
+  flex: 0 0 25%; // Takes up 25% of the slide's width
+  text-align: center; // Center the image horizontally
+}
+
+.slide-image {
+  width: 70%;
+  height: auto; // Maintain aspect ratio
+}
+
+.info-box {
+  flex: 0 0 60%;
+  margin-right: 40px;
+  background-color: #ffffff;
+  color: rgb(0, 0, 0);
+  position: relative;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  
+  &:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+  }
+}
+
+
+
+.title {
+  font-size: 30px;
+}
+
+.subtitle {
+  margin-top: 10px; // Adds margin between title and subtitle
+  opacity: 60%;
+}
+
+.description {
+  margin-top: 10px; // Adds margin between subtitle and description
+  margin-bottom: 10px; // Adds margin between description and button
+}
+
+.button-city {
+  display: block;
+  margin: 0 auto; // Center the button horizontally
+}
+
+.custom-arrow {
+  font-size: 60px;
+  font-weight: bold;
+  color: black;
+  cursor: pointer;
+  padding: 10px;
+  user-select: none;
+}
+
+.carousel__prev,
+.carousel__next {
+  background-color: transparent;
+  border: none;
+}
+
+@media (max-width: 768px) {
+  .custom-arrow {
+    font-size: 40px;
+    padding: 5px;
+  }
+}
+
+// Optimize carousel controls for mobile
+:deep(.carousel__pagination) {
+  @media (max-width: 768px) {
+    bottom: 0;
+    padding: 10px 0;
+    
+    .carousel__pagination-button {
+      width: 10px;
+      height: 10px;
+      margin: 0 4px;
+    }
+  }
+}
+
+:deep(.carousel__nav) {
+  @media (max-width: 768px) {
+    .carousel__prev,
+    .carousel__next {
+      width: 40px;
+      height: 40px;
     }
   }
 }
 </style>
 
+
+<style>
+:root {
+  --vc-nav-width: 60px;
+  --vc-nav-height: 60px;
+  --vc-pgn-width: 15px;
+  --vc-pgn-height: 15px;
+  --vc-pgn-margin: 5px;
+  --vc-pgn-border-radius: 100%;
+}
+</style>

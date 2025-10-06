@@ -1,4 +1,0 @@
-from classes import *
-{% for obj in objects %}
-{{ obj.className.name }} = {{ obj.name }}({% for attr in obj.attributes %}{{ attr.name }} = "{{ attr.value }}"{% if not loop.last %}, {% endif %}{% endfor %}{% for object in obj.deps %}, {{ object.className.name }}{% endfor %})
-{% endfor %}

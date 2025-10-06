@@ -1,0 +1,420 @@
+@startuml Climaborough_Refactored_Architecture
+
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam backgroundColor white
+skinparam shadowing false
+
+title Climaborough Data Platform - Refactored Backend Architecture
+
+' ========================================
+' DATABASE MODELS
+' ========================================
+
+package "Database Models" {
+    
+    ' Core City Entity
+    class City << (T,#FFAAAA) >> {
+        + id: int <<PK>>
+        --
+        name: str
+        code: str [unique]
+        country: str
+        timezone: str
+        created_at: datetime
+        updated_at: datetime
+    }
+    
+    ' Dashboard Management
+    class Dashboard << (T,#FFAAAA) >> {
+        + id: int <<PK>>
+        --
+        code: str [unique per city]
+        title: str
+        description: str
+        city_id: int <<FK>>
+        created_at: datetime
+        updated_at: datetime
+    }
+    
+    class DashboardSection << (T,#FFAAAA) >> {
+        + id: int <<PK>>
+        --
+        name: str [unique per dashboard]
+        description: str
+        order: int
+        dashboard_id: int <<FK>>
+        created_at: datetime
+        updated_at: datetime
+    }
+    
+    ' KPI System
+    class KPI << (T,#FFAAAA) >> {
+        + id: int <<PK>>
+        --
+        id_kpi: str [unique per city]
+        name: str
+        category: str
+        unit_text: str
+        unit_description: str
+        thresholds: JSON
+        category_label_dictionary: JSON
+        has_category_labels: bool
+        city_id: int <<FK>>
+        created_at: datetime
+        updated_at: datetime
+    }
+    
+    class KPIValue << (T,#FFAAAA) >> {
+        + id: int <<PK>>
+        --
+        value: float
+        timestamp: datetime
+        category_label: str [nullable]
+        kpi_id: int <<FK>>
+        created_at: datetime
+        updated_at: datetime
+        --
+        Index: (kpi_id, timestamp)
+    }
+    
+    ' Polymorphic Visualization Base
+    class Visualization << (T,#FFAAAA) >> {
+        + id: int <<PK>>
+        --
+        type: str [discriminator]
+        title: str
+        description: str
+        dashboard_id: int <<FK>>
+        section_id: int <<FK>>
+        kpi_id: int [nullable] <<FK>>
+        x_position: int
+        y_position: int
+        width: int
+        height: int
+        created_at: datetime
+        updated_at: datetime
+    }
+    
+    ' Visualization Subtypes
+    class LineChart {
+        x_title: str
+        y_title: str
+        color: str
+        type = "line"
+    }
+    
+    class BarChart {
+        orientation: str (horizontal/vertical)
+        type = "bar"
+    }
+    
+    class PieChart {
+        show_legend: bool
+        type = "pie"
+    }
+    
+    class StatChart {
+        unit: str
+        show_trend: bool
+        type = "stat"
+    }
+    
+    class Table {
+        pagination_enabled: bool
+        page_size: int
+        type = "table"
+    }
+    
+    class TableColumn << (T,#FFAAAA) >> {
+        + id: int <<PK>>
+        --
+        name: str
+        display_name: str
+        type: str
+        sortable: bool
+        filterable: bool
+        order: int
+        table_id: int <<FK>>
+    }
+    
+    class Map {
+        default_zoom: int
+        center_lat: float
+        center_lon: float
+        type = "map"
+    }
+    
+    ' Polymorphic MapData Base
+    class MapData << (T,#FFAAAA) >> {
+        + id: int <<PK>>
+        --
+        type: str [discriminator]
+        name: str
+        description: str
+        city_id: int <<FK>>
+        map_id: int [nullable] <<FK>>
+        created_at: datetime
+        updated_at: datetime
+    }
+    
+    ' MapData Subtypes
+    class WMS {
+        url: str
+        layer_name: str
+        format: str
+        transparent: bool
+        type = "wms"
+    }
+    
+    class GeoJson {
+        data: JSON
+        style: JSON
+        type = "geojson"
+    }
+}
+
+' ========================================
+' RELATIONSHIPS
+' ========================================
+
+' City Relationships
+City "1" -- "0..*" Dashboard : has
+City "1" -- "0..*" KPI : tracks
+City "1" -- "0..*" MapData : contains
+
+' Dashboard Structure
+Dashboard "1" -- "0..*" DashboardSection : organized into
+Dashboard "1" -- "0..*" Visualization : displays
+
+' Section Relationships
+DashboardSection "1" -- "0..*" Visualization : contains
+
+' KPI Relationships
+KPI "1" -- "0..*" KPIValue : measured by
+KPI "0..1" -- "0..*" Visualization : visualized in
+
+' Visualization Inheritance (Polymorphic)
+Visualization <|-- LineChart
+Visualization <|-- BarChart
+Visualization <|-- PieChart
+Visualization <|-- StatChart
+Visualization <|-- Table
+Visualization <|-- Map
+
+' Table Relationships
+Table "1" -- "0..*" TableColumn : defines
+
+' Map Relationships
+Map "1" -- "0..*" MapData : displays
+
+' MapData Inheritance (Polymorphic)
+MapData <|-- WMS
+MapData <|-- GeoJson
+
+' ========================================
+' API LAYER
+' ========================================
+
+package "API Endpoints (FastAPI)" {
+    
+    class CitiesAPI {
+        +GET /cities
+        +GET /cities/{city_id}
+        +GET /cities/code/{city_code}
+        +POST /cities
+        +PUT /cities/{city_id}
+        +DELETE /cities/{city_id}
+        +GET /cities/{city_id}/stats
+        --
+        List all cities
+        Get city by ID or code
+        Manage city CRUD
+    }
+    
+    class DashboardsAPI {
+        +GET /dashboards
+        +GET /dashboards/{dashboard_id}
+        +GET /dashboards/{dashboard_id}/with-visualizations
+        +POST /dashboards
+        +PUT /dashboards/{dashboard_id}
+        +DELETE /dashboards/{dashboard_id}
+        --
+        Dashboard management
+        Full dashboard with sections/visualizations
+    }
+    
+    class SectionsAPI {
+        +GET /dashboards/{dashboard_id}/sections
+        +POST /dashboards/{dashboard_id}/sections
+        +PUT /sections/{section_id}
+        +DELETE /sections/{section_id}
+        +POST /sections/{section_id}/duplicate
+        --
+        Section CRUD operations
+        Section reordering
+    }
+    
+    class KPIsAPI {
+        +GET /kpis/?city_id={city_id}
+        +GET /kpis/{kpi_id}
+        +GET /kpis/{kpi_id}/values
+        +POST /kpis
+        +PUT /kpis/{kpi_id}
+        +DELETE /kpis/{kpi_id}
+        --
+        KPI management
+        Time series data with filtering
+        Category label support
+    }
+    
+    class VisualizationsAPI {
+        +GET /dashboards/{dashboard_id}/visualizations
+        +POST /dashboards/{dashboard_id}/visualizations
+        +PUT /visualizations/{visualization_id}
+        +DELETE /visualizations/{visualization_id}
+        --
+        Polymorphic visualization CRUD
+        Type-specific rendering
+    }
+    
+    class AuthAPI {
+        +POST /auth/login
+        +POST /auth/logout
+        +GET /auth/verify
+        +POST /auth/refresh
+        --
+        Keycloak integration
+        JWT token validation
+        Role-based access
+    }
+}
+
+' API to Model Mappings
+CitiesAPI ..> City : manages
+DashboardsAPI ..> Dashboard : manages
+DashboardsAPI ..> DashboardSection : includes
+SectionsAPI ..> DashboardSection : manages
+KPIsAPI ..> KPI : manages
+KPIsAPI ..> KPIValue : retrieves
+VisualizationsAPI ..> Visualization : manages
+
+' ========================================
+' ARCHITECTURE LAYERS
+' ========================================
+
+package "Architecture Layers" {
+    
+    class "API Layer" as APILayer {
+        + FastAPI Routes
+        + Request Validation
+        + Response Serialization
+    }
+    
+    class "Service Layer" as ServiceLayer {
+        + Business Logic
+        + Authentication Service
+        + KPI Service
+    }
+    
+    class "Repository Layer" as RepositoryLayer {
+        + Data Access
+        + Query Building
+    }
+    
+    class "Model Layer" as ModelLayer {
+        + SQLAlchemy Models
+        + Relationships
+    }
+    
+    class "PostgreSQL + PostGIS" as Database {
+        + Tables
+        + Indexes
+        + Constraints
+    }
+}
+
+APILayer --> ServiceLayer : calls
+ServiceLayer --> RepositoryLayer : uses
+RepositoryLayer --> ModelLayer : queries
+ModelLayer --> Database : persists
+
+' ========================================
+' NOTES
+' ========================================
+
+note right of City
+    **Core Entity**
+    - Unique code per city
+    - Timezone support for data
+    - Cascade delete to all related data
+end note
+
+note right of Dashboard
+    **Dashboard System**
+    - Multi-section layout
+    - Grid-based positioning
+    - City-specific dashboards
+    - Unique code constraint per city
+end note
+
+note right of KPI
+    **KPI Features**
+    - Category-based organization
+    - Threshold management
+    - Optional category labels
+    - Time series values
+end note
+
+note right of Visualization
+    **Polymorphic Design**
+    - Single table inheritance
+    - Type discriminator field
+    - Shared base attributes
+    - Type-specific properties
+    
+    **Supported Types:**
+    - LineChart (trends)
+    - BarChart (comparisons)
+    - PieChart (proportions)
+    - StatChart (metrics)
+    - Table (tabular data)
+    - Map (geospatial)
+end note
+
+note left of APILayer
+    **API Design Principles**
+    1. RESTful conventions
+    2. Resource-based URLs
+    3. snake_case JSON
+    4. Consistent errors
+    5. Pydantic validation
+end note
+
+note bottom of Database
+    **Database Features**
+    - Foreign key constraints
+    - Cascade deletes
+    - Composite indexes
+    - JSON column support
+    - PostGIS for geospatial
+    - Timestamp tracking
+end note
+
+legend right
+    **Legend**
+    <<PK>> = Primary Key
+    <<FK>> = Foreign Key
+    "1" -- "0..*" = One to Many
+    <|-- = Inheritance
+    ..> = Dependency
+    
+    **Technology Stack**
+    - FastAPI (async web framework)
+    - SQLAlchemy 2.0 (ORM)
+    - Pydantic v2 (validation)
+    - PostgreSQL + PostGIS
+    - Keycloak (authentication)
+endlegend
+
+@enduml
