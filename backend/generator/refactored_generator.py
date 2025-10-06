@@ -161,10 +161,11 @@ class RefactoredBackendGenerator:
         """Get association ends that represent foreign keys (many-to-one)."""
         fk_ends = []
         for end in class_obj.association_ends():
-            # It's a FK if it points to another class and is navigable
-            if end.multiplicity.max == 1 and end.is_navigable:
+            # Foreign key side: NOT navigable, points to single entity (max=1)
+            # Opposite side: IS navigable, is a collection (max > 1)
+            if end.multiplicity.max == 1 and not end.is_navigable:
                 opposite = end.opposite_end()
-                if opposite and opposite.multiplicity.max > 1:
+                if opposite and opposite.is_navigable:
                     fk_ends.append(end)
         return fk_ends
     

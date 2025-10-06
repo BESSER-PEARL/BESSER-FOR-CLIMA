@@ -8,21 +8,21 @@ from datetime import datetime, timedelta
 
 from .base import BaseRepository
 from ..models import (
-    {%- for class in classes %}
+    {% for class in classes %}
     {{ class.name }}{% if not loop.last %},{% endif %}
-    {%- endfor %}
+    {% endfor %}
 )
 from ..schemas import (
-    {%- for class in classes %}
-    {%- if not has_polymorphic_parent(class) %}
+    {% for class in classes %}
+    {% if not has_polymorphic_parent(class) %}
     {{ class.name }}Create, {{ class.name }}Update{% if not loop.last %},{% endif %}
-    {%- endif %}
-    {%- endfor %}
+    {% endif %}
+    {% endfor %}
 )
 
 
 {% for class in classes %}
-{%- if not has_polymorphic_parent(class) %}
+{% if not has_polymorphic_parent(class) %}
 class {{ class.name }}Repository(BaseRepository[{{ class.name }}, {{ class.name }}Create, {{ class.name }}Update]):
     """Repository for {{ class.name }} model."""
     
@@ -34,8 +34,8 @@ class {{ class.name }}Repository(BaseRepository[{{ class.name }}, {{ class.name 
 {% endfor %}
 
 # Repository instances (singletons)
-{%- for class in classes %}
-{%- if not has_polymorphic_parent(class) %}
+{% for class in classes %}
+{% if not has_polymorphic_parent(class) %}
 {{ class.name.lower() }}_repo = {{ class.name }}Repository()
-{%- endif %}
-{%- endfor %}
+{% endif %}
+{% endfor %}

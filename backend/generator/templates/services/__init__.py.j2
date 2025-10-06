@@ -67,8 +67,8 @@ class {{ class.name }}Service:
 {% endfor %}
 
 # Service instances
-{%- for class in classes %}
-{%- if not has_polymorphic_parent(class) %}
+{% for class in classes %}
+{% if not has_polymorphic_parent(class) %}
 {{ class.name.lower() }}_service = {{ class.name }}Service()
-{%- endif %}
-{%- endfor %}
+{% endif %}
+{% endfor %}

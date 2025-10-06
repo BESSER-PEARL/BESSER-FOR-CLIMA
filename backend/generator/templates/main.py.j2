@@ -120,11 +120,11 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 
 # Include API routers
 app.include_router(auth.router)
-{%- for class in classes %}
-{%- if not has_polymorphic_parent(class) %}
+{% for class in classes %}
+{% if not has_polymorphic_parent(class) %}
 app.include_router({{ class.name.lower() }}s.router)
-{%- endif %}
-{%- endfor %}
+{% endif %}
+{% endfor %}
 
 
 @app.on_event("startup")

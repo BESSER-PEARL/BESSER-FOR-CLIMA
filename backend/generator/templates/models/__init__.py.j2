@@ -65,7 +65,7 @@ class {{ class.name }}(Base{% if has_timestamps(class) %}, TimestampMixin{% endi
     {{ end.name }}: Mapped[{% if end.multiplicity.min == 0 %}Optional["{{ target_class }}"]{% else %}"{{ target_class }}"{% endif %}] = relationship("{{ target_class }}"{% if back_pop %}, back_populates="{{ back_pop }}"{% endif %})
 {% else %}
     {{ end.name }}: Mapped[List["{{ target_class }}"]] = relationship(
-        "{{ target_class }}", back_populates="{{ back_pop }}"{% if end.metadata and end.metadata.cascade %}, cascade="{{ end.metadata.cascade }}"{% else %}, cascade="all, delete-orphan"{% endif %}{% if has_order_attribute(end.type) %},
+        "{{ target_class }}"{% if back_pop %}, back_populates="{{ back_pop }}"{% endif %}{% if end.metadata and end.metadata.cascade %}, cascade="{{ end.metadata.cascade }}"{% else %}, cascade="all, delete-orphan"{% endif %}{% if has_order_attribute(end.type) %},
         order_by="{{ target_class }}.order"{% endif %}
     )
 {% endif %}
@@ -123,7 +123,7 @@ class {{ class.name }}({{ parent_class.name }}):
     {{ end.name }}: Mapped[{% if end.multiplicity.min == 0 %}Optional["{{ target_class }}"]{% else %}"{{ target_class }}"{% endif %}] = relationship("{{ target_class }}"{% if back_pop %}, back_populates="{{ back_pop }}"{% endif %})
 {% else %}
     {{ end.name }}: Mapped[List["{{ target_class }}"]] = relationship(
-        "{{ target_class }}", back_populates="{{ back_pop }}", cascade="all, delete-orphan"
+        "{{ target_class }}"{% if back_pop %}, back_populates="{{ back_pop }}"{% endif %}, cascade="all, delete-orphan"
     )
 {% endif %}
 {% endfor %}

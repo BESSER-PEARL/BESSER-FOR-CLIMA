@@ -35,7 +35,7 @@ class {{ class.name }}Base(BaseSchema):
     {% if attr.name not in ['id', 'created_at', 'updated_at', 'type'] %}
     {% set is_optional = attr.multiplicity.min == 0 %}
     {% if is_optional %}
-    {{ attr.name }}: Optional[{{ get_python_type(attr.type) }}] = {% if attr.metadata and attr.metadata.default is defined %}Field({{ attr.metadata.default }}{% else %}None{% endif %}{% if get_python_type(attr.type) == 'str' and get_string_length(attr) %}, max_length={{ get_string_length(attr) }}{% endif %})
+    {{ attr.name }}: Optional[{{ get_python_type(attr.type) }}] = Field({% if attr.metadata and attr.metadata.default is defined %}{{ attr.metadata.default }}{% else %}None{% endif %}{% if get_python_type(attr.type) == 'str' and get_string_length(attr) %}, max_length={{ get_string_length(attr) }}{% endif %})
     {% else %}
     {{ attr.name }}: {{ get_python_type(attr.type) }} = Field(...{% if get_python_type(attr.type) == 'str' %}, min_length=1, max_length={{ get_string_length(attr) }}{% endif %})
     {% endif %}
@@ -44,13 +44,18 @@ class {{ class.name }}Base(BaseSchema):
 
 
 class {{ class.name }}Create({{ class.name }}Base):
-    {%- for end in get_foreign_key_associations(class) %}
+{% set fk_assocs = get_foreign_key_associations(class) %}
+{% if fk_assocs | length > 0 %}
+    {% for end in fk_assocs %}
     {% if end.multiplicity.min > 0 %}
     {{ end.name }}_id: int = Field(..., gt=0)
     {% else %}
     {{ end.name }}_id: Optional[int] = Field(None, gt=0)
     {% endif %}
     {% endfor %}
+{% else %}
+    pass
+{% endif %}
 
 
 class {{ class.name }}Update(BaseSchema):
@@ -73,7 +78,7 @@ class {{ class.name }}({{ class.name }}Base):
     {%- if has_timestamps(class) %}
     created_at: datetime
     updated_at: datetime
-    {%- endif %}
+    {% endif %}
     {% for end in get_navigable_associations(class) %}
     {% if end.multiplicity.max == 1 %}
     {% if end.multiplicity.min == 0 %}
@@ -92,32 +97,40 @@ class {{ class.name }}({{ class.name }}Base):
 # {{ class.name }} schemas
 class {{ class.name }}Create({{ parent_class.name }}Create):
     type: Literal["{{ class.name.lower() }}"] = "{{ class.name.lower() }}"
-    {% for attr in class.attributes %}
-    {% if attr.name not in ['id', 'created_at', 'updated_at'] %}
-    {% set is_optional = attr.multiplicity.min == 0 %}
-    {%if is_optional %}
+{% for attr in class.attributes %}
+{% if attr.name not in ['id', 'created_at', 'updated_at'] %}
+{% set is_optional = attr.multiplicity.min == 0 %}
+
+{% if is_optional %}
     {{ attr.name }}: Optional[{{ get_python_type(attr.type) }}] = {% if attr.metadata and attr.metadata.default is defined %}Field({{ attr.metadata.default }}{% if get_python_type(attr.type) == 'str' and get_string_length(attr) %}, max_length={{ get_string_length(attr) }}{% endif %}){% else %}None{% endif %}
-    {% else %}
+{% else %}
     {{ attr.name }}: {{ get_python_type(attr.type) }} = Field(...{% if get_python_type(attr.type) == 'str' %}, min_length=1, max_length={{ get_string_length(attr) }}{% endif %})
-    {% endif %}
-    {% endif %}
-    {% endfor %}
+{% endif %}
+{% endif %}
+{% endfor %}
+{% if class.attributes | selectattr('name', 'in', ['id', 'created_at', 'updated_at']) | list | length == class.attributes | length %}
+    pass
+{% endif %}
 
 
 class {{ class.name }}({{ parent_class.name }}):
-    {% for attr in class.attributes %}
-    {% if attr.name not in ['id', 'created_at', 'updated_at'] %}
-    {% set is_optional = attr.multiplicity.min == 0 %}
-    {% if is_optional %}
+{% for attr in class.attributes %}
+{% if attr.name not in ['id', 'created_at', 'updated_at'] %}
+{% set is_optional = attr.multiplicity.min == 0 %}
+{% if is_optional %}
     {{ attr.name }}: Optional[{{ get_python_type(attr.type) }}]
-    {% else %}
+{% else %}
     {{ attr.name }}: {{ get_python_type(attr.type) }}
-    {% endif %}
-    {%- endif %}
-    {%- endfor %}
+{% endif %}
+{% endif %}
+{% endfor %}
+{% if class.attributes | selectattr('name', 'in', ['id', 'created_at', 'updated_at']) | list | length == class.attributes | length %}
+    pass
+{% endif %}
 
 {% endif %}
 {% endfor %}
+
 
 # Response wrapper schemas
 class PaginatedResponse(BaseSchema):
