@@ -1,0 +1,121 @@
+"""
+Base repository with common CRUD operations.
+"""
+from typing import Generic, TypeVar, Type, List, Optional, Any, Dict
+from sqlalchemy.orm import Session
+from sqlalchemy import and_, or_, desc, asc, func
+from datetime import datetime
+
+from ..core.database import Base
+
+ModelType = TypeVar("ModelType", bound=Base)
+CreateSchemaType = TypeVar("CreateSchemaType")
+UpdateSchemaType = TypeVar("UpdateSchemaType")
+
+
+class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
+    """Base repository with common database operations."""
+    
+    def __init__(self, model: Type[ModelType]):
+        """Initialize repository with model class."""
+        self.model = model
+    
+    def get(self, db: Session, id: Any) -> Optional[ModelType]:
+        """Get single record by ID."""
+        return db.query(self.model).filter(self.model.id == id).first()
+    
+    def get_multi(
+        self,
+        db: Session,
+        *,
+        skip: int = 0,
+        limit: int = 100,
+        filters: Optional[Dict[str, Any]] = None,
+        order_by: Optional[str] = None,
+        order_desc: bool = False
+    ) -> List[ModelType]:
+        """Get multiple records with filtering and pagination."""
+        query = db.query(self.model)
+        
+        # Apply filters
+        if filters:
+            for key, value in filters.items():
+                if hasattr(self.model, key) and value is not None:
+                    if isinstance(value, str):
+                        query = query.filter(getattr(self.model, key).ilike(f"%{value}%"))
+                    else:
+                        query = query.filter(getattr(self.model, key) == value)
+        
+        # Apply ordering
+        if order_by and hasattr(self.model, order_by):
+            order_column = getattr(self.model, order_by)
+            if order_desc:
+                query = query.order_by(desc(order_column))
+            else:
+                query = query.order_by(asc(order_column))
+        
+        return query.offset(skip).limit(limit).all()
+    
+    def count(self, db: Session, filters: Optional[Dict[str, Any]] = None) -> int:
+        """Count records with optional filtering."""
+        query = db.query(func.count(self.model.id))
+        
+        if filters:
+            for key, value in filters.items():
+                if hasattr(self.model, key) and value is not None:
+                    if isinstance(value, str):
+                        query = query.filter(getattr(self.model, key).ilike(f"%{value}%"))
+                    else:
+                        query = query.filter(getattr(self.model, key) == value)
+        
+        return query.scalar()
+    
+    def create(self, db: Session, *, obj_in: CreateSchemaType) -> ModelType:
+        """Create new record."""
+        obj_in_data = obj_in.dict() if hasattr(obj_in, 'dict') else obj_in
+        db_obj = self.model(**obj_in_data)
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
+        return db_obj
+    
+    def update(
+        self,
+        db: Session,
+        *,
+        db_obj: ModelType,
+        obj_in: UpdateSchemaType
+    ) -> ModelType:
+        """Update existing record."""
+        obj_data = obj_in.dict(exclude_unset=True) if hasattr(obj_in, 'dict') else obj_in
+        
+        for field, value in obj_data.items():
+            if hasattr(db_obj, field):
+                setattr(db_obj, field, value)
+        
+        # Update timestamp if model has updated_at field
+        if hasattr(db_obj, 'updated_at'):
+            db_obj.updated_at = datetime.utcnow()
+        
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
+        return db_obj
+    
+    def delete(self, db: Session, *, id: Any) -> Optional[ModelType]:
+        """Delete record by ID."""
+        obj = db.query(self.model).filter(self.model.id == id).first()
+        if obj:
+            db.delete(obj)
+            db.commit()
+        return obj
+    
+    def exists(self, db: Session, **filters) -> bool:
+        """Check if record exists with given filters."""
+        query = db.query(self.model)
+        
+        for key, value in filters.items():
+            if hasattr(self.model, key):
+                query = query.filter(getattr(self.model, key) == value)
+        
+        return query.first() is not None

@@ -1,0 +1,30 @@
+"""
+Authentication API routes (stub).
+"""
+from fastapi import APIRouter, HTTPException, status
+from pydantic import BaseModel
+
+
+router = APIRouter(prefix="/auth", tags=["Authentication"])
+
+
+class TokenRequest(BaseModel):
+    username: str
+    password: str
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+
+
+@router.post("/token", response_model=TokenResponse, summary="Get access token")
+def get_token(request: TokenRequest):
+    """
+    Get access token (stub for Keycloak integration).
+    TODO: Implement Keycloak authentication
+    """
+    return TokenResponse(
+        access_token="stub_token",
+        token_type="bearer"
+    )

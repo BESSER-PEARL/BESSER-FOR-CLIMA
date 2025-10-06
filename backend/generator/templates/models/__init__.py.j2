@@ -1,0 +1,135 @@
+"""
+Improved database models with proper relationships and constraints.
+"""
+from typing import List, Optional, Dict, Any
+from sqlalchemy import (
+    Column, Integer, String, Float, Boolean, DateTime, 
+    ForeignKey, Text, JSON, Index, UniqueConstraint
+)
+from sqlalchemy.orm import relationship, Mapped, mapped_column
+from datetime import datetime
+
+from ..core.database import Base
+
+
+class TimestampMixin:
+    """Mixin for adding created/updated timestamps."""
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, 
+        default=datetime.utcnow, 
+        nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, 
+        default=datetime.utcnow, 
+        onupdate=datetime.utcnow, 
+        nullable=False
+    )
+
+
+{% for class in classes %}
+{% if not has_polymorphic_parent(class) %}
+
+class {{ class.name }}(Base{% if has_timestamps(class) %}, TimestampMixin{% endif %}):
+    """{{ class.name }} model{% if is_polymorphic_base(class) %} using table per class inheritance{% endif %}."""
+    __tablename__ = "{{ get_table_name(class) }}"
+    
+{% for attr in class.attributes %}
+{% if attr.name == 'id' %}
+    {{ attr.name }}: Mapped[{{ get_python_type(attr.type) }}] = mapped_column(primary_key=True, index=True)
+{% elif attr.name in ['created_at', 'updated_at'] %}
+    {# Skip timestamp fields as they're in the mixin #}
+{% elif attr.name == 'type' and is_polymorphic_base(class) %}
+    {{ attr.name }}: Mapped[{{ get_python_type(attr.type) }}] = mapped_column(String(50), nullable=False, index=True)
+{% else %}
+{% set is_optional = attr.multiplicity.max == 0 or attr.multiplicity.min == 0 %}
+{% if is_optional %}
+    {{ attr.name }}: Mapped[Optional[{{ get_python_type(attr.type) }}]] = mapped_column({% if get_python_type(attr.type) == 'str' %}String({{ get_string_length(attr) }}){% elif get_python_type(attr.type) == 'float' %}Float{% elif get_python_type(attr.type) == 'int' %}Integer{% elif get_python_type(attr.type) == 'bool' %}Boolean{% elif get_python_type(attr.type) == 'datetime' %}DateTime{% elif get_python_type(attr.type) == 'dict' or get_python_type(attr.type) == 'Dict[str, Any]' or get_python_type(attr.type).startswith('Dict[') %}JSON{% else %}String(255){% endif %})
+{% else %}
+    {{ attr.name }}: Mapped[{{ get_python_type(attr.type) }}] = mapped_column({% if get_python_type(attr.type) == 'str' %}String({{ get_string_length(attr) }}), nullable=False{% elif get_python_type(attr.type) == 'float' %}Float, nullable=False{% elif get_python_type(attr.type) == 'int' %}Integer{% if attr.metadata and attr.metadata.default is defined %}, default={{ attr.metadata.default }}{% endif %}{% elif get_python_type(attr.type) == 'bool' %}Boolean{% if attr.metadata and attr.metadata.default is defined %}, default={{ attr.metadata.default }}{% endif %}{% elif get_python_type(attr.type) == 'datetime' %}DateTime, nullable=False{% if should_index(attr) %}, index=True{% endif %}{% elif get_python_type(attr.type) == 'dict' or get_python_type(attr.type) == 'Dict[str, Any]' or get_python_type(attr.type).startswith('Dict[') %}JSON, nullable=False{% else %}String(255), nullable=False{% endif %})
+{% endif %}
+{% endif %}
+{% endfor %}
+{% for end in get_foreign_key_associations(class) %}
+{% set target_class = end.type.name %}
+{% set target_table = get_table_name(end.type) %}
+    {{ end.name }}_id: Mapped[{% if end.multiplicity.min == 0 %}Optional[int]{% else %}int{% endif %}] = mapped_column(ForeignKey("{{ target_table }}.id"){% if end.multiplicity.min > 0 %}, nullable=False{% endif %}, index=True)
+{% endfor %}
+    
+{% if get_navigable_associations(class) | length > 0 %}
+    # Relationships
+{% for end in get_navigable_associations(class) %}
+{% set target_class = end.type.name %}
+{% set back_pop = get_back_populates(end) %}
+{% if end.multiplicity.max == 1 %}
+    {{ end.name }}: Mapped[{% if end.multiplicity.min == 0 %}Optional["{{ target_class }}"]{% else %}"{{ target_class }}"{% endif %}] = relationship("{{ target_class }}"{% if back_pop %}, back_populates="{{ back_pop }}"{% endif %})
+{% else %}
+    {{ end.name }}: Mapped[List["{{ target_class }}"]] = relationship(
+        "{{ target_class }}", back_populates="{{ back_pop }}"{% if end.metadata and end.metadata.cascade %}, cascade="{{ end.metadata.cascade }}"{% else %}, cascade="all, delete-orphan"{% endif %}{% if has_order_attribute(end.type) %},
+        order_by="{{ target_class }}.order"{% endif %}
+    )
+{% endif %}
+{% endfor %}
+{% endif %}
+    
+{% if is_polymorphic_base(class) %}
+    # Polymorphic configuration
+    __mapper_args__ = {
+        "polymorphic_identity": "{{ class.name.lower() }}",
+        "polymorphic_on": "type",
+    }
+{% endif %}
+    
+{% set constraints = get_table_constraints(class) %}
+{% if constraints | length > 0 or get_foreign_key_associations(class) | length > 0 %}
+    __table_args__ = (
+{% for constraint in constraints %}
+        {{ constraint }},
+{% endfor %}
+{% for end in get_foreign_key_associations(class) %}
+{% if loop.first and constraints | length == 0 %}
+        Index("idx_{{ get_table_name(class) }}_{{ end.name }}", "{{ end.name }}_id"),
+{% elif not loop.first %}
+        Index("idx_{{ get_table_name(class) }}_{{ end.name }}", "{{ end.name }}_id"),
+{% endif %}
+{% endfor %}
+    )
+{% endif %}
+{% else %}
+{% set parent_class = class.parents() | list | first %}
+
+class {{ class.name }}({{ parent_class.name }}):
+    """{{ class.name }} visualization."""
+    __tablename__ = "{{ get_table_name(class) }}"
+    
+    id: Mapped[int] = mapped_column(ForeignKey("{{ get_table_name(parent_class) }}.id"), primary_key=True)
+{% for attr in class.attributes %}
+{% if attr.name not in ['id', 'created_at', 'updated_at'] %}
+{% set is_optional = attr.multiplicity.max == 0 or attr.multiplicity.min == 0 %}
+{% if is_optional %}
+    {{ attr.name }}: Mapped[Optional[{{ get_python_type(attr.type) }}]] = mapped_column({% if get_python_type(attr.type) == 'str' %}String({{ get_string_length(attr) }}){% elif get_python_type(attr.type) == 'float' %}Float{% elif get_python_type(attr.type) == 'int' %}Integer{% elif get_python_type(attr.type) == 'bool' %}Boolean{% elif get_python_type(attr.type) == 'dict' or get_python_type(attr.type) == 'Dict[str, Any]' %}JSON{% else %}String(255){% endif %})
+{% else %}
+    {{ attr.name }}: Mapped[{{ get_python_type(attr.type) }}] = mapped_column({% if get_python_type(attr.type) == 'str' %}String({{ get_string_length(attr) }}){% if attr.metadata and attr.metadata.default is defined %}, default="{{ attr.metadata.default }}"{% endif %}{% elif get_python_type(attr.type) == 'bool' %}Boolean{% if attr.metadata and attr.metadata.default is defined %}, default={{ attr.metadata.default }}{% endif %}{% elif get_python_type(attr.type) == 'int' %}Integer{% if attr.metadata and attr.metadata.default is defined %}, default={{ attr.metadata.default }}{% endif %}{% else %}String(255){% endif %})
+{% endif %}
+{% endif %}
+{% endfor %}
+{% if get_navigable_associations(class) | length > 0 %}
+    
+    # Relationship
+{% for end in get_navigable_associations(class) %}
+{% set target_class = end.type.name %}
+{% set back_pop = get_back_populates(end) %}
+{% if end.multiplicity.max == 1 %}
+    {{ end.name }}: Mapped[{% if end.multiplicity.min == 0 %}Optional["{{ target_class }}"]{% else %}"{{ target_class }}"{% endif %}] = relationship("{{ target_class }}"{% if back_pop %}, back_populates="{{ back_pop }}"{% endif %})
+{% else %}
+    {{ end.name }}: Mapped[List["{{ target_class }}"]] = relationship(
+        "{{ target_class }}", back_populates="{{ back_pop }}", cascade="all, delete-orphan"
+    )
+{% endif %}
+{% endfor %}
+{% endif %}
+    
+    __mapper_args__ = {"polymorphic_identity": "{{ class.name.lower() }}"}
+{% endif %}
+
+{% endfor %}

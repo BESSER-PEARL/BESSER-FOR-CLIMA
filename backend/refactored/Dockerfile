@@ -18,9 +18,7 @@ COPY ./app /code/app
 COPY ./run.py /code/run.py
 COPY ./startup.py /code/startup.py
 COPY ./init_db.py /code/init_db.py
-COPY ./migrate_sections.py /code/migrate_sections.py
 COPY ./create_minimal_kpis.py /code/create_minimal_kpis.py
-COPY ./create_differdange_kpis.py /code/create_differdange_kpis.py
 
 # Create .env file with default values (will be overridden by docker-compose)
 RUN echo 'DB_HOST=postgres\nDB_PORT=5432\nDB_USER=aaron\nDB_PASSWORD=aaron\nDB_NAME=aaron\nDEBUG=true' > /code/.env
