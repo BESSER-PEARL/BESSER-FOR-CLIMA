@@ -46,7 +46,7 @@ const isAdmin = computed(() => {
 
 // Navigation handler that checks authentication before navigating
 const handleNavigation = (path) => {
-  const protectedRoutes = ['/projects', '/bot', '/datacatalogue', '/admin/kpis'];
+  const protectedRoutes = [ '/bot', '/datacatalogue', '/admin/kpis'];
   
   if (protectedRoutes.includes(path) && !auth.isAuthenticated.value) {
     // Don't navigate, just show login popup

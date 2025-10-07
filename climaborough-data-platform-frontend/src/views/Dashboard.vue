@@ -34,7 +34,15 @@ const auth = useAuth();
 
 // Define permissions based on user type
 const canCreateDashboard = computed(() => {
-  return auth.userType.value === 'admin' || (auth.userType.value === 'cityuser' && useRoute().params.city === auth.userCity.value);	
+  // Admins can always create/edit dashboards
+  if (auth.userType.value === 'admin') return true;
+  
+  // City users can only edit their own city's dashboard (case-insensitive)
+  if (auth.userType.value === 'cityuser' && auth.userCity.value) {
+    return useRoute().params.city.toLowerCase() === auth.userCity.value.toLowerCase();
+  }
+  
+  return false;
 });
 
 const canUpdateOrDeleteDashboard = (dashboard) => {

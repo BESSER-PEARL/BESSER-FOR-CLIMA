@@ -33,16 +33,40 @@ export const useAuth = () => {
 
   // Computed properties
   const userType = computed(() => {
-    if (!userInfo.value) return null;
-    if (userInfo.value.group_membership?.includes('/Administrator')) return 'admin';
-    if (userInfo.value.group_membership?.some(group => group.startsWith('/City/'))) return 'cityuser';
+    if (!userInfo.value || !userInfo.value.group_membership) return null;
+    
+    const groups = userInfo.value.group_membership;
+    
+    // Check for administrator roles
+    if (groups.includes('/Administrator') || groups.includes('/Super-Administrator')) {
+      return 'admin';
+    }
+    
+    // Check for city-specific catalog groups (e.g., /athens-catalog, /cascais-catalog)
+    if (groups.some(group => group.endsWith('-catalog'))) {
+      return 'cityuser';
+    }
+    
     return null;
   });
 
   const userCity = computed(() => {
-    if (!userInfo.value) return null;
-    const cityGroup = userInfo.value.group_membership?.find(group => group.startsWith('/City/'));
-    return cityGroup ? cityGroup.split('/').pop() : null;
+    if (!userInfo.value || !userInfo.value.group_membership) return null;
+    
+    const groups = userInfo.value.group_membership;
+    
+    // Find city catalog group (e.g., /athens-catalog -> athens)
+    const cityGroup = groups.find(group => group.endsWith('-catalog'));
+    
+    if (cityGroup) {
+      // Extract city name from group path (e.g., /athens-catalog -> athens)
+      const cityName = cityGroup.replace(/^\//, '').replace(/-catalog$/, '');
+      
+      // Capitalize first letter for proper city name
+      return cityName.charAt(0).toUpperCase() + cityName.slice(1);
+    }
+    
+    return null;
   });
 
   // Methods

@@ -194,13 +194,64 @@ export const authService = {
       return null;
     }
     
-    const cityGroup = userInfo.group_membership.find(group => group.startsWith('/City/'));
-    return cityGroup ? cityGroup.replace('/City/', '') : null;
+    // Find city catalog group (e.g., /athens-catalog -> athens)
+    const cityGroup = userInfo.group_membership.find(group => group.endsWith('-catalog'));
+    
+    if (cityGroup) {
+      // Extract city name from group path (e.g., /athens-catalog -> athens)
+      const cityName = cityGroup.replace(/^\//, '').replace(/-catalog$/, '');
+      
+      // Capitalize first letter for proper city name
+      return cityName.charAt(0).toUpperCase() + cityName.slice(1);
+    }
+    
+    return null;
   },
 
   // Check if user has admin role
   isAdmin() {
-    return this.hasRole('admin') || this.hasRole('realm-admin');
+    const userInfo = this.getUserInfo();
+    if (!userInfo || !userInfo.group_membership) {
+      return false;
+    }
+    
+    const groups = userInfo.group_membership;
+    return groups.includes('/Administrator') || groups.includes('/Super-Administrator');
+  },
+
+  // Check if user is a city user (has a city catalog group)
+  isCityUser() {
+    const userInfo = this.getUserInfo();
+    if (!userInfo || !userInfo.group_membership) {
+      return false;
+    }
+    
+    return userInfo.group_membership.some(group => group.endsWith('-catalog'));
+  },
+
+  // Get all user groups
+  getUserGroups() {
+    const userInfo = this.getUserInfo();
+    if (!userInfo || !userInfo.group_membership) {
+      return [];
+    }
+    
+    return userInfo.group_membership;
+  },
+
+  // Check if user belongs to a specific city catalog
+  belongsToCityGroup(cityName) {
+    if (!cityName) return false;
+    
+    const userInfo = this.getUserInfo();
+    if (!userInfo || !userInfo.group_membership) {
+      return false;
+    }
+    
+    const normalizedCityName = cityName.toLowerCase();
+    const cityGroup = `/${normalizedCityName}-catalog`;
+    
+    return userInfo.group_membership.includes(cityGroup);
   },
 
   // Update token

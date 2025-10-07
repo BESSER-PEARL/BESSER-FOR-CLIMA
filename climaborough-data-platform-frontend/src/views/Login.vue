@@ -62,7 +62,7 @@ const auth = useAuth();
 // Handle successful login
 const handleLoginSuccess = () => {
   loginLoading.value = false;
-  const redirectPath = sessionStorage.getItem('postLoginRedirect') || '/projects';
+  const redirectPath = sessionStorage.getItem('postLoginRedirect') || '/';
   sessionStorage.removeItem('postLoginRedirect');
   router.push(redirectPath);
 };
@@ -80,7 +80,7 @@ onMounted(() => {
   
   // Check if user is already authenticated
   if (auth.isAuthenticated.value) {
-    const redirectPath = sessionStorage.getItem('postLoginRedirect') || '/projects';
+    const redirectPath = sessionStorage.getItem('postLoginRedirect') || '/';
     sessionStorage.removeItem('postLoginRedirect');
     router.push(redirectPath);
   }
@@ -99,7 +99,7 @@ const handleLogin = () => {
   
   try {
     // Get the intended destination
-    const redirectPath = sessionStorage.getItem('postLoginRedirect') || '/projects';
+    const redirectPath = sessionStorage.getItem('postLoginRedirect') || '/';
     auth.login(redirectPath);
   } catch (error) {
     console.error('Login error:', error);

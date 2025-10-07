@@ -97,44 +97,49 @@ const chatMode = ref(false);
 const globalMonthFilter = ref('');
 const tempName = ref("");
 
-// Projects mapping for flags
+// Projects mapping for flags (lowercase keys for consistent matching)
 const projects = {
-    Differdange: "luxembourgball.png",
-    Cascais: "portugalball.png",
-    Sofia: "bulgariaball.png",
-    Maribor: "sloveniaball.png",
-    Athens: "greeceball.png",
-    Ioannina: "greeceball.png",
-    Grenoble: "franceball.png",
-    'Grenoble-Alpes': "franceball.png",
-    Torino: "italyball.png"
+    differdange: "luxembourgball.png",
+    cascais: "portugalball.png",
+    sofia: "bulgariaball.png",
+    maribor: "sloveniaball.png",
+    athens: "greeceball.png",
+    ioannina: "greeceball.png",
+    grenoble: "franceball.png",
+    'grenoble-alpes': "franceball.png",
+    torino: "italyball.png"
 };
 
-const flag = projects[city.value];
+// Computed properties for display
+const flag = computed(() => {
+    // Convert city to lowercase for matching
+    return projects[city.value?.toLowerCase()];
+});
+
+const cityDisplayName = computed(() => {
+    // Capitalize first letter of each word for display
+    if (!city.value) return '';
+    return city.value
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join('-');
+});
 
 // Computed permissions
 const canCreateDashboard = computed(() => {
-    return auth.userType.value === 'admin' || 
-           (auth.userType.value === 'cityuser' && city.value === auth.userCity.value);
+    // Admins can always create/edit dashboards
+    if (auth.userType.value === 'admin') return true;
+    
+    // City users can only edit their own city's dashboard
+    if (auth.userType.value === 'cityuser' && auth.userCity.value) {
+        // Case-insensitive comparison
+        return city.value.toLowerCase() === auth.userCity.value.toLowerCase();
+    }
+    
+    return false;
 });
 
-const canUpdateOrDeleteDashboard = (dashboard) => {
-    if (auth.userType.value === 'admin') {
-        return true;
-    } else if (auth.userType.value === 'cityuser' && dashboard?.creator === auth.userInfo.value?.preferred_username) {
-        return true;
-    }
-    return false;
-};
 
-const canReadDashboard = (dashboardCity) => {
-    if (['admin', 'solutionprovider', 'partnerorsupplier', 'citizen'].includes(auth.userType.value)) {
-        return true;
-    } else if (['cityuser', 'cityangel'].includes(auth.userType.value)) {
-        return true;
-    }
-    return false;
-};
 
 // API Helper Functions - Now using the centralized API service
 const setupApiService = async () => {
@@ -1294,10 +1299,26 @@ watch(error, (newError) => {
             <div v-if="!loading" class="dashboard-content">
                 <!-- Header -->
                 <div class="dashboard-header">
-                    <h2 class="city-title">
-                        Overview: {{ city }}
-                        <img v-if="flag" :src='"../../" + flag' class="city-flag" alt="City flag" />
-                    </h2>
+                    <div class="city-title-container">
+                        <h2 class="city-title">
+                            <img v-if="flag" :src='"../../" + flag' class="city-flag" alt="City flag" />
+                            {{ cityDisplayName }} Dashboard
+                        </h2>
+                        <div class="dashboard-meta">
+                            <span v-if="auth.userType.value" class="user-badge" :class="`badge-${auth.userType.value}`">
+                                <Icon icon="material-symbols:person" />
+                                {{ auth.userType.value === 'admin' ? 'Administrator' : 'City User' }}
+                            </span>
+                            <span v-if="dashboardData" class="dashboard-info">
+                                <Icon icon="material-symbols:dashboard" />
+                                {{ sections.length }} Section{{ sections.length !== 1 ? 's' : '' }}
+                            </span>
+                            <span v-if="selectedSection.layout.length > 0" class="dashboard-info">
+                                <Icon icon="material-symbols:widgets" />
+                                {{ selectedSection.layout.length }} Visualization{{ selectedSection.layout.length !== 1 ? 's' : '' }}
+                            </span>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Edit Mode -->
@@ -1649,12 +1670,24 @@ watch(error, (newError) => {
                                     <!-- Regular grid item -->
                                     <div v-else class="grid-item-content">
                                         <div class="grid-item-header">
-                                            <h4 class="grid-item-title">{{ item.attributes?.title || 'Untitled' }}</h4>
+                                            <div class="grid-item-type">
+                                                <Icon 
+                                                    :icon="item.chart === 'LineChart' ? 'material-symbols:show-chart' :
+                                                           item.chart === 'PieChart' ? 'material-symbols:pie-chart' :
+                                                           item.chart === 'BarChart' ? 'material-symbols:bar-chart' :
+                                                           item.chart === 'StatChart' ? 'material-symbols:speed' :
+                                                           item.chart === 'Table' ? 'material-symbols:table' :
+                                                           item.chart === 'Map' ? 'material-symbols:map' :
+                                                           'material-symbols:widgets'"
+                                                    class="widget-type-icon"
+                                                />
+                                                <span class="widget-type-label">{{ item.chart }}</span>
+                                            </div>
                                             <div class="grid-item-actions">
                                                 <Icon 
                                                     icon="material-symbols:edit" 
                                                     @click="editVisualization(item)"
-                                                    class="action-icon"
+                                                    class="action-icon edit-icon"
                                                 />
                                                 <Icon 
                                                     icon="material-symbols:delete" 
@@ -1944,17 +1977,71 @@ watch(error, (newError) => {
 .dashboard-header {
     margin-bottom: 24px;
     
-    .city-title {
+    .city-title-container {
         display: flex;
-        align-items: center;
+        flex-direction: column;
         gap: 12px;
-        font-size: 28px;
-        font-weight: 700;
-        color: #333;
         
-        .city-flag {
-            width: 32px;
-            height: 32px;
+        .city-title {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 32px;
+            font-weight: 700;
+            color: #333;
+            margin: 0;
+            
+            .city-flag {
+                width: 42px;
+                height: 42px;
+                border-radius: 50%;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            }
+        }
+        
+        .dashboard-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            
+            .user-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 6px 14px;
+                border-radius: 20px;
+                font-size: 13px;
+                font-weight: 600;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                
+                &.badge-admin {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                }
+                
+                &.badge-cityuser {
+                    background: linear-gradient(135deg, #0177a9 0%, #06b6d4 100%);
+                    color: white;
+                }
+            }
+            
+            .dashboard-info {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 6px 14px;
+                background: #f3f4f6;
+                border-radius: 20px;
+                font-size: 13px;
+                font-weight: 500;
+                color: #4b5563;
+                
+                svg {
+                    font-size: 16px;
+                    opacity: 0.7;
+                }
+            }
         }
     }
 }
@@ -2126,14 +2213,39 @@ watch(error, (newError) => {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                padding: 12px;
+                padding: 8px 12px;
                 border-bottom: 1px solid #eee;
+                background: linear-gradient(to bottom, #fafafa 0%, #f5f5f5 100%);
+                min-height: 40px;
+                
+                .grid-item-type {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    
+                    .widget-type-icon {
+                        font-size: 18px;
+                        color: #0177a9;
+                    }
+                    
+                    .widget-type-label {
+                        font-size: 12px;
+                        font-weight: 600;
+                        color: #666;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                    }
+                }
                 
                 .grid-item-title {
                     font-size: 14px;
                     font-weight: 600;
                     margin: 0;
                     color: #333;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    flex: 1;
                 }
                 
                 .grid-item-actions {
@@ -2142,11 +2254,17 @@ watch(error, (newError) => {
                     
                     .action-icon {
                         cursor: pointer;
-                        font-size: 16px;
+                        font-size: 24px;
                         color: #666;
-                        transition: color 0.2s ease;
+                        transition: all 0.2s ease;
+                        padding: 4px;
+                        border-radius: 4px;
                         
                         &:hover {
+                            background-color: rgba(0, 0, 0, 0.05);
+                        }
+                        
+                        &.edit-icon:hover {
                             color: #0177a9;
                         }
                         

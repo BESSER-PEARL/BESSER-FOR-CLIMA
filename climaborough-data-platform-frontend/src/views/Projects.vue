@@ -14,9 +14,20 @@ const isAdmin = computed(() => {
 });
 
 const isCityUser = computed(() => {
-  if (!auth.userInfo.value) return false;
-  const isCityGroup = auth.userInfo.value.group_membership?.some(group => group.startsWith('/City/'));
-  return isCityGroup && projects.some(project => project.title === auth.userCity.value);
+  if (!auth.userInfo.value || !auth.userInfo.value.group_membership) return false;
+  
+  // Check if user has any city catalog group (e.g., /athens-catalog, /cascais-catalog)
+  const hasCityGroup = auth.userInfo.value.group_membership.some(group => group.endsWith('-catalog'));
+  
+  // Check if the user's city matches any project (case-insensitive comparison)
+  const userCity = auth.userCity.value;
+  if (!userCity) return false;
+  
+  const hasMatchingProject = projects.some(project => 
+    project.title.toLowerCase() === userCity.toLowerCase()
+  );
+  
+  return hasCityGroup && hasMatchingProject;
 });
 
 const isMobile = ref(false)
