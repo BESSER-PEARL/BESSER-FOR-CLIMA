@@ -27,7 +27,35 @@ def list_kpis(
     offset: int = Query(0, ge=0, description="Number of records to skip"),
     db: Session = Depends(get_db)
 ):
-    """List KPIs with optional filtering."""
+    """
+    List KPIs with optional filtering.
+    
+    Retrieves KPIs for a specific city with optional filters for category and provider.
+    
+    **City IDs:**
+    - 1: Torino
+    - 2: Cascais
+    - 3: Differdange
+    - 4: Sofia
+    - 5: Athens
+    - 6: Grenoble
+    - 7: Maribor
+    - 8: Ioannina
+    
+    **Parameters:**
+    - `city_id` (required): The ID of the city to filter KPIs
+    - `category`: Filter by KPI category (e.g., "Environment", "Energy", "Transport")
+    - `provider`: Filter by data provider name
+    - `active_only`: If true, only return active KPIs (default: true)
+    - `limit`: Maximum number of results to return (1-1000)
+    - `offset`: Number of records to skip for pagination
+    
+    **Returns:**
+    - List of KPI objects matching the filters
+    
+    **Example:**
+    - `/kpis?city_id=8&category=Environment&active_only=true`
+    """
     if not city_id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -51,7 +79,18 @@ def get_kpi_categories(
     city_id: int = Query(..., description="City ID"),
     db: Session = Depends(get_db)
 ):
-    """Get all available KPI categories for a city."""
+    """
+    Get all available KPI categories for a city.
+    
+    Returns a list of unique KPI category names available for the specified city.
+    
+    **City IDs:**
+    - 1: Torino | 2: Cascais | 3: Differdange | 4: Sofia
+    - 5: Athens | 6: Grenoble | 7: Maribor | 8: Ioannina
+    
+    **Example:**
+    - `/kpis/categories?city_id=8` - Get categories for Ioannina
+    """
     return kpi_service.get_kpi_categories(db, city_id)
 
 
@@ -60,7 +99,21 @@ def get_kpi(
     kpi_id: int = Path(..., description="KPI ID"),
     db: Session = Depends(get_db)
 ):
-    """Get a specific KPI by ID."""
+    """
+    Get a specific KPI by its database ID.
+    
+    Retrieves detailed information about a KPI including its configuration,
+    thresholds, and metadata.
+    
+    **Parameters:**
+    - `kpi_id`: The numeric database ID of the KPI
+    
+    **Returns:**
+    - Full KPI object with all properties
+    
+    **Example:**
+    - `/kpis/123` - Get KPI with ID 123
+    """
     return kpi_service.get_kpi(db, kpi_id)
 
 
@@ -87,7 +140,31 @@ def create_kpi(
     kpi_in: KPICreate,
     db: Session = Depends(get_db)
 ):
-    """Create a new KPI."""
+    """
+    Create a new KPI.
+    
+    Creates a new Key Performance Indicator with the specified configuration.
+    
+    **Required Fields:**
+    - `id_kpi`: Unique string identifier (e.g., "TEMP_AVG_MONTHLY")
+    - `name`: Human-readable name
+    - `description`: Detailed description
+    - `category`: KPI category (e.g., "Environment", "Energy")
+    - `unit_text`: Unit of measurement (e.g., "°C", "kWh")
+    - `city_id`: ID of the city this KPI belongs to (1-8, see list above)
+    
+    **Optional Fields:**
+    - `provider`: Data provider name
+    - `calculation_frequency`: How often calculated (e.g., "daily", "monthly")
+    - `min_threshold`: Minimum threshold value
+    - `max_threshold`: Maximum threshold value
+    - `has_category_label`: Whether values have category labels
+    - `category_label_dictionary`: A dictionary mapping category labels to their meanings (e.g., {1: "Low", 2: "Medium", 3: "High"}).
+    - `is_active`: Whether the KPI is active (default: true)
+    
+    **Returns:**
+    - The created KPI object with assigned ID
+    """
     return kpi_service.create_kpi(db, kpi_in)
 
 
@@ -121,7 +198,28 @@ def get_kpi_values(
     offset: int = Query(0, ge=0, description="Number of values to skip"),
     db: Session = Depends(get_db)
 ):
-    """Get KPI values with optional time range and category filtering."""
+    """
+    Get KPI values with optional time range and category filtering.
+    
+    Retrieves historical values for a specific KPI with optional date range
+    and category label filters.
+    
+    **Parameters:**
+    - `kpi_id`: The numeric database ID of the KPI
+    - `start_date`: Start of date range (ISO 8601 format: 2024-01-01T00:00:00)
+    - `end_date`: End of date range (ISO 8601 format: 2024-12-31T23:59:59)
+    - `category_label`: Filter by category label (if KPI has category labels)
+    - `limit`: Maximum number of values to return (1-10000)
+    - `offset`: Number of values to skip for pagination
+    
+    **Returns:**
+    - List of KPI values with timestamps and values
+    
+    **Examples:**
+    - `/kpis/123/values` - All values for KPI 123
+    - `/kpis/123/values?start_date=2024-01-01&end_date=2024-01-31` - January 2024 values
+    - `/kpis/123/values?limit=100&offset=0` - First 100 values
+    """
     params = KPIValueQueryParams(
         start_date=start_date,
         end_date=end_date,
@@ -181,7 +279,46 @@ def bulk_create_kpi_values(
     bulk_in: KPIValueBulkCreate = ...,
     db: Session = Depends(get_db)
 ):
-    """Bulk add multiple values to a KPI."""
+    """
+    Bulk add multiple KPI values for a KPI.
+    
+    This endpoint allows adding multiple time-series data points for an existing KPI 
+    in a single request. Duplicate entries (same timestamp for the same KPI) will be 
+    skipped to prevent integrity errors.
+    
+    **City IDs (for reference):**
+    - 1: Torino | 2: Cascais | 3: Differdange | 4: Sofia
+    - 5: Athens | 6: Grenoble | 7: Maribor | 8: Ioannina
+    
+    **Path Parameters:**
+    - `kpi_id` (int): The database ID of the KPI to add values to
+    
+    **Request Body Fields:**
+    - `values`: List of KPIValue objects, each containing:
+      - `kpi_value` (float, required): The measured value for the KPI
+      - `timestamp` (datetime, required): ISO 8601 format (e.g., "2024-01-15T10:30:00")
+      - `category_label` (str, optional): Category label if KPI uses category labels
+    
+    **Returns:**
+    - JSON object with:
+      - `created` (int): Number of values successfully added
+      - `message` (str): Summary message
+    
+    **Errors:**
+    - 404: KPI not found
+    - 400: Invalid data format or KPI configuration mismatch
+    - 500: Internal server error
+    
+    **Example Request:**
+    ```json
+    {
+      "values": [
+        {"kpi_value": 25.5, "timestamp": "2024-01-01T00:00:00"},
+        {"kpi_value": 26.2, "timestamp": "2024-01-02T00:00:00"}
+      ]
+    }
+    ```
+    """
     # Ensure the KPI ID matches
     bulk_in.kpi_id = kpi_id
     count = kpi_value_service.bulk_create_kpi_values(db, bulk_in)
