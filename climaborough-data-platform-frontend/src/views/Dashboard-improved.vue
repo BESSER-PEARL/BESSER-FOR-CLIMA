@@ -553,10 +553,21 @@ const toggleKPIForm = async (chart) => {
 // Visualization Management
 const createVisualization = (tableId, tableName, chart, kpi = {}) => {
     let x = 0, y = 0;
+    
+    // Check if widget was added via drag and drop
     if (dragItemStop.value.chart === chart) {
+        // Use the position from drag and drop
         x = parseInt(dragItemStop.value.x) || 0;
         y = parseInt(dragItemStop.value.y) || 0;
         selectedSection.layout = selectedSection.layout.filter(item => item.i !== dropId);
+    } else {
+        // Widget added by clicking - find first available empty space
+        const position = findEmptyPosition(
+            chart === "Map" ? 7 : (chart === "FreeTextField" ? 6 : 4),
+            chart === "Map" ? 13 : (chart === "FreeTextField" ? 4 : 8)
+        );
+        x = position.x;
+        y = position.y;
     }
 
     const vis = {
@@ -598,6 +609,49 @@ const createVisualization = (tableId, tableName, chart, kpi = {}) => {
     } else {
         tableForm.value = false;
     }
+};
+
+// Find first available empty position in the grid
+const findEmptyPosition = (width, height) => {
+    const gridCols = 12;
+    const occupiedCells = new Set();
+    
+    // Mark all occupied cells
+    selectedSection.layout.forEach(item => {
+        for (let row = item.y; row < item.y + item.h; row++) {
+            for (let col = item.x; col < item.x + item.w; col++) {
+                occupiedCells.add(`${row}-${col}`);
+            }
+        }
+    });
+    
+    // Find first available position that fits the widget
+    let currentRow = 0;
+    let maxRow = Math.max(...selectedSection.layout.map(item => item.y + item.h), 0);
+    
+    while (currentRow <= maxRow + height) {
+        for (let col = 0; col <= gridCols - width; col++) {
+            // Check if this position is available
+            let fits = true;
+            for (let row = currentRow; row < currentRow + height; row++) {
+                for (let c = col; c < col + width; c++) {
+                    if (occupiedCells.has(`${row}-${c}`)) {
+                        fits = false;
+                        break;
+                    }
+                }
+                if (!fits) break;
+            }
+            
+            if (fits) {
+                return { x: col, y: currentRow };
+            }
+        }
+        currentRow++;
+    }
+    
+    // If no empty space found, place at the bottom
+    return { x: 0, y: maxRow + 1 };
 };
 
 const deleteVisualization = (item) => {
@@ -1218,81 +1272,109 @@ const exportToPDF = async () => {
 // Drag & Drop functionality
 const mouseAt = { x: -1, y: -1 };
 const dropId = 'drop';
-const dragItem = ref({ x: 0, y: 0, w: 2, h: 2, i: '' });
+const dragItem = ref({ x: 0, y: 0, w: 4, h: 4, i: '' });
 const dragItemStop = ref({});
 const gridSpaceRef = ref(null);
 const gridLayout = ref(null);
+const isDragging = ref(false);
+const currentDragChart = ref(null);
+const lastCalculatedPosition = ref({ x: -1, y: -1 });
 
 function syncMousePosition(event) {
     mouseAt.x = event.clientX;
     mouseAt.y = event.clientY;
 }
 
+// Optimized drag function with position caching
 const drag = throttle((chart) => {
+    if (!isDragging.value) {
+        isDragging.value = true;
+        currentDragChart.value = chart;
+        lastCalculatedPosition.value = { x: -1, y: -1 };
+    }
+    
     const parentRect = gridSpaceRef.value?.getBoundingClientRect();
     if (!parentRect || !gridLayout.value) return;
 
     const mouseInGrid = mouseAt.x > parentRect.left && mouseAt.x < parentRect.right &&
                        mouseAt.y > parentRect.top && mouseAt.y < parentRect.bottom;
-                       
-    if (mouseInGrid) {
-        dragItem.value.x = mouseAt.x - parentRect.left;
-        dragItem.value.y = mouseAt.y - parentRect.top;
-        
-        if (!selectedSection.layout.find(item => item.i === dropId)) {
-            selectedSection.layout.push({
-                x: 0, y: 0, w: 4, h: 4,
-                i: dropId, chart: "", id: dropId,
-                attributes: { title: "", city: city.value, tableId: "" }
-            });
+    
+    if (!mouseInGrid) {
+        // Mouse outside grid - remove placeholder
+        const index = selectedSection.layout.findIndex(item => item.i === dropId);
+        if (index !== -1) {
+            selectedSection.layout = selectedSection.layout.filter(item => item.i !== dropId);
+            lastCalculatedPosition.value = { x: -1, y: -1 };
         }
-    }
-
-    const index = selectedSection.layout.findIndex(item => item.i === dropId);
-    if (dragItemStop.value.chart) {
-        dragItemStop.value = {};
-        selectedSection.layout = selectedSection.layout.filter(item => item.i !== dropId);
         return;
     }
     
-    if (index !== -1) {
-        const item = gridLayout.value.getItem(dropId);
-        if (!item) return;
-
-        Object.assign(item.state, {
-            top: mouseAt.y - parentRect.top,
-            left: mouseAt.x - parentRect.left
+    // Mouse inside grid - ensure placeholder exists
+    let index = selectedSection.layout.findIndex(item => item.i === dropId);
+    if (index === -1) {
+        selectedSection.layout.push({
+            x: 0, y: 0, w: 4, h: 4,
+            i: dropId, chart: "", id: dropId,
+            attributes: { title: "", city: city.value, tableId: "" }
         });
-        
-        const newPos = item.calcXY(mouseAt.y - parentRect.top, mouseAt.x - parentRect.left);
-        
-        if (mouseInGrid) {
-            gridLayout.value.dragEvent('dragstart', dropId, newPos.x, newPos.y, dragItem.value.h, dragItem.value.w);
-            dragItem.value.i = String(index);
-            dragItem.value.x = selectedSection.layout[index].x;
-            dragItem.value.y = selectedSection.layout[index].y;
-        } else {
-            gridLayout.value.dragEvent('dragend', dropId, newPos.x, newPos.y, dragItem.value.h, dragItem.value.w);
-            selectedSection.layout = selectedSection.layout.filter(item => item.i !== dropId);
-        }
+        index = selectedSection.layout.length - 1;
     }
-});
+    
+    const item = gridLayout.value.getItem(dropId);
+    if (!item) return;
+
+    // Calculate relative position with offset to center placeholder under cursor
+    const relativeX = mouseAt.x - parentRect.left;
+    const relativeY = mouseAt.y - parentRect.top;
+    
+    // Offset by half the item width/height to center under cursor
+    const offsetX = relativeX - (dragItem.value.w * 30);
+    const offsetY = relativeY - (dragItem.value.h * 15);
+    
+    const newPos = item.calcXY(offsetY, offsetX);
+    
+    // Only update if position actually changed (reduces unnecessary re-renders)
+    if (newPos.x !== lastCalculatedPosition.value.x || newPos.y !== lastCalculatedPosition.value.y) {
+        lastCalculatedPosition.value = { x: newPos.x, y: newPos.y };
+        
+        gridLayout.value.dragEvent('dragstart', dropId, newPos.x, newPos.y, dragItem.value.h, dragItem.value.w);
+        dragItem.value.i = String(index);
+        dragItem.value.x = selectedSection.layout[index].x;
+        dragItem.value.y = selectedSection.layout[index].y;
+    }
+}, 100); // Increased to 100ms for better performance with many widgets
 
 function dragEnd(chart) {
     const parentRect = gridSpaceRef.value?.getBoundingClientRect();
-    if (!parentRect || !gridLayout.value) return;
+    if (!parentRect || !gridLayout.value) {
+        // Reset state even if grid not available
+        isDragging.value = false;
+        currentDragChart.value = null;
+        lastCalculatedPosition.value = { x: -1, y: -1 };
+        selectedSection.layout = selectedSection.layout.filter(item => item.i !== dropId);
+        return;
+    }
 
     const mouseInGrid = mouseAt.x > parentRect.left && mouseAt.x < parentRect.right &&
                        mouseAt.y > parentRect.top && mouseAt.y < parentRect.bottom;
 
-    if (mouseInGrid) {
+    if (mouseInGrid && dragItem.value.x >= 0 && dragItem.value.y >= 0) {
+        // Valid drop position - create the widget
         dragItemStop.value = JSON.parse(JSON.stringify(dragItem.value));
         dragItemStop.value.chart = chart;
-        toggleKPIForm(chart);
+        
         gridLayout.value.dragEvent('dragend', dropId, dragItemStop.value.x, dragItemStop.value.y, 
                                   dragItemStop.value.h, dragItemStop.value.w);
-        selectedSection.layout = selectedSection.layout.filter(item => item.i !== dropId);
+        
+        // Open form to configure the widget
+        toggleKPIForm(chart);
     }
+    
+    // Clean up state
+    selectedSection.layout = selectedSection.layout.filter(item => item.i !== dropId);
+    isDragging.value = false;
+    currentDragChart.value = null;
+    lastCalculatedPosition.value = { x: -1, y: -1 };
 }
 
 // Chat functionality
