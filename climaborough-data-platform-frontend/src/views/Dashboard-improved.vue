@@ -979,8 +979,11 @@ const duplicateSection = async (item, event) => {
         if (event) event.stopPropagation();
         sectionOperationInProgress.value = true;
         
+        // Generate a unique name for the duplicated section
+        const newName = generateUniqueSectionName(item.name);
+        
         // Duplicate section in backend
-        const duplicatedSection = await apiService.duplicateSection(item.id);
+        const duplicatedSection = await apiService.duplicateDashboardSection(item.id, newName);
         
         // Add to local state
         const newSection = {
@@ -1042,13 +1045,10 @@ const moveSectionUp = async (index) => {
             sections.value[index] = sections.value[index - 1];
             sections.value[index - 1] = temp;
             
-            // Update backend with new order
-            const sectionOrder = sections.value.map((section, idx) => ({
-                section_id: section.id,
-                order: idx
-            }));
+            // Update backend with new order - API expects array of section IDs
+            const sectionIds = sections.value.map(section => section.id);
             
-            await apiService.reorderSections(dashboardId, sectionOrder);
+            await apiService.reorderDashboardSections(dashboardData.value.id, sectionIds);
             showToast('Section moved up successfully', 'success');
         } catch (error) {
             console.error('Error moving section up:', error);
@@ -1069,13 +1069,9 @@ const moveSectionDown = async (index) => {
             sections.value[index] = sections.value[index + 1];
             sections.value[index + 1] = temp;
             
-            // Update backend with new order
-            const sectionOrder = sections.value.map((section, idx) => ({
-                section_id: section.id,
-                order: idx
-            }));
+            const sectionIds = sections.value.map(section => section.id);
             
-            await apiService.reorderSections(dashboardId, sectionOrder);
+            await apiService.reorderDashboardSections(dashboardData.value.id, sectionIds);
             showToast('Section moved down successfully', 'success');
         } catch (error) {
             console.error('Error moving section down:', error);
@@ -2534,15 +2530,15 @@ watch(error, (newError) => {
         
         .section-actions {
             display: flex;
-            gap: 4px;
+            gap: 6px;
             opacity: 0;
             transition: opacity 0.2s ease;
             flex-shrink: 0;
             
             .action-icon {
                 cursor: pointer;
-                font-size: 16px;
-                padding: 4px;
+                font-size: 30px;
+                padding: 6px;
                 border-radius: 4px;
                 transition: all 0.2s ease;
                 
@@ -2576,8 +2572,8 @@ watch(error, (newError) => {
                 }
                 
                 &:not(.disabled):hover {
-                    background-color: rgba(0, 0, 0, 0.04);
-                    transform: scale(1.1);
+                    background-color: rgba(0, 0, 0, 0.08);
+                    transform: scale(1.15);
                 }
             }
         }

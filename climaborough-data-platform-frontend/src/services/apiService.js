@@ -271,7 +271,7 @@ class ApiService {
     }
 
     async duplicateDashboardSection(sectionId, newName) {
-        return this.post(`/dashboards/sections/${sectionId}/duplicate`, { new_name: newName });
+        return this.post(`/dashboards/sections/${sectionId}/duplicate?new_name=${encodeURIComponent(newName)}`);
     }
 
     // VISUALIZATION API METHODS
