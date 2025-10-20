@@ -20,6 +20,6 @@ climaborough-data-platform-frontend/src/views/HomeView copy.vue
 # Clima Solutions Bot
 climasolutionsbot/config.ini
 *.log
-backend/refactored/venv/
+backend/src/venv/
 
 savedold/

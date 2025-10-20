@@ -1,6 +1,6 @@
 /**
  * Enhanced API service for the Climaborough dashboard
- * Provides a clean interface to the refactored backend API
+ * Provides a clean interface to the backend API
  */
 
 class ApiService {

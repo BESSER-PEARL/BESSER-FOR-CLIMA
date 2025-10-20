@@ -8,7 +8,7 @@ The backend follows a **layered architecture** with clear separation of concerns
 
 ```
 backend/
-├── refactored/              # Main application (clean architecture)
+├── src/              # Main application (clean architecture)
 │   ├── app/
 │   │   ├── api/            # FastAPI routes (controllers)
 │   │   ├── core/           # Configuration & utilities
@@ -23,10 +23,6 @@ backend/
 ├── Docker/                  # Docker configurations
 └── CLEANUP_SUMMARY.md       # Backend cleanup documentation
 ```
-
-📖 **See [ARCHITECTURE.md](refactored/ARCHITECTURE.md) for detailed documentation**
-
-📊 **See [architecture.plantuml](refactored/architecture.plantuml) for visual diagram**
 
 ## Technology Stack
 
@@ -60,7 +56,7 @@ backend/
 ### 1. Setup Virtual Environment
 
 ```bash
-cd backend/refactored
+cd backend/src
 python -m venv venv
 
 # Windows
@@ -78,7 +74,7 @@ pip install -r requirements.txt
 
 ### 3. Configure Environment
 
-Create `.env` file in `backend/refactored/`:
+Create `.env` file in `backend/src/`:
 
 ```env
 # Database
@@ -173,7 +169,7 @@ DELETE /visualizations/{visualization_id}     - Delete visualization
 ### Option 1: Full Stack (PostgreSQL + Backend)
 
 ```bash
-cd backend/refactored
+cd backend/src
 docker-compose up -d
 ```
 
@@ -185,7 +181,7 @@ Includes:
 ### Option 2: Backend Only
 
 ```bash
-cd backend/refactored
+cd backend/src
 docker build -t climaborough-backend .
 docker run -p 8000:8000 \
   -e DATABASE_URL=postgresql://user:pass@host:5432/db \
@@ -328,7 +324,7 @@ lsof -i :8000                    # Linux/Mac
 ### Import Errors
 ```bash
 # Ensure you're in the right directory
-cd backend/refactored
+cd backend/src
 
 # Reinstall dependencies
 pip install -r requirements.txt --force-reinstall
@@ -343,20 +339,7 @@ pip install -r requirements.txt --force-reinstall
 5. Update API documentation
 6. Follow REST conventions
 
-## Documentation
-
-- **Architecture**: [ARCHITECTURE.md](refactored/ARCHITECTURE.md)
-- **Cleanup Summary**: [CLEANUP_SUMMARY.md](CLEANUP_SUMMARY.md)
-- **PlantUML Diagram**: [architecture.plantuml](refactored/architecture.plantuml)
 
 ## License
 
 See main project LICENSE file.
-
-## Support
-
-For issues or questions:
-1. Check [ARCHITECTURE.md](refactored/ARCHITECTURE.md)
-2. Review [CLEANUP_SUMMARY.md](CLEANUP_SUMMARY.md)
-3. Check API docs at http://localhost:8000/docs
-4. Open an issue on GitHub

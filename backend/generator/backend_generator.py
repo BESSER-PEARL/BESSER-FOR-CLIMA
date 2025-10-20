@@ -1,5 +1,5 @@
 """
-Generator for creating refactored backend architecture from BUML models.
+Generator for creating backend architecture from BUML models.
 This generator creates SQLAlchemy models, Pydantic schemas, and FastAPI routers.
 """
 import os
@@ -27,8 +27,8 @@ except ImportError:
 from jinja2 import Environment, FileSystemLoader
 
 
-class RefactoredBackendGenerator:
-    """Generator for creating a complete refactored backend from BUML models."""
+class BackendGenerator:
+    """Generator for creating a complete backend from BUML models."""
     
     # Type mappings for SQLAlchemy
     SQLALCHEMY_TYPE_MAP = {
@@ -404,13 +404,13 @@ class RefactoredBackendGenerator:
             raise
 
 
-def generate_refactored_backend(model: DomainModel, output_dir: str = "refactored/generated"):
+def generate_backend(model: DomainModel, output_dir: str = "src/generated"):
     """
-    Convenience function to generate refactored backend.
+    Convenience function to generate backend.
     
     Args:
         model: The BUML DomainModel
         output_dir: Output directory for generated files
     """
-    generator = RefactoredBackendGenerator(model, output_dir)
+    generator = BackendGenerator(model, output_dir)
     generator.generate()

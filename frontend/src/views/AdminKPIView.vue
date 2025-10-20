@@ -116,7 +116,7 @@ const fetchKpiValues = async (kpi) => {
   selectedKpi.value = kpi;
   
   try {
-    // Use the new refactored API endpoint - kpi.id is the database ID
+    // Use the new API endpoint - kpi.id is the database ID
     const response = await fetch(`http://localhost:8000/kpis/${kpi.id}/values`);
     
     if (!response.ok) {

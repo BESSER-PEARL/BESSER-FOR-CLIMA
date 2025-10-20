@@ -9,7 +9,7 @@ import os
 sys.path.insert(0, os.path.dirname(__file__))
 
 from buml_model import buml_model
-from generator.refactored_generator import RefactoredBackendGenerator
+from generator.generator import BackendGenerator
 
 
 def main():
@@ -29,8 +29,8 @@ def main():
     # Step 2: Generate the backend
     print("Step 2: Generating Complete Backend...")
     print("-" * 70)
-    output_dir = "refactored/generated/"
-    generator = RefactoredBackendGenerator(model, output_dir)
+    output_dir = "src/generated/"
+    generator = BackendGenerator(model, output_dir)
     generator.generate()
     print()
     
@@ -50,12 +50,12 @@ def main():
     print("  ✓ 6 visualization types + 2 map data types")
     print()
     print("Next steps:")
-    print("  1. Review generated code in refactored/generated_from_plantuml/app/")
-    print("  2. Compare with manual implementation: refactored/app/")
+    print("  1. Review generated code in src/generated_from_plantuml/app/")
+    print("  2. Compare with manual implementation: src/app/")
     print("  3. Test the generated backend")
     print()
     print("To run the generated app:")
-    print("  cd refactored/generated_from_plantuml")
+    print("  cd src/generated_from_plantuml")
     print("  python -m uvicorn app.main:app --reload")
     print()
 

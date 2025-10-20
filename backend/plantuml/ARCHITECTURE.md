@@ -1,7 +1,7 @@
-# Refactored Backend Architecture
+#  Backend Architecture
 
 ## Overview
-The refactored backend follows a clean, layered architecture with proper separation of concerns:
+The backend follows a clean, layered architecture with proper separation of concerns:
 
 ```
 app/

@@ -1,5 +1,5 @@
 """
-Run the refactored Climaborough API.
+Run the Climaborough API.
 """
 import uvicorn
 from app.main import app

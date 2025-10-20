@@ -1,4 +1,4 @@
-# Climaborough API - Refactored Backend
+# Climaborough API - Backend Requirements
 
 ## Core Dependencies
 fastapi>=0.104.0

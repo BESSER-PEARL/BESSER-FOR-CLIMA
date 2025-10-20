@@ -1,11 +1,11 @@
-@startuml Climaborough_Refactored_Architecture
+@startuml Climaborough_Architecture
 
 skinparam classAttributeIconSize 0
 skinparam linetype ortho
 skinparam backgroundColor white
 skinparam shadowing false
 
-title Climaborough Data Platform - Refactored Backend Architecture
+title Climaborough Data Platform - Backend Architecture
 
 ' ========================================
 ' DATABASE MODELS
