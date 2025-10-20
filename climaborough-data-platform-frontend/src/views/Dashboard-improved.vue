@@ -21,6 +21,9 @@ import Table from '../components/Table.vue'
 import MapComponent from '../components/Map.vue'
 import MonthFilter from '../components/MonthFilter.vue'
 import DashboardChat from '../components/DashboardChat.vue'
+import FreeTextField from '../components/FreeTextField.vue'
+import Timeline from '../components/Timeline.vue'
+import TimelineForm from '../components/TimelineForm.vue'
 import { uid } from "uid"
 
 import { throttle } from '@vexip-ui/utils'
@@ -37,7 +40,9 @@ const componentMap = {
     'BarChart': BarChart,
     'StatChart': StatChart,
     'Table': Table,
-    'Map': MapComponent
+    'Map': MapComponent,
+    'FreeTextField': FreeTextField,
+    'Timeline': Timeline
 };
 
 // Utility functions
@@ -87,10 +92,14 @@ const pieChartBool = ref(false);
 const barChartBool = ref(false);
 const statChartBool = ref(false);
 const tableBool = ref(false);
+const freeTextForm = ref(false);
+const showTimelineForm = ref(false);
 
 // Current item for editing
 const currentItem = ref({});
 const currentSelectedChart = ref("");
+const editingTimeline = ref(null);
+const currentTimelineKPIs = ref([]);
 
 // Chat and filter states
 const chatMode = ref(false);
@@ -324,6 +333,11 @@ const loadVisualizations = async () => {
                     vis.attributes.color = item.color || '#0177a9';
                 } else if (item.type === 'statchart') {
                     vis.attributes.suffix = item.unit || '';
+                } else if (item.type === 'freetextfield') {
+                    vis.attributes.text = item.text || '';
+                } else if (item.type === 'timeline') {
+                    vis.attributes.description = item.description || '';
+                    vis.attributes.events = item.events || [];
                 }
 
                 // Find the section for this visualization
@@ -434,6 +448,12 @@ const saveDashboard = async () => {
                         visData.color = item.attributes.color || '#0177a9';
                     } else if (item.chart === "StatChart") {
                         visData.unit = item.attributes.suffix || '';
+                    } else if (item.chart === "FreeTextField") {
+                        visData.text = item.attributes.text || '';
+                        // console.log('Saving FreeTextField with text:', item.attributes.text);
+                    } else if (item.chart === "Timeline") {
+                        visData.description = item.attributes.description || '';
+                        visData.events = item.attributes.events || [];
                     }
 
                     const savePromise = apiService.createVisualization(dashboardData.value.id, visData);
@@ -513,6 +533,19 @@ const toggleKPIForm = async (chart) => {
         }
         return;
     }
+    if (chart === "FreeTextField") {
+        // FreeTextField doesn't need KPI, create it directly
+        createVisualization(null, 'Free Text', 'FreeTextField', {});
+        return;
+    }
+    if (chart === "Timeline") {
+        // Timeline doesn't need KPI at creation, show form with available KPIs
+        const kpis = await loadKPIs();
+        currentTimelineKPIs.value = kpis;
+        showTimelineForm.value = true;
+        editingTimeline.value = null;
+        return;
+    }
     tableForm.value = !tableForm.value;
     currentSelectedChart.value = chart;
 };
@@ -520,7 +553,6 @@ const toggleKPIForm = async (chart) => {
 // Visualization Management
 const createVisualization = (tableId, tableName, chart, kpi = {}) => {
     let x = 0, y = 0;
-    
     if (dragItemStop.value.chart === chart) {
         x = parseInt(dragItemStop.value.x) || 0;
         y = parseInt(dragItemStop.value.y) || 0;
@@ -530,8 +562,8 @@ const createVisualization = (tableId, tableName, chart, kpi = {}) => {
     const vis = {
         x: x,
         y: y,
-        w: chart === "Map" ? 7 : 4,
-        h: chart === "Map" ? 13 : 8,
+        w: chart === "Map" ? 7 : (chart === "FreeTextField" ? 6 : 4),
+        h: chart === "Map" ? 13 : (chart === "FreeTextField" ? 4 : 8),
         i: uid(),
         chart: chart,
         attributes: {
@@ -539,7 +571,9 @@ const createVisualization = (tableId, tableName, chart, kpi = {}) => {
             tableId: tableId,
             title: tableName
         },
-        id: uid()
+        id: uid(),
+        section_id: selectedSection.id,
+        dashboard_id: dashboardData.value?.id
     };
 
     // Add chart-specific attributes
@@ -551,10 +585,19 @@ const createVisualization = (tableId, tableName, chart, kpi = {}) => {
     } else if (chart === "StatChart") {
         vis.attributes.suffix = kpi.unit_text || '';
         vis.attributes.target = kpi.max_threshold || 0;
+    } else if (chart === "FreeTextField") {
+        vis.attributes.text = '';
+    } else if (chart === "Timeline") {
+        vis.attributes.description = '';
+        vis.attributes.events = [];
     }
 
     selectedSection.layout.push(vis);
-    tableForm.value = false;
+    if (chart === "FreeTextField") {
+        freeTextForm.value = false;
+    } else {
+        tableForm.value = false;
+    }
 };
 
 const deleteVisualization = (item) => {
@@ -562,7 +605,7 @@ const deleteVisualization = (item) => {
 };
 
 // Visualization Edit Forms
-const editVisualization = (item) => {
+const editVisualization = async (item) => {
     currentItem.value = item;
     
     switch (item.chart) {
@@ -580,6 +623,12 @@ const editVisualization = (item) => {
             break;
         case "Table":
             tableBool.value = true;
+            break;
+        case "Timeline":
+            const kpis = await loadKPIs();
+            currentTimelineKPIs.value = kpis;
+            editingTimeline.value = item;
+            showTimelineForm.value = true;
             break;
     }
 };
@@ -608,6 +657,34 @@ const closeAllForms = () => {
     barChartBool.value = false;
     statChartBool.value = false;
     tableBool.value = false;
+    freeTextForm.value = false;
+    showTimelineForm.value = false;
+};
+
+// Timeline Management
+const saveTimelineData = (timelineData) => {
+    if (editingTimeline.value) {
+        // Update existing timeline
+        const index = selectedSection.layout.findIndex(obj => obj.i === editingTimeline.value.i);
+        if (index !== -1) {
+            selectedSection.layout[index].attributes.description = timelineData.description;
+            selectedSection.layout[index].attributes.events = timelineData.events;
+        }
+    } else {
+        // Create new timeline
+        createVisualization(null, 'Project Timeline', 'Timeline', {});
+        const newTimeline = selectedSection.layout[selectedSection.layout.length - 1];
+        newTimeline.attributes.description = timelineData.description;
+        newTimeline.attributes.events = timelineData.events;
+    }
+    
+    showTimelineForm.value = false;
+    editingTimeline.value = null;
+};
+
+const closeTimelineForm = () => {
+    showTimelineForm.value = false;
+    editingTimeline.value = null;
 };
 
 // Enhanced Section Management
@@ -1632,6 +1709,28 @@ watch(error, (newError) => {
                                         <Icon icon="material-symbols:map" class="widget-icon" />
                                         <span>Map</span>
                                     </div>
+                                    <div 
+                                        class="widget-item"
+                                        draggable="true"
+                                        unselectable="on"
+                                        @drag="drag('FreeTextField')"
+                                        @dragend="dragEnd('FreeTextField')"
+                                        @click="toggleKPIForm('FreeTextField')"
+                                    >
+                                        <Icon icon="material-symbols:notes" class="widget-icon" />
+                                        <span>Text Field</span>
+                                    </div>
+                                    <div 
+                                        class="widget-item"
+                                        draggable="true"
+                                        unselectable="on"
+                                        @drag="drag('Timeline')"
+                                        @dragend="dragEnd('Timeline')"
+                                        @click="toggleKPIForm('Timeline')"
+                                    >
+                                        <Icon icon="material-symbols:timeline" class="widget-icon" />
+                                        <span>Timeline</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1678,6 +1777,8 @@ watch(error, (newError) => {
                                                            item.chart === 'StatChart' ? 'material-symbols:speed' :
                                                            item.chart === 'Table' ? 'material-symbols:table' :
                                                            item.chart === 'Map' ? 'material-symbols:map' :
+                                                           item.chart === 'Timeline' ? 'material-symbols:timeline' :
+                                                           item.chart === 'FreeTextField' ? 'material-symbols:notes' :
                                                            'material-symbols:widgets'"
                                                     class="widget-type-icon"
                                                 />
@@ -1701,8 +1802,16 @@ watch(error, (newError) => {
                                             <component 
                                                 v-if="item.chart && componentMap[item.chart]"
                                                 :is="componentMap[item.chart]"
-                                                v-bind="item.attributes"
+                                                v-bind="item.chart === 'FreeTextField' ? {
+                                                    canEdit: true,
+                                                    attributes: item.attributes
+                                                } : item.chart === 'Timeline' ? {
+                                                    title: item.attributes.title,
+                                                    attributes: item.attributes,
+                                                    isEditMode: true
+                                                } : item.attributes"
                                                 :month-filter="globalMonthFilter"
+                                                @edit="editVisualization(item)"
                                             />
                                         </div>
                                     </div>
@@ -1752,6 +1861,15 @@ watch(error, (newError) => {
                             @updateChart="updateChart"
                             :city="city"
                             v-bind="currentItem.attributes"
+                        />
+                        <TimelineForm 
+                            v-if="showTimelineForm" 
+                            :show="showTimelineForm"
+                            :timeline="editingTimeline?.attributes || { description: '', events: [] }"
+                            :availableKPIs="currentTimelineKPIs"
+                            :isEdit="!!editingTimeline"
+                            @close="closeTimelineForm"
+                            @save="saveTimelineData"
                         />
                     </div>
                 </div>
@@ -1850,7 +1968,14 @@ watch(error, (newError) => {
                                     <div class="static-item-content">
                                         <component 
                                             :is="componentMap[item.chart]"
-                                            v-bind="item.attributes"
+                                            v-bind="item.chart === 'FreeTextField' ? {
+                                                canEdit: false,
+                                                attributes: item.attributes
+                                            } : item.chart === 'Timeline' ? {
+                                                title: item.attributes.title,
+                                                attributes: item.attributes,
+                                                isEditMode: false
+                                            } : item.attributes"
                                             :month-filter="globalMonthFilter"
                                         />
                                     </div>

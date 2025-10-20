@@ -267,6 +267,58 @@ class Map(Visualization):
     __mapper_args__ = {"polymorphic_identity": "map"}
 
 
+class FreeTextField(Visualization):
+    """Free text field visualization for descriptions and notes."""
+    __tablename__ = "free_text_fields"
+    
+    id: Mapped[int] = mapped_column(ForeignKey("visualizations.id"), primary_key=True)
+    text: Mapped[Optional[str]] = mapped_column(Text)
+    
+    __mapper_args__ = {"polymorphic_identity": "freetextfield"}
+
+
+class Timeline(Visualization):
+    """Timeline visualization for solution implementation phases."""
+    __tablename__ = "timelines"
+    
+    id: Mapped[int] = mapped_column(ForeignKey("visualizations.id"), primary_key=True)
+    description: Mapped[Optional[str]] = mapped_column(Text)
+    
+    # Relationship to timeline events
+    events: Mapped[List["TimelineEvent"]] = relationship(
+        "TimelineEvent", back_populates="timeline", cascade="all, delete-orphan",
+        order_by="TimelineEvent.start_date"
+    )
+    
+    __mapper_args__ = {"polymorphic_identity": "timeline"}
+
+
+class TimelineEvent(Base, TimestampMixin):
+    """Timeline event model for tracking solution phases."""
+    __tablename__ = "timeline_events"
+    
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    timeline_id: Mapped[int] = mapped_column(ForeignKey("timelines.id"), nullable=False, index=True)
+    title: Mapped[str] = mapped_column(String(200), nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(Text)
+    phase: Mapped[str] = mapped_column(String(50), nullable=False)  # planning, implementation, scale-up, completed, discontinued
+    start_date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    end_date: Mapped[Optional[datetime]] = mapped_column(DateTime)
+    is_ongoing: Mapped[bool] = mapped_column(Boolean, default=False)
+    status: Mapped[str] = mapped_column(String(50), default="active")  # active, completed, failed
+    kpi_references: Mapped[Optional[str]] = mapped_column(Text)  # JSON array of KPI IDs
+    failure_reason: Mapped[Optional[str]] = mapped_column(Text)  # Explanation if discontinued
+    color: Mapped[str] = mapped_column(String(50), default="#0177a9")
+    
+    # Relationship
+    timeline: Mapped["Timeline"] = relationship("Timeline", back_populates="events")
+    
+    __table_args__ = (
+        Index("idx_timeline_event_timeline", "timeline_id"),
+        Index("idx_timeline_event_dates", "start_date", "end_date"),
+    )
+
+
 class TableColumn(Base):
     """Table column configuration."""
     __tablename__ = "table_columns"

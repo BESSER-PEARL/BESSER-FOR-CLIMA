@@ -10,7 +10,7 @@ from .base import BaseRepository
 from ..models import (
     City, Dashboard, DashboardSection, KPI, KPIValue, Visualization,
     LineChart, BarChart, PieChart, StatChart, Table, Map,
-    TableColumn, MapData, WMS, GeoJson
+    TableColumn, MapData, WMS, GeoJson, FreeTextField, Timeline, TimelineEvent
 )
 from ..schemas import (
     CityCreate, CityUpdate, DashboardCreate, DashboardUpdate,
@@ -275,6 +275,51 @@ class VisualizationRepository(BaseRepository[Visualization, VisualizationCreate,
     
     def __init__(self):
         super().__init__(Visualization)
+        # Map visualization types to their model classes
+        self.type_map = {
+            'linechart': LineChart,
+            'barchart': BarChart,
+            'piechart': PieChart,
+            'statchart': StatChart,
+            'table': Table,
+            'map': Map,
+            'freetextfield': FreeTextField,
+            'timeline': Timeline
+        }
+    
+    def create(self, db: Session, *, obj_in: VisualizationCreate) -> Visualization:
+        """Create new visualization with proper polymorphic type."""
+        obj_in_data = obj_in.dict()
+        vis_type = obj_in_data.get('type', 'linechart')
+        
+        # Get the appropriate model class based on type
+        model_class = self.type_map.get(vis_type, Visualization)
+        
+        # Special handling for Timeline with events
+        if vis_type == 'timeline':
+            # Extract events data before creating the Timeline
+            events_data = obj_in_data.pop('events', [])
+            
+            # Create Timeline instance
+            db_obj = model_class(**obj_in_data)
+            db.add(db_obj)
+            db.flush()  # Get the timeline ID without committing
+            
+            # Create TimelineEvent instances
+            for event_data in events_data:
+                event = TimelineEvent(timeline_id=db_obj.id, **event_data)
+                db.add(event)
+            
+            db.commit()
+            db.refresh(db_obj)
+            return db_obj
+        
+        # For other visualization types, use standard creation
+        db_obj = model_class(**obj_in_data)
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
+        return db_obj
     
     def get_by_dashboard(self, db: Session, *, dashboard_id: int) -> List[Visualization]:
         """Get all visualizations for a dashboard."""

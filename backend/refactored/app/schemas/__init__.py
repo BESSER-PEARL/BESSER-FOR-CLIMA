@@ -24,6 +24,8 @@ class VisualizationType(str, Enum):
     STATCHART = "statchart"
     TABLE = "table"
     MAP = "map"
+    FREETEXTFIELD = "freetextfield"
+    TIMELINE = "timeline"
 
 
 class KPICategory(str, Enum):
@@ -336,6 +338,51 @@ class Map(Visualization):
     center_lon: Optional[float]
 
 
+class FreeTextFieldCreate(VisualizationCreate):
+    type: Literal[VisualizationType.FREETEXTFIELD] = VisualizationType.FREETEXTFIELD
+    text: Optional[str] = None
+
+
+class FreeTextField(Visualization):
+    text: Optional[str]
+
+
+# Timeline schemas
+class TimelineEventBase(BaseSchema):
+    title: str = Field(..., min_length=1, max_length=200)
+    description: Optional[str] = None
+    phase: str = Field(..., min_length=1, max_length=50)
+    start_date: datetime
+    end_date: Optional[datetime] = None
+    is_ongoing: bool = False
+    status: str = Field("active", pattern=r'^(active|completed|failed)$')
+    kpi_references: Optional[str] = None  # JSON array of KPI IDs
+    failure_reason: Optional[str] = None
+    color: str = Field("#0177a9", pattern=r'^#[0-9A-Fa-f]{6}$')
+
+
+class TimelineEventCreate(TimelineEventBase):
+    pass
+
+
+class TimelineEvent(TimelineEventBase):
+    id: int
+    timeline_id: int
+    created_at: datetime
+    updated_at: datetime
+
+
+class TimelineCreate(VisualizationCreate):
+    type: Literal[VisualizationType.TIMELINE] = VisualizationType.TIMELINE
+    description: Optional[str] = None
+    events: List[TimelineEventCreate] = Field(default_factory=list)
+
+
+class Timeline(Visualization):
+    description: Optional[str]
+    events: List[TimelineEvent]
+
+
 # Map Data schemas
 class MapDataBase(BaseSchema):
     title: str = Field(..., min_length=1, max_length=200)
@@ -443,3 +490,30 @@ class ErrorResponse(BaseSchema):
     error: str
     message: str
     details: Optional[Dict[str, Any]] = None
+
+
+# Union type for all visualization creation schemas
+AnyVisualizationCreate = Union[
+    LineChartCreate,
+    BarChartCreate,
+    PieChartCreate,
+    StatChartCreate,
+    TableCreate,
+    MapCreate,
+    FreeTextFieldCreate,
+    TimelineCreate,
+    VisualizationCreate  # Fallback for generic visualizations
+]
+
+# Union type for all visualization response schemas
+AnyVisualization = Union[
+    LineChart,
+    BarChart,
+    PieChart,
+    StatChart,
+    Table,
+    Map,
+    FreeTextField,
+    Timeline,
+    Visualization  # Fallback for generic visualizations
+]

@@ -125,7 +125,7 @@ async function getItems() {
       return;
     }
     
-    console.log('LineChart getItems - localMonthFilter:', localMonthFilter.value);
+    // console.log('LineChart getItems - localMonthFilter:', localMonthFilter.value);
     
     // Use server-side filtering if month filter is active
     const data = localMonthFilter.value 

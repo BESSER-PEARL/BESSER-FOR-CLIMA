@@ -171,7 +171,21 @@ class ApiService {
             return this.getKPIValues(kpiId, additionalParams);
         }
 
-        // Convert "YYYY-MM" to start_date and end_date
+        // Check if it's a date range (format: start|end)
+        if (monthFilter.includes('|')) {
+            const [start, end] = monthFilter.split('|');
+            const startDate = new Date(start);
+            const endDate = new Date(end);
+            endDate.setHours(23, 59, 59, 999); // End of day
+
+            return this.get(`/kpis/${kpiId}/values`, {
+                start_date: startDate.toISOString(),
+                end_date: endDate.toISOString(),
+                ...additionalParams
+            });
+        }
+
+        // Otherwise treat as "YYYY-MM" month format
         const [year, month] = monthFilter.split('-').map(Number);
         const startDate = new Date(year, month - 1, 1); // month is 0-indexed
         const endDate = new Date(year, month, 0, 23, 59, 59); // Last day of month
@@ -317,7 +331,9 @@ class ApiService {
             'piechart': 'PieChart',
             'statchart': 'StatChart',
             'table': 'Table',
-            'map': 'Map'
+            'map': 'Map',
+            'freetextfield': 'FreeTextField',
+            'timeline': 'Timeline'
         };
         return typeMap[newType] || 'LineChart';
     }
@@ -330,7 +346,9 @@ class ApiService {
             'PieChart': 'piechart', 
             'StatChart': 'statchart',
             'Table': 'table',
-            'Map': 'map'
+            'Map': 'map',
+            'FreeTextField': 'freetextfield',
+            'Timeline': 'timeline'
         };
         return typeMap[chartType] || 'linechart';
     }

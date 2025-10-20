@@ -10,7 +10,8 @@ from ..schemas import (
     Dashboard, DashboardCreate, DashboardUpdate, DashboardWithSections,
     DashboardSection, DashboardSectionCreate, DashboardSectionUpdate,
     Visualization, VisualizationCreate, VisualizationUpdate,
-    LineChart, BarChart, PieChart, StatChart, Table, Map
+    LineChart, BarChart, PieChart, StatChart, Table, Map,
+    AnyVisualizationCreate, AnyVisualization
 )
 from ..services import dashboard_service, visualization_service, section_service
 
@@ -157,7 +158,7 @@ def delete_dashboard(
 
 
 # Visualization routes
-@router.get("/{dashboard_id}/visualizations", response_model=List[Visualization], summary="Get dashboard visualizations")
+@router.get("/{dashboard_id}/visualizations", response_model=List[AnyVisualization], summary="Get dashboard visualizations")
 def get_dashboard_visualizations(
     dashboard_id: int = Path(..., description="Dashboard ID"),
     db: Session = Depends(get_db)
@@ -166,10 +167,10 @@ def get_dashboard_visualizations(
     return visualization_service.list_visualizations_by_dashboard(db, dashboard_id)
 
 
-@router.post("/{dashboard_id}/visualizations", response_model=Visualization, status_code=status.HTTP_201_CREATED, summary="Create visualization")
+@router.post("/{dashboard_id}/visualizations", response_model=AnyVisualization, status_code=status.HTTP_201_CREATED, summary="Create visualization")
 def create_visualization(
     dashboard_id: int = Path(..., description="Dashboard ID"),
-    vis_in: VisualizationCreate = ...,
+    vis_in: AnyVisualizationCreate = ...,
     db: Session = Depends(get_db)
 ):
     """Create a new visualization for a dashboard."""
@@ -193,7 +194,7 @@ def delete_multiple_visualizations(
     return {"deleted": count, "message": f"Successfully deleted {count} visualizations"}
 
 
-@visualization_router.get("/{vis_id}", response_model=Visualization, summary="Get visualization")
+@visualization_router.get("/{vis_id}", response_model=AnyVisualization, summary="Get visualization")
 def get_visualization(
     vis_id: int = Path(..., description="Visualization ID"),
     db: Session = Depends(get_db)
@@ -202,7 +203,7 @@ def get_visualization(
     return visualization_service.get_visualization(db, vis_id)
 
 
-@visualization_router.put("/{vis_id}", response_model=Visualization, summary="Update visualization")
+@visualization_router.put("/{vis_id}", response_model=AnyVisualization, summary="Update visualization")
 def update_visualization(
     vis_id: int = Path(..., description="Visualization ID"),
     vis_in: VisualizationUpdate = ...,
@@ -212,7 +213,7 @@ def update_visualization(
     return visualization_service.update_visualization(db, vis_id, vis_in)
 
 
-@visualization_router.delete("/{vis_id}", response_model=Visualization, summary="Delete visualization")
+@visualization_router.delete("/{vis_id}", response_model=AnyVisualization, summary="Delete visualization")
 def delete_visualization(
     vis_id: int = Path(..., description="Visualization ID"),
     db: Session = Depends(get_db)
