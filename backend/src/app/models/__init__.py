@@ -121,6 +121,7 @@ class KPI(Base, TimestampMixin):
     has_category_label: Mapped[bool] = mapped_column(Boolean, default=False)
     category_label_dictionary: Mapped[Optional[Dict[int, str]]] = mapped_column(JSON)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    is_processed: Mapped[bool] = mapped_column(Boolean, default=True)
     city_id: Mapped[int] = mapped_column(ForeignKey("cities.id"), nullable=False, index=True)
     
     # Relationships

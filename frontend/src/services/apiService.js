@@ -1,27 +1,53 @@
 /**
  * Enhanced API service for the Climaborough dashboard
- * Provides a clean interface to the backend API
+ * Provides a clean interface to the backend API with Keycloak authentication
  */
 
 class ApiService {
     constructor(baseUrl = 'http://localhost:8000') {
         this.baseUrl = baseUrl;
         this.authToken = null;
+        this.keycloak = null; // Will be set by the app
     }
 
-    // Set authentication token
+    // Set Keycloak instance
+    setKeycloak(keycloak) {
+        this.keycloak = keycloak;
+    }
+
+    // Get current token from Keycloak
+    async getToken() {
+        if (this.keycloak && this.keycloak.authenticated) {
+            // Update token if needed
+            try {
+                await this.keycloak.updateToken(30); // Refresh if expires in 30 seconds
+                return this.keycloak.token;
+            } catch (error) {
+                console.error('Failed to refresh token', error);
+                // Try to re-authenticate
+                this.keycloak.login();
+                return null;
+            }
+        }
+        return this.authToken; // Fallback to manually set token
+    }
+
+    // Set authentication token manually (for testing or non-Keycloak auth)
     setAuthToken(token) {
         this.authToken = token;
     }
 
-    // Generic request method with error handling
+    // Generic request method with error handling and automatic token injection
     async request(endpoint, options = {}) {
         const url = `${this.baseUrl}${endpoint}`;
+        
+        // Get current token
+        const token = await this.getToken();
         
         const config = {
             headers: {
                 'Content-Type': 'application/json',
-                ...(this.authToken && { 'Authorization': `Bearer ${this.authToken}` }),
+                ...(token && { 'Authorization': `Bearer ${token}` }),
                 ...options.headers
             },
             ...options
@@ -30,12 +56,22 @@ class ApiService {
         try {
             const response = await fetch(url, config);
             
+            // Handle 401 Unauthorized - token might be expired
+            if (response.status === 401) {
+                if (this.keycloak) {
+                    console.log('Token expired, redirecting to login...');
+                    this.keycloak.login();
+                    return null;
+                }
+                throw new Error('Authentication required');
+            }
+            
             if (!response.ok) {
                 let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
                 
                 try {
                     const errorData = await response.json();
-                    errorMessage = errorData.message || errorData.error || errorMessage;
+                    errorMessage = errorData.message || errorData.detail || errorData.error || errorMessage;
                 } catch {
                     // Use default error message if JSON parsing fails
                 }

@@ -42,7 +42,7 @@ const cities = [
     hub: 1,
     description: "Smart city pioneer in the Paris metropolitan area",
     features: ["Digital Innovation", "Energy Efficiency", "Smart Buildings"],
-    hasDashboard: true,
+    hasDashboard: false,
     hasInfo: true
   },
   { 
@@ -55,7 +55,7 @@ const cities = [
     hub: 1,
     description: "Alpine city with focus on sustainable urban development",
     features: ["Climate Action", "Public Transport", "Innovation"],
-    hasDashboard: true,
+    hasDashboard: false,
     hasInfo: true
   },
   { 
@@ -81,7 +81,7 @@ const cities = [
     hub: 1,
     description: "Island city focused on tourism and environmental protection",
     features: ["Coastal Management", "Tourism", "Biodiversity"],
-    hasDashboard: true,
+    hasDashboard: false,
     hasInfo: true
   },
   { 
@@ -146,7 +146,7 @@ const cities = [
     hub: 2,
     description: "Capital city with environmental and digital transformation projects",
     features: ["Digital Services", "Air Quality", "Urban Mobility"],
-    hasDashboard: false,
+    hasDashboard: true,
     hasInfo: true
   },
   { 
@@ -159,7 +159,7 @@ const cities = [
     hub: 2,
     description: "Industrial city evolving into a sustainable urban hub",
     features: ["Innovation", "Circular Economy", "Smart Mobility"],
-    hasDashboard: false,
+    hasDashboard: true,
     hasInfo: true
   },
   { 

@@ -1,5 +1,5 @@
 """
-KPI API routes with improved organization and no city-specific duplication.
+KPI API routes with Keycloak authentication.
 """
 from typing import List, Optional
 from datetime import datetime
@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, Query, HTTPException, status, Path
 from sqlalchemy.orm import Session
 
 from ..core.database import get_db
+from ..core.security import KeycloakBearer
 from ..schemas import (
     KPI, KPICreate, KPIUpdate, KPISummary,
     KPIValue, KPIValueCreate, KPIValueBulkCreate,
@@ -14,7 +15,11 @@ from ..schemas import (
 )
 from ..services import kpi_service, kpi_value_service
 
-router = APIRouter(prefix="/kpis", tags=["KPIs"])
+router = APIRouter(
+    prefix="/kpis", 
+    tags=["KPIs"],
+    dependencies=[Depends(KeycloakBearer())]
+)
 
 
 @router.get("/", response_model=List[KPI], summary="List KPIs")
@@ -161,6 +166,7 @@ def create_kpi(
     - `has_category_label`: Whether values have category labels
     - `category_label_dictionary`: A dictionary mapping category labels to their meanings (e.g., {1: "Low", 2: "Medium", 3: "High"}).
     - `is_active`: Whether the KPI is active (default: true)
+    - `is_processed`: Whether the KPI has been processed (default: true)
     
     **Returns:**
     - The created KPI object with assigned ID
@@ -313,8 +319,8 @@ def bulk_create_kpi_values(
     ```json
     {
       "values": [
-        {"kpi_value": 25.5, "timestamp": "2024-01-01T00:00:00"},
-        {"kpi_value": 26.2, "timestamp": "2024-01-02T00:00:00"}
+        {"kpi_value": 25.5, "timestamp": "2024-01-01T00:00:00", "category_label": "Low"},
+        {"kpi_value": 26.2, "timestamp": "2024-01-02T00:00:00", "category_label": "Medium"}
       ]
     }
     ```

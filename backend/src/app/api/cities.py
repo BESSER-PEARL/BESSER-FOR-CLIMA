@@ -1,18 +1,23 @@
 """
-City API routes.
+City API routes with Keycloak authentication.
 """
 from typing import List
 from fastapi import APIRouter, Depends, Query, HTTPException, status
 from sqlalchemy.orm import Session
 
 from ..core.database import get_db
+from ..core.security import KeycloakBearer
 from ..schemas import (
     City, CityCreate, CityUpdate, 
     PaginatedResponse, ErrorResponse
 )
 from ..services import city_service
 
-router = APIRouter(prefix="/cities", tags=["Cities"])
+router = APIRouter(
+    prefix="/cities", 
+    tags=["Cities"],
+    dependencies=[Depends(KeycloakBearer())]
+)
 
 
 @router.get("/", response_model=List[City], summary="List cities")

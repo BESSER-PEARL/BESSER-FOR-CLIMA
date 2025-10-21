@@ -33,40 +33,42 @@ def create_tables():
 def create_sample_data(engine):
     """Create sample cities and minimal KPIs if database is empty."""
     
-    with Session(engine) as db:
-        try:
-            # Check if cities already exist
-            cities = db.query(City).all()  # FIX: Direct query instead of service method
+    db = SessionLocal()
+    try:
+        # Check if cities already exist
+        cities = db.query(City).all()  # FIX: Direct query instead of service method
             
-            if len(cities) > 0:
-                logger.info(f"Cities already exist ({len(cities)} cities found). Skipping sample data creation.")
-                return
+        if len(cities) > 0:
+            logger.info(f"Cities already exist ({len(cities)} cities found). Skipping sample data creation.")
+            return
+        
+        logger.info("No cities found. Creating default cities...")
+        
+        # Create default cities
+        default_cities = [
+            {"name": "Torino", "code": "torino"},
+            {"name": "Cascais", "code": "cascais"},
+            {"name": "Differdange", "code": "differdange"},
+            {"name": "Sofia", "code": "sofia"},
+            {"name": "Athens", "code": "athens"},
+            {"name": "Grenoble", "code": "grenoble"},
+            {"name": "Maribor", "code": "maribor"},
+            {"name": "Ioannina", "code": "ioannina"}
+        ]
+        
+        for city_data in default_cities:
+            city = City(**city_data)
+            db.add(city)
+        
+        db.commit()
+        logger.info(f"Created {len(default_cities)} default cities")
             
-            logger.info("No cities found. Creating default cities...")
-            
-            # Create default cities
-            default_cities = [
-                {"name": "Torino", "code": "torino"},
-                {"name": "Cascais", "code": "cascais"},
-                {"name": "Differdange", "code": "differdange"},
-                {"name": "Sofia", "code": "sofia"},
-                {"name": "Athens", "code": "athens"},
-                {"name": "Grenoble", "code": "grenoble"},
-                {"name": "Maribor", "code": "maribor"},
-                {"name": "Ioannina", "code": "ioannina"}
-            ]
-            
-            for city_data in default_cities:
-                city = City(**city_data)
-                db.add(city)
-            
-            db.commit()
-            logger.info(f"Created {len(default_cities)} default cities")
-            
-        except Exception as e:
-            logger.error(f"Error creating sample data: {e}")
-            db.rollback()
-            raise
+    except Exception as e:
+        logger.error(f"Error creating sample data: {e}")
+        db.rollback()
+        raise
+    finally:
+        db.close()
 
 def main():
     """Main initialization function."""

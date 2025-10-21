@@ -1,11 +1,12 @@
 """
-Dashboard and Visualization API routes - consolidated and improved.
+Dashboard and Visualization API routes with Keycloak authentication.
 """
 from typing import List, Optional
 from fastapi import APIRouter, Depends, Query, HTTPException, status, Path
 from sqlalchemy.orm import Session
 
 from ..core.database import get_db
+from ..core.security import KeycloakBearer
 from ..schemas import (
     Dashboard, DashboardCreate, DashboardUpdate, DashboardWithSections,
     DashboardSection, DashboardSectionCreate, DashboardSectionUpdate,
@@ -15,7 +16,11 @@ from ..schemas import (
 )
 from ..services import dashboard_service, visualization_service, section_service
 
-router = APIRouter(prefix="/dashboards", tags=["Dashboards"])
+router = APIRouter(
+    prefix="/dashboards", 
+    tags=["Dashboards"],
+    dependencies=[Depends(KeycloakBearer())]
+)
 
 
 @router.get("/", response_model=List[Dashboard], summary="List dashboards")
@@ -180,7 +185,11 @@ def create_visualization(
 
 
 # Visualization management routes
-visualization_router = APIRouter(prefix="/visualizations", tags=["Visualizations"])
+visualization_router = APIRouter(
+    prefix="/visualizations", 
+    tags=["Visualizations"],
+    dependencies=[Depends(KeycloakBearer())]
+)
 
 
 # Bulk operations must come before path parameters to avoid route conflicts

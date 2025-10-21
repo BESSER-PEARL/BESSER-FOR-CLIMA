@@ -143,6 +143,7 @@ class KPIBase(BaseSchema):
     has_category_label: bool = False
     category_label_dictionary: Optional[Dict[int, str]] = None
     is_active: bool = True
+    is_processed: bool = True
 
     @field_validator('max_threshold')
     @classmethod
@@ -169,6 +170,7 @@ class KPIUpdate(BaseSchema):
     has_category_label: Optional[bool] = None
     category_label_dictionary: Optional[Dict[int, str]] = None
     is_active: Optional[bool] = None
+    is_processed: Optional[bool] = None
 
 
 class KPI(KPIBase):
