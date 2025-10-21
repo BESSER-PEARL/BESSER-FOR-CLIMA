@@ -31,74 +31,43 @@ def create_tables():
     
     logger.info("Database tables created successfully!")
 
-def create_sample_data():
-    """Create sample dashboard and visualizations."""
-    logger.info("Creating sample data...")
+def create_sample_data(engine):
+    """Create sample cities and minimal KPIs if database is empty."""
     
-    db = SessionLocal()
-    try:
-        from app.services import DashboardService, VisualizationService, CityService, SectionService
-        from app.schemas import CityCreate, DashboardCreate, DashboardSectionCreate, VisualizationCreate
-        
-        dashboard_service = DashboardService()
-        section_service = SectionService()
-        viz_service = VisualizationService()
-        city_service = CityService()
-        
-        # Create multiple cities that the frontend expects
-        cities_data = [
-            CityCreate(name="Differdange", code="differdange", country="Luxembourg", timezone="Europe/Luxembourg"),
-            CityCreate(name="Cascais", code="cascais", country="Portugal", timezone="Europe/Lisbon"),
-            CityCreate(name="Sofia", code="sofia", country="Bulgaria", timezone="Europe/Sofia"),
-            CityCreate(name="Maribor", code="maribor", country="Slovenia", timezone="Europe/Ljubljana"),
-            CityCreate(name="Athens", code="athens", country="Greece", timezone="Europe/Athens"),
-            CityCreate(name="Ioannina", code="ioannina", country="Greece", timezone="Europe/Athens"),
-            CityCreate(name="Grenoble", code="grenoble", country="France", timezone="Europe/Paris"),
-            CityCreate(name="Torino", code="torino", country="Italy", timezone="Europe/Rome"),
-        ]
-        
-        cities = []
-        for city_data in cities_data:
-            city = city_service.create_city(db, city_data)
-            cities.append(city)
-            logger.info(f"Created city: {city.name}")
-        
-        # Create a sample dashboard for the first city (Differdange)
-        dashboard_data = DashboardCreate(
-            code="differdange-overview",
-            title="Differdange Climate Dashboard",
-            description="Main dashboard for Differdange climate data visualization",
-            is_public=True,
-            city_id=cities[0].id
-        )
-        dashboard = dashboard_service.create_dashboard(db, dashboard_data)
-        logger.info(f"Created dashboard: {dashboard.title}")
-        
-        # Create sample sections
-        sections_data = [
-            DashboardSectionCreate(name="Overview", dashboard_id=dashboard.id, order=1, is_active=True),
-            DashboardSectionCreate(name="Charts", dashboard_id=dashboard.id, order=2, is_active=True),
-            DashboardSectionCreate(name="Analytics", dashboard_id=dashboard.id, order=3, is_active=True),
-        ]
-        
-        sections = []
-        for section_data in sections_data:
-            section = section_service.create_section(db, section_data)
-            sections.append(section)
-            logger.info(f"Created section: {section.name}")
-        
-        # Sample visualizations creation removed - users will create their own visualizations
-        # You can manually create visualizations through the UI using your KPI data
-        
-        db.commit()
-        logger.info(f"Sample data created: {len(cities)} cities, 1 dashboard, {len(sections)} sections, 0 visualizations (create your own!)")
-        
-    except Exception as e:
-        logger.error(f"Error creating sample data: {e}")
-        db.rollback()
-        raise
-    finally:
-        db.close()
+    with Session(engine) as db:
+        try:
+            # Check if cities already exist
+            cities = db.query(City).all()  # FIX: Direct query instead of service method
+            
+            if len(cities) > 0:
+                logger.info(f"Cities already exist ({len(cities)} cities found). Skipping sample data creation.")
+                return
+            
+            logger.info("No cities found. Creating default cities...")
+            
+            # Create default cities
+            default_cities = [
+                {"name": "Torino", "code": "torino"},
+                {"name": "Cascais", "code": "cascais"},
+                {"name": "Differdange", "code": "differdange"},
+                {"name": "Sofia", "code": "sofia"},
+                {"name": "Athens", "code": "athens"},
+                {"name": "Grenoble", "code": "grenoble"},
+                {"name": "Maribor", "code": "maribor"},
+                {"name": "Ioannina", "code": "ioannina"}
+            ]
+            
+            for city_data in default_cities:
+                city = City(**city_data)
+                db.add(city)
+            
+            db.commit()
+            logger.info(f"Created {len(default_cities)} default cities")
+            
+        except Exception as e:
+            logger.error(f"Error creating sample data: {e}")
+            db.rollback()
+            raise
 
 def main():
     """Main initialization function."""
@@ -107,7 +76,7 @@ def main():
         create_tables()
         
         # Create sample data
-        create_sample_data()
+        create_sample_data(engine)
         
         logger.info("Database initialization completed successfully!")
         
