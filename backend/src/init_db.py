@@ -25,8 +25,7 @@ def create_tables():
     logger.info(f"Using database URL: {settings.DATABASE_URL}")
     
     logger.info("Creating database tables...")
-    # Drop all tables and recreate them
-    Base.metadata.drop_all(bind=engine)
+    # Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
     
     logger.info("Database tables created successfully!")
