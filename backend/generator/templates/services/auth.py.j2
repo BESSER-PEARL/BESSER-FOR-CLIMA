@@ -1,0 +1,22 @@
+"""
+Authentication service (stub for Keycloak integration).
+"""
+from typing import Optional
+from fastapi import HTTPException, status
+
+
+class AuthService:
+    """Service for authentication operations."""
+    
+    def verify_token(self, token: str) -> Optional[dict]:
+        """Verify JWT token with Keycloak."""
+        # TODO: Implement Keycloak token verification
+        pass
+    
+    def get_user_info(self, token: str) -> Optional[dict]:
+        """Get user information from token."""
+        # TODO: Implement user info retrieval
+        pass
+
+
+auth_service = AuthService()

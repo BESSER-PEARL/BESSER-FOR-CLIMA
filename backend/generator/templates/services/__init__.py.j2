@@ -1,0 +1,74 @@
+"""
+Service layer for business logic and data operations.
+"""
+from typing import List, Optional, Dict, Any, Tuple
+from sqlalchemy.orm import Session
+from fastapi import HTTPException, status
+from datetime import datetime, timedelta
+
+from ..repositories import (
+    {%- for class in classes %}
+    {%- if not has_polymorphic_parent(class) %}
+    {{ class.name.lower() }}_repo{% if not loop.last %},{% endif %}
+    {%- endif %}
+    {%- endfor %}
+)
+from ..schemas import (
+    {%- for class in classes %}
+    {%- if not has_polymorphic_parent(class) %}
+    {{ class.name }}Create, {{ class.name }}Update, {{ class.name }}{% if not loop.last %},{% endif %}
+    {%- endif %}
+    {%- endfor %}
+)
+
+
+{% for class in classes %}
+{%- if not has_polymorphic_parent(class) %}
+class {{ class.name }}Service:
+    """Service for {{ class.name }} operations."""
+    
+    def get_{{ class.name.lower() }}(self, db: Session, {{ class.name.lower() }}_id: int) -> {{ class.name }}:
+        """Get {{ class.name }} by ID."""
+        {{ class.name.lower() }} = {{ class.name.lower() }}_repo.get(db, {{ class.name.lower() }}_id)
+        if not {{ class.name.lower() }}:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="{{ class.name }} not found"
+            )
+        return {{ class.name.lower() }}
+    
+    def list_{{ class.name.lower() }}s(
+        self, 
+        db: Session, 
+        skip: int = 0, 
+        limit: int = 100
+    ) -> Tuple[List[{{ class.name }}], int]:
+        """List {{ class.name }}s with pagination."""
+        items = {{ class.name.lower() }}_repo.get_multi(db, skip=skip, limit=limit)
+        total = {{ class.name.lower() }}_repo.count(db)
+        return items, total
+    
+    def create_{{ class.name.lower() }}(self, db: Session, {{ class.name.lower() }}_in: {{ class.name }}Create) -> {{ class.name }}:
+        """Create new {{ class.name }}."""
+        return {{ class.name.lower() }}_repo.create(db, obj_in={{ class.name.lower() }}_in)
+    
+    def update_{{ class.name.lower() }}(self, db: Session, {{ class.name.lower() }}_id: int, {{ class.name.lower() }}_in: {{ class.name }}Update) -> {{ class.name }}:
+        """Update existing {{ class.name }}."""
+        {{ class.name.lower() }} = self.get_{{ class.name.lower() }}(db, {{ class.name.lower() }}_id)
+        return {{ class.name.lower() }}_repo.update(db, db_obj={{ class.name.lower() }}, obj_in={{ class.name.lower() }}_in)
+    
+    def delete_{{ class.name.lower() }}(self, db: Session, {{ class.name.lower() }}_id: int) -> {{ class.name }}:
+        """Delete {{ class.name }}."""
+        {{ class.name.lower() }} = self.get_{{ class.name.lower() }}(db, {{ class.name.lower() }}_id)
+        return {{ class.name.lower() }}_repo.delete(db, id={{ class.name.lower() }}_id)
+
+
+{% endif %}
+{% endfor %}
+
+# Service instances
+{% for class in classes %}
+{% if not has_polymorphic_parent(class) %}
+{{ class.name.lower() }}_service = {{ class.name }}Service()
+{% endif %}
+{% endfor %}

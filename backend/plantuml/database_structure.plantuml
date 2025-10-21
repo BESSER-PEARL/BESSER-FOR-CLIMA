@@ -1,0 +1,226 @@
+@startuml Climaborough_Database_Structure
+
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam backgroundColor white
+skinparam shadowing false
+
+title Climaborough Data Platform - Database Structure
+
+' ========================================
+' CORE ENTITIES
+' ========================================
+
+class City {
+    + id: Integer [PK]
+    --
+    name: String [NotNull]
+    code: String [Unique, NotNull]
+    country: String [NotNull]
+    timezone: String [NotNull]
+    created_at: DateTime [NotNull]
+    updated_at: DateTime [NotNull]
+}
+
+class Dashboard {
+    + id: Integer [PK]
+    --
+    code: String [NotNull]
+    title: String [NotNull]
+    description: Text
+    city_id: Integer [FK->City.id, NotNull]
+    created_at: DateTime [NotNull]
+    updated_at: DateTime [NotNull]
+    --
+    Unique: (code, city_id)
+}
+
+class DashboardSection {
+    + id: Integer [PK]
+    --
+    name: String [NotNull]
+    description: Text
+    order: Integer [NotNull]
+    dashboard_id: Integer [FK->Dashboard.id, NotNull, OnDelete:CASCADE]
+    created_at: DateTime [NotNull]
+    updated_at: DateTime [NotNull]
+    --
+    Unique: (name, dashboard_id)
+}
+
+' ========================================
+' KPI SYSTEM
+' ========================================
+
+class KPI {
+    + id: Integer [PK]
+    --
+    id_kpi: String [NotNull]
+    name: String [NotNull]
+    category: String [NotNull]
+    unit_text: String
+    unit_description: Text
+    thresholds: JSON
+    category_label_dictionary: JSON
+    has_category_labels: Boolean [Default:False]
+    city_id: Integer [FK->City.id, NotNull, OnDelete:CASCADE]
+    created_at: DateTime [NotNull]
+    updated_at: DateTime [NotNull]
+    --
+    Unique: (id_kpi, city_id)
+}
+
+class KPIValue {
+    + id: Integer [PK]
+    --
+    value: Float [NotNull]
+    timestamp: DateTime [NotNull]
+    category_label: String [Nullable]
+    kpi_id: Integer [FK->KPI.id, NotNull, OnDelete:CASCADE]
+    created_at: DateTime [NotNull]
+    updated_at: DateTime [NotNull]
+    --
+    Index: (kpi_id, timestamp)
+}
+
+' ========================================
+' VISUALIZATION SYSTEM (Polymorphic)
+' ========================================
+
+class Visualization {
+    + id: Integer [PK]
+    --
+    type: String [Discriminator, NotNull]
+    title: String [NotNull]
+    description: Text
+    dashboard_id: Integer [FK->Dashboard.id, NotNull, OnDelete:CASCADE]
+    section_id: Integer [FK->DashboardSection.id, NotNull, OnDelete:CASCADE]
+    kpi_id: Integer [FK->KPI.id, Nullable, OnDelete:SET_NULL]
+    x_position: Integer [NotNull]
+    y_position: Integer [NotNull]
+    width: Integer [NotNull]
+    height: Integer [NotNull]
+    created_at: DateTime [NotNull]
+    updated_at: DateTime [NotNull]
+}
+
+class LineChart {
+    <<Visualization type='line'>>
+    --
+    x_title: String
+    y_title: String
+    color: String
+}
+
+class BarChart {
+    <<Visualization type='bar'>>
+    --
+    orientation: String [Default:'vertical']
+}
+
+class PieChart {
+    <<Visualization type='pie'>>
+    --
+    show_legend: Boolean [Default:True]
+}
+
+class StatChart {
+    <<Visualization type='stat'>>
+    --
+    unit: String
+    show_trend: Boolean [Default:False]
+}
+
+class Table {
+    <<Visualization type='table'>>
+    --
+    pagination_enabled: Boolean [Default:True]
+    page_size: Integer [Default:10]
+}
+
+class TableColumn {
+    + id: Integer [PK]
+    --
+    name: String [NotNull]
+    display_name: String [NotNull]
+    type: String [NotNull]
+    sortable: Boolean [Default:True]
+    filterable: Boolean [Default:True]
+    order: Integer [NotNull]
+    table_id: Integer [FK->Table.id, NotNull, OnDelete:CASCADE]
+    created_at: DateTime [NotNull]
+    updated_at: DateTime [NotNull]
+}
+
+class Map {
+    <<Visualization type='map'>>
+    --
+    default_zoom: Integer [Default:10]
+    center_lat: Float
+    center_lon: Float
+}
+
+' ========================================
+' MAP DATA SYSTEM (Polymorphic)
+' ========================================
+
+class MapData {
+    + id: Integer [PK]
+    --
+    type: String [Discriminator, NotNull]
+    name: String [NotNull]
+    description: Text
+    city_id: Integer [FK->City.id, NotNull, OnDelete:CASCADE]
+    map_id: Integer [FK->Map.id, Nullable, OnDelete:SET_NULL]
+    created_at: DateTime [NotNull]
+    updated_at: DateTime [NotNull]
+}
+
+class WMS {
+    <<MapData type='wms'>>
+    --
+    url: String [NotNull]
+    layer_name: String [NotNull]
+    format: String [Default:'image/png']
+    transparent: Boolean [Default:True]
+}
+
+class GeoJson {
+    <<MapData type='geojson'>>
+    --
+    data: JSON [NotNull]
+    style: JSON
+}
+
+' ========================================
+' RELATIONSHIPS
+' ========================================
+
+City "1" -- "0..*" Dashboard : has >
+City "1" -- "0..*" KPI : tracks >
+City "1" -- "0..*" MapData : contains >
+
+Dashboard "1" -- "0..*" DashboardSection : organized_into >
+Dashboard "1" -- "0..*" Visualization : displays >
+
+DashboardSection "1" -- "0..*" Visualization : contains >
+
+KPI "1" -- "0..*" KPIValue : measured_by >
+KPI "0..1" -- "0..*" Visualization : visualized_in >
+
+Visualization <|-- LineChart
+Visualization <|-- BarChart
+Visualization <|-- PieChart
+Visualization <|-- StatChart
+Visualization <|-- Table
+Visualization <|-- Map
+
+Table "1" -- "0..*" TableColumn : defines >
+
+Map "1" -- "0..*" MapData : displays >
+
+MapData <|-- WMS
+MapData <|-- GeoJson
+
+
+@enduml
