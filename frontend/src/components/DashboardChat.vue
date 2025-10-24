@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue';
 import WebSocketService from '../js/websocket.js';
 import { useAuth } from '../composables/useAuth';
+import apiService from '../services/apiService';
 
 const auth = useAuth();
 
@@ -48,19 +49,20 @@ const sendMessage = () => {
 
 const getAvailableKPIs = async () => {
   try {
-    const token = await auth.getAccessToken();
-    const response = await fetch(`http://localhost:8000/${props.city.toLowerCase()}/kpis`, {
-      headers: {
-        'Authorization': 'Bearer ' + token
-      }
-    });
-    const kpis = await response.json();
+    // First get city data
+    const cityData = await apiService.getCityByCode(props.city);
+    if (!cityData) {
+      throw new Error('City not found');
+    }
+    
+    // Use API service to get KPIs
+    const kpis = await apiService.getKPIs(cityData.id);
     availableKPIs.value = kpis;
     
     // Create a formatted list of KPIs to show to the user
     let kpiList = "";
     kpis.forEach(kpi => {
-      kpiList += `<li><strong>${kpi.name}</strong> (${kpi.unit || 'No unit'})</li>`;
+      kpiList += `<li><strong>${kpi.name}</strong> (${kpi.unit_text || 'No unit'})</li>`;
     });
     
     // Add message showing available KPIs

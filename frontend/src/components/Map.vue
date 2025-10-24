@@ -2,6 +2,7 @@
 import "leaflet/dist/leaflet.css";
 import { LMap, LTileLayer, LWmsTileLayer, LGeoJson } from "@vue-leaflet/vue-leaflet";
 import { ref, reactive, watch } from "vue";
+import apiService from '../services/apiService';
 
 const props = defineProps({
   city: {
@@ -36,8 +37,8 @@ if (cityConfig[props.city]) {
 
 async function getItems() {
   try {
-    const response = await fetch(`http://localhost:8000/${props.city.toLowerCase()}/mapdata/`);
-    const data = await response.json();
+    // Use API service instead of direct fetch
+    const data = await apiService.get(`/${props.city.toLowerCase()}/mapdata/`);
     
     // Create a Set to track unique titles
     const uniqueTitles = new Set();

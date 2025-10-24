@@ -2,6 +2,7 @@
 import { ref, reactive, computed, onMounted } from 'vue';
 import { useAuth } from '../composables/useAuth';
 import AuthRequired from '../components/AuthRequired.vue';
+import apiService from '../services/apiService';
 
 // Use the authentication composable
 const auth = useAuth();
@@ -75,22 +76,16 @@ const fetchKPIs = async () => {
   try {
     // Step 1: Get city by code to retrieve city ID
     const cityCode = selectedCity.value.toLowerCase().replace(/\s+/g, '-');
-    const cityResponse = await fetch(`http://localhost:8000/cities/code/${cityCode}`);
+    const city = await apiService.getCityByCode(cityCode);
     
-    if (!cityResponse.ok) {
+    if (!city) {
       throw new Error(`Failed to fetch city: ${selectedCity.value}`);
     }
-    const city = await cityResponse.json();
     
     console.log(`Found city:`, city);
     
     // Step 2: Get KPIs using city ID
-    const kpisResponse = await fetch(`http://localhost:8000/kpis/?city_id=${city.id}`);
-    
-    if (!kpisResponse.ok) {
-      throw new Error('Failed to fetch KPIs');
-    }
-    const data = await kpisResponse.json();
+    const data = await apiService.getKPIs(city.id);
     
     console.log(`Fetched ${data.length} KPIs for ${selectedCity.value}:`, data);
     
@@ -116,14 +111,9 @@ const fetchKpiValues = async (kpi) => {
   selectedKpi.value = kpi;
   
   try {
-    // Use the new API endpoint - kpi.id is the database ID
-    const response = await fetch(`http://localhost:8000/kpis/${kpi.id}/values`);
+    // Use the API service - kpi.id is the database ID
+    const data = await apiService.getKPIValues(kpi.id);
     
-    if (!response.ok) {
-      throw new Error('Failed to fetch KPI values');
-    }
-    
-    const data = await response.json();
     kpiValues.value = data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Sort by timestamp descending
     console.log('Fetched KPI values:', data.slice(0, 5)); // Log first 5 for debugging
     showKpiValuesDialog.value = true;
@@ -153,20 +143,8 @@ const deleteKPI = async (kpiId) => {
   deleteLoading.value = true;
   
   try {
-    const token = await auth.getAccessToken();
-    // Use kpi.id (database ID) not kpi.id_kpi
-    const response = await fetch(`http://localhost:8000/kpis/${kpiId}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || errorData.detail || 'Failed to delete KPI');
-    }
+    // Use the API service - it will automatically include the token
+    await apiService.deleteKPI(kpiId);
     
     // Refresh KPIs list
     await fetchKPIs();

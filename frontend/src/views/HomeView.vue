@@ -5,190 +5,28 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 
 // City data with flags and information
-const cities = [
-  { 
-    id: 1, 
-    name: "Athens", 
-    country: "Greece", 
-    flag: "/landing_page/FLAGS/FLAG_Greece.jpg",
-    flagOff: "/landing_page/FLAGS/FLAG_Greece_OFF.jpg",
-    code: "athens",
-    hub: 1,
-    description: "Capital city of Greece, combining ancient heritage with modern urban development",
-    features: ["Urban Mobility", "Air Quality", "Smart City"],
-    hasDashboard: true,
-    hasInfo: true
-  },
-  { 
-    id: 2, 
-    name: "Cascais", 
-    country: "Portugal", 
-    flag: "/landing_page/FLAGS/FLAG_Portugal.jpg",
-    flagOff: "/landing_page/FLAGS/FLAG_Portugal_OFF.jpg",
-    code: "cascais",
-    hub: 1,
-    description: "Coastal municipality known for its sustainability initiatives and smart city projects",
-    features: ["Waste Management", "Green Spaces", "Coastal Protection"],
-    hasDashboard: true,
-    hasInfo: true
-  },
-  { 
-    id: 3, 
-    name: "Issy-les-Moulineaux", 
-    country: "France", 
-    flag: "/landing_page/FLAGS/FLAG_France.jpg",
-    flagOff: "/landing_page/FLAGS/FLAG_France_OFF.jpg",
-    code: "issy-les-moulineaux",
-    hub: 1,
-    description: "Smart city pioneer in the Paris metropolitan area",
-    features: ["Digital Innovation", "Energy Efficiency", "Smart Buildings"],
-    hasDashboard: false,
-    hasInfo: true
-  },
-  { 
-    id: 4, 
-    name: "Grenoble", 
-    country: "France", 
-    flag: "/landing_page/FLAGS/FLAG_France.jpg",
-    flagOff: "/landing_page/FLAGS/FLAG_France_OFF.jpg",
-    code: "grenoble",
-    hub: 1,
-    description: "Alpine city with focus on sustainable urban development",
-    features: ["Climate Action", "Public Transport", "Innovation"],
-    hasDashboard: false,
-    hasInfo: true
-  },
-  { 
-    id: 5, 
-    name: "Ioannina", 
-    country: "Greece", 
-    flag: "/landing_page/FLAGS/FLAG_Greece.jpg",
-    flagOff: "/landing_page/FLAGS/FLAG_Greece_OFF.jpg",
-    code: "ioannina",
-    hub: 1,
-    description: "Historic city in northwestern Greece with environmental initiatives",
-    features: ["Lake Protection", "Cultural Heritage", "Sustainability"],
-    hasDashboard: true,
-    hasInfo: true
-  },
-  { 
-    id: 6, 
-    name: "Krk", 
-    country: "Croatia", 
-    flag: "/landing_page/FLAGS/FLAG_Croatia.jpg",
-    flagOff: "/landing_page/FLAGS/FLAG_Croatia_OFF.jpg",
-    code: "krk",
-    hub: 1,
-    description: "Island city focused on tourism and environmental protection",
-    features: ["Coastal Management", "Tourism", "Biodiversity"],
-    hasDashboard: false,
-    hasInfo: true
-  },
-  { 
-    id: 7, 
-    name: "Differdange", 
-    country: "Luxembourg", 
-    flag: "/landing_page/FLAGS/FLAG_Luxembourg.jpg",
-    flagOff: "/landing_page/FLAGS/FLAG_Luxembourg_OFF.jpg",
-    code: "differdange",
-    hub: 1,
-    description: "Industrial heritage city transitioning to sustainable development",
-    features: ["Urban Regeneration", "Air Quality", "Climate Data"],
-    hasDashboard: true,
-    hasInfo: true
-  },
-  { 
-    id: 8, 
-    name: "Maribor", 
-    country: "Slovenia", 
-    flag: "/landing_page/FLAGS/FLAG_Slovenia.jpg",
-    flagOff: "/landing_page/FLAGS/FLAG_Slovenia_OFF.jpg",
-    code: "maribor",
-    hub: 2,
-    description: "Second largest city in Slovenia with smart city initiatives",
-    features: ["Smart Mobility", "Waste Management", "Green Infrastructure"],
-    hasDashboard: true,
-    hasInfo: true
-  },
-  { 
-    id: 9, 
-    name: "Katowice", 
-    country: "Poland", 
-    flag: "/landing_page/FLAGS/FLAG_Poland.jpg",
-    flagOff: "/landing_page/FLAGS/FLAG_Poland_OFF.jpg",
-    code: "katowice",
-    hub: 2,
-    description: "Industrial city transforming into a green urban center",
-    features: ["Post-Industrial Transformation", "Air Quality", "Smart City"],
-    hasDashboard: false,
-    hasInfo: true
-  },
-  { 
-    id: 10, 
-    name: "Pilsen", 
-    country: "Czech Republic", 
-    flag: "/landing_page/FLAGS/FLAG_CzechRepublic.jpg",
-    flagOff: "/landing_page/FLAGS/FLAG_CzechRepublic_OFF.jpg",
-    code: "pilsen",
-    hub: 2,
-    description: "Historic city with focus on sustainability and innovation",
-    features: ["Smart Solutions", "Cultural Heritage", "Urban Development"],
-    hasDashboard: false,
-    hasInfo: true
-  },
-  { 
-    id: 11, 
-    name: "Sofia", 
-    country: "Bulgaria", 
-    flag: "/landing_page/FLAGS/FLAG_Bulgaria.jpg",
-    flagOff: "/landing_page/FLAGS/FLAG_Bulgaria_OFF.jpg",
-    code: "sofia",
-    hub: 2,
-    description: "Capital city with environmental and digital transformation projects",
-    features: ["Digital Services", "Air Quality", "Urban Mobility"],
-    hasDashboard: true,
-    hasInfo: true
-  },
-  { 
-    id: 12, 
-    name: "Torino", 
-    country: "Italy", 
-    flag: "/landing_page/FLAGS/FLAG_Italy.jpg",
-    flagOff: "/landing_page/FLAGS/FLAG_Italy_OFF.jpg",
-    code: "torino",
-    hub: 2,
-    description: "Industrial city evolving into a sustainable urban hub",
-    features: ["Innovation", "Circular Economy", "Smart Mobility"],
-    hasDashboard: true,
-    hasInfo: true
-  },
-  { 
-    id: 13, 
-    name: "Podgorica", 
-    country: "Montenegro", 
-    flag: "/landing_page/FLAGS/FLAG_Montenegro.jpg",
-    flagOff: "/landing_page/FLAGS/FLAG_Montenegro_OFF.jpg",
-    code: "podgorica",
-    hub: 2,
-    description: "Capital city developing sustainable urban solutions",
-    features: ["Urban Planning", "Environmental Protection", "Smart City"],
-    hasDashboard: false,
-    hasInfo: true
-  },
-  { 
-    id: 14, 
-    name: "Prijedor", 
-    country: "Bosnia and Herzegovina", 
-    flag: "/landing_page/FLAGS/FLAG_BosniaAndHerzegovina.jpg",
-    flagOff: "/landing_page/FLAGS/FLAG_BosniaAndHerzegovina_OFF.jpg",
-    code: "prijedor",
-    hub: 2,
-    description: "City implementing sustainable development strategies",
-    features: ["Environmental Management", "Urban Development", "Climate Action"],
-    hasDashboard: false,
-    hasInfo: true
-  }
-]
+let cities = [
+  { id: 1, name: "Athens", country: "Greece", flag: "/landing_page/FLAGS/FLAG_Greece.jpg", flagOff: "/landing_page/FLAGS/FLAG_Greece_OFF.jpg", code: "athens", hub: 1, description: "Capital city of Greece, combining ancient heritage with modern urban development", features: ["Urban Mobility", "Air Quality", "Smart City"], hasDashboard: true, hasInfo: true },
+  { id: 2, name: "Cascais", country: "Portugal", flag: "/landing_page/FLAGS/FLAG_Portugal.jpg", flagOff: "/landing_page/FLAGS/FLAG_Portugal_OFF.jpg", code: "cascais", hub: 1, description: "Coastal municipality known for its sustainability initiatives and smart city projects", features: ["Waste Management", "Green Spaces", "Coastal Protection"], hasDashboard: true, hasInfo: true },
+  { id: 5, name: "Ioannina", country: "Greece", flag: "/landing_page/FLAGS/FLAG_Greece.jpg", flagOff: "/landing_page/FLAGS/FLAG_Greece_OFF.jpg", code: "ioannina", hub: 1, description: "Historic city in northwestern Greece with environmental initiatives", features: ["Lake Protection", "Cultural Heritage", "Sustainability"], hasDashboard: true, hasInfo: true },
+  { id: 7, name: "Differdange", country: "Luxembourg", flag: "/landing_page/FLAGS/FLAG_Luxembourg.jpg", flagOff: "/landing_page/FLAGS/FLAG_Luxembourg_OFF.jpg", code: "differdange", hub: 1, description: "Industrial heritage city transitioning to sustainable development", features: ["Urban Regeneration", "Air Quality", "Climate Data"], hasDashboard: true, hasInfo: true },
+  { id: 8, name: "Maribor", country: "Slovenia", flag: "/landing_page/FLAGS/FLAG_Slovenia.jpg", flagOff: "/landing_page/FLAGS/FLAG_Slovenia_OFF.jpg", code: "maribor", hub: 2, description: "Second largest city in Slovenia with smart city initiatives", features: ["Smart Mobility", "Waste Management", "Green Infrastructure"], hasDashboard: true, hasInfo: true },
+  { id: 11, name: "Sofia", country: "Bulgaria", flag: "/landing_page/FLAGS/FLAG_Bulgaria.jpg", flagOff: "/landing_page/FLAGS/FLAG_Bulgaria_OFF.jpg", code: "sofia", hub: 2, description: "Capital city with environmental and digital transformation projects", features: ["Digital Services", "Air Quality", "Urban Mobility"], hasDashboard: true, hasInfo: true },
+  { id: 12, name: "Torino", country: "Italy", flag: "/landing_page/FLAGS/FLAG_Italy.jpg", flagOff: "/landing_page/FLAGS/FLAG_Italy_OFF.jpg", code: "torino", hub: 2, description: "Industrial city evolving into a sustainable urban hub", features: ["Innovation", "Circular Economy", "Smart Mobility"], hasDashboard: true, hasInfo: true },
+  { id: 3, name: "Issy-les-Moulineaux", country: "France", flag: "/landing_page/FLAGS/FLAG_France.jpg", flagOff: "/landing_page/FLAGS/FLAG_France_OFF.jpg", code: "issy-les-moulineaux", hub: 1, description: "Smart city pioneer in the Paris metropolitan area", features: ["Digital Innovation", "Energy Efficiency", "Smart Buildings"], hasDashboard: false, hasInfo: true },
+  { id: 4, name: "Grenoble", country: "France", flag: "/landing_page/FLAGS/FLAG_France.jpg", flagOff: "/landing_page/FLAGS/FLAG_France_OFF.jpg", code: "grenoble", hub: 1, description: "Alpine city with focus on sustainable urban development", features: ["Climate Action", "Public Transport", "Innovation"], hasDashboard: false, hasInfo: true },
+  { id: 6, name: "Krk", country: "Croatia", flag: "/landing_page/FLAGS/FLAG_Croatia.jpg", flagOff: "/landing_page/FLAGS/FLAG_Croatia_OFF.jpg", code: "krk", hub: 1, description: "Island city focused on tourism and environmental protection", features: ["Coastal Management", "Tourism", "Biodiversity"], hasDashboard: false, hasInfo: true },
+  { id: 9, name: "Katowice", country: "Poland", flag: "/landing_page/FLAGS/FLAG_Poland.jpg", flagOff: "/landing_page/FLAGS/FLAG_Poland_OFF.jpg", code: "katowice", hub: 2, description: "Industrial city transforming into a green urban center", features: ["Post-Industrial Transformation", "Air Quality", "Smart City"], hasDashboard: false, hasInfo: true },
+  { id: 10, name: "Pilsen", country: "Czech Republic", flag: "/landing_page/FLAGS/FLAG_CzechRepublic.jpg", flagOff: "/landing_page/FLAGS/FLAG_CzechRepublic_OFF.jpg", code: "pilsen", hub: 2, description: "Historic city with focus on sustainability and innovation", features: ["Smart Solutions", "Cultural Heritage", "Urban Development"], hasDashboard: false, hasInfo: true },
+  { id: 13, name: "Podgorica", country: "Montenegro", flag: "/landing_page/FLAGS/FLAG_Montenegro.jpg", flagOff: "/landing_page/FLAGS/FLAG_Montenegro_OFF.jpg", code: "podgorica", hub: 2, description: "Capital city developing sustainable urban solutions", features: ["Urban Planning", "Environmental Protection", "Smart City"], hasDashboard: false, hasInfo: true },
+  { id: 14, name: "Prijedor", country: "Bosnia and Herzegovina", flag: "/landing_page/FLAGS/FLAG_BosniaAndHerzegovina.jpg", flagOff: "/landing_page/FLAGS/FLAG_BosniaAndHerzegovina_OFF.jpg", code: "prijedor", hub: 2, description: "City implementing sustainable development strategies", features: ["Environmental Management", "Urban Development", "Climate Action"], hasDashboard: false, hasInfo: true }
+];
+
+// Sort cities so those with dashboard come first
+cities = cities.slice().sort((a, b) => {
+  if (a.hasDashboard === b.hasDashboard) return 0;
+  return a.hasDashboard ? -1 : 1;
+});
 
 // State for hover effects
 const hoveredCity = ref(null)
