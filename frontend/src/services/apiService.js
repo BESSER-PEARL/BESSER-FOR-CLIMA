@@ -508,6 +508,54 @@ class ApiService {
     async getApiInfo() {
         return this.get('/');
     }
+
+    // MAP DATA API METHODS
+    
+    async getMapDataByCity(cityId) {
+        return this.get(`/mapdata/city/${cityId}`);
+    }
+
+    async getMapDataByCityCode(cityCode) {
+        return this.get(`/mapdata/city/code/${cityCode.toLowerCase()}`);
+    }
+
+    async getMapDataById(mapDataId) {
+        return this.get(`/mapdata/${mapDataId}`);
+    }
+
+    async createWMSLayer(wmsData) {
+        return this.post('/mapdata/wms', wmsData);
+    }
+
+    async createGeoJsonLayer(geojsonData) {
+        return this.post('/mapdata/geojson', geojsonData);
+    }
+
+    async updateWMSLayer(mapDataId, wmsData) {
+        return this.put(`/mapdata/wms/${mapDataId}`, wmsData);
+    }
+
+    async updateGeoJsonLayer(mapDataId, geojsonData) {
+        return this.put(`/mapdata/geojson/${mapDataId}`, geojsonData);
+    }
+
+    async deleteMapData(mapDataId) {
+        return this.delete(`/mapdata/${mapDataId}`);
+    }
+
+    async uploadGeoJsonFile(title, cityId, geojsonData, description = null) {
+        return this.post('/mapdata/geojson/upload-file', {
+            title,
+            city_id: cityId,
+            geojson_data: geojsonData,
+            description
+        });
+    }
+
+    // Legacy map data endpoint (for backward compatibility)
+    async getMapDataLegacy(cityCode) {
+        return this.get(`/${cityCode.toLowerCase()}/mapdata/`);
+    }
 }
 
 // Create singleton instance

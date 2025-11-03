@@ -398,7 +398,6 @@ class WMSCreate(MapDataBase):
     format: str = Field("image/png", max_length=50)
     transparent: bool = True
     city_id: int = Field(..., gt=0)
-    map_id: Optional[int] = Field(None, gt=0)
 
 
 class WMS(MapDataBase):
@@ -416,9 +415,7 @@ class WMS(MapDataBase):
 
 class GeoJsonCreate(MapDataBase):
     data: Dict[str, Any]
-    style: Optional[Dict[str, Any]] = None
     city_id: int = Field(..., gt=0)
-    map_id: Optional[int] = Field(None, gt=0)
 
 
 class GeoJson(MapDataBase):

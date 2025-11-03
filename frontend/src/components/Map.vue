@@ -17,28 +17,30 @@ const chosen_layers = ref([]);
 const legend = ref(true);
 const center = ref([49.5203, 5.890186]);
 
-// City-specific configuration
+// City-specific configuration (lowercase keys for case-insensitive matching)
 const cityConfig = {
-  Cascais: { center: [38.696912, -9.422269], zoom: 15, legend: false },
-  Torino: { center: [45.070602, 7.682152], zoom: 12.5, legend: false },
-  Differdange: { center: [49.5244, 5.8932], zoom: 14, legend: true },
-  Sofia: { center: [42.6977, 23.3219], zoom: 13, legend: true },
-  Athens: { center: [37.9838, 23.7275], zoom: 13, legend: true },
-  Grenoble: { center: [45.1885, 5.7245], zoom: 13, legend: true },
-  Maribor: { center: [46.5547, 15.6459], zoom: 13, legend: true },
-  Ioannina: { center: [39.6679, 20.8509], zoom: 13, legend: true } 
+  cascais: { center: [38.696912, -9.422269], zoom: 15, legend: false },
+  torino: { center: [45.070602, 7.682152], zoom: 12.5, legend: false },
+  differdange: { center: [49.5244, 5.8932], zoom: 14, legend: true },
+  sofia: { center: [42.6977, 23.3219], zoom: 13, legend: true },
+  athens: { center: [37.9838, 23.7275], zoom: 13, legend: true },
+  grenoble: { center: [45.1885, 5.7245], zoom: 13, legend: true },
+  maribor: { center: [46.5547, 15.6459], zoom: 13, legend: true },
+  ioannina: { center: [39.6679, 20.8509], zoom: 13, legend: true } 
 };
 
-if (cityConfig[props.city]) {
-  center.value = cityConfig[props.city].center;
-  zoom.value = cityConfig[props.city].zoom;
-  legend.value = cityConfig[props.city].legend;
+// Apply city-specific config (case-insensitive)
+const cityKey = props.city?.toLowerCase();
+if (cityKey && cityConfig[cityKey]) {
+  center.value = cityConfig[cityKey].center;
+  zoom.value = cityConfig[cityKey].zoom;
+  legend.value = cityConfig[cityKey].legend;
 }
 
 async function getItems() {
   try {
-    // Use API service instead of direct fetch
-    const data = await apiService.get(`/${props.city.toLowerCase()}/mapdata/`);
+    // Use new API service method instead of legacy endpoint
+    const data = await apiService.getMapDataByCityCode(props.city);
     
     // Create a Set to track unique titles
     const uniqueTitles = new Set();
@@ -107,17 +109,17 @@ function toggleLayer(layer) {
     <div class="map-body-body">
       <l-map id="test" :useGlobalLeaflet="false" ref="map" v-model:zoom="zoom" :center="center">
         <l-tile-layer url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" layer-type="base" name="OpenStreetMap" />
-        <div class="layer" v-for="(layer, index) in chosen_layers" :key="layer.name">
+        <div class="layer" v-for="(layer, index) in chosen_layers" :key="layer.id">
           <l-wms-tile-layer
-            v-if="layer.type_spec === 'wms'"
+            v-if="layer.type === 'wms'"
             :url="layer.url"
-            :layers="layer.name"
+            :layers="layer.layer_name"
             format="image/png"
             transparent
             :attribution="layer.attribution"
           />
           <l-geo-json
-            v-else-if="layer.type_spec === 'geojson'"
+            v-else-if="layer.type === 'geojson'"
             :geojson="layer.data"
             :options-style="getGeoJsonOptions(index)"
           />

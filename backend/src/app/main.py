@@ -10,7 +10,7 @@ import time
 
 from .core.config import settings
 from .core.database import init_db
-from .api import auth, cities, kpis, dashboards
+from .api import auth, cities, kpis, dashboards, mapdata
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -122,6 +122,7 @@ app.include_router(auth.router)
 app.include_router(cities.router)
 app.include_router(kpis.router)
 app.include_router(dashboards.router)
+app.include_router(mapdata.router)
 
 
 @app.on_event("startup")
