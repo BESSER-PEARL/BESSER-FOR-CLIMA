@@ -275,9 +275,7 @@ def create_kpi_value(
     db: Session = Depends(get_db)
 ):
     """Add a new value to a KPI."""
-    # Ensure the KPI ID matches
-    value_in.kpi_id = kpi_id
-    return kpi_value_service.create_kpi_value(db, value_in)
+    return kpi_value_service.create_kpi_value(db, kpi_id, value_in)
 
 
 @router.post("/{kpi_id}/values/bulk", status_code=status.HTTP_201_CREATED, summary="Bulk add KPI values")
@@ -302,7 +300,7 @@ def bulk_create_kpi_values(
     
     **Request Body Fields:**
     - `values`: List of KPIValue objects, each containing:
-      - `kpi_value` (float, required): The measured value for the KPI
+      - `value` (float, required): The measured value for the KPI
       - `timestamp` (datetime, required): ISO 8601 format (e.g., "2024-01-15T10:30:00")
       - `category_label` (str, optional): Category label if KPI uses category labels
     
@@ -320,15 +318,13 @@ def bulk_create_kpi_values(
     ```json
     {
       "values": [
-        {"kpi_value": 25.5, "timestamp": "2024-01-01T00:00:00", "category_label": "Low"},
-        {"kpi_value": 26.2, "timestamp": "2024-01-02T00:00:00", "category_label": "Medium"}
+        {"value": 25.5, "timestamp": "2024-01-01T00:00:00", "category_label": "Low"},
+        {"value": 26.2, "timestamp": "2024-01-02T00:00:00", "category_label": "Medium"}
       ]
     }
     ```
     """
-    # Ensure the KPI ID matches
-    bulk_in.kpi_id = kpi_id
-    count = kpi_value_service.bulk_create_kpi_values(db, bulk_in)
+    count = kpi_value_service.bulk_create_kpi_values(db, kpi_id, bulk_in)
     return {"created": count, "message": f"Successfully created {count} KPI values"}
 
 

@@ -486,22 +486,26 @@ class KPIValueService:
             end_date=end_date
         )
     
-    def create_kpi_value(self, db: Session, value_in: KPIValueCreate) -> KPIValue:
+    def create_kpi_value(self, db: Session, kpi_id: int, value_in: KPIValueCreate) -> KPIValue:
         """Create new KPI value."""
         # Verify KPI exists
-        kpi = kpi_repo.get(db, value_in.kpi_id)
+        kpi = kpi_repo.get(db, kpi_id)
         if not kpi:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="KPI not found"
             )
         
-        return kpi_value_repo.create(db, obj_in=value_in)
+        # Create value dict with kpi_id
+        value_dict = value_in.dict()
+        value_dict["kpi_id"] = kpi_id
+        
+        return kpi_value_repo.create(db, obj_in=value_dict)
     
-    def bulk_create_kpi_values(self, db: Session, bulk_in: KPIValueBulkCreate) -> int:
+    def bulk_create_kpi_values(self, db: Session, kpi_id: int, bulk_in: KPIValueBulkCreate) -> int:
         """Bulk create KPI values."""
         # Verify KPI exists
-        kpi = kpi_repo.get(db, bulk_in.kpi_id)
+        kpi = kpi_repo.get(db, kpi_id)
         if not kpi:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -512,7 +516,7 @@ class KPIValueService:
         values_with_kpi = []
         for value in bulk_in.values:
             value_dict = value.dict()
-            value_dict["kpi_id"] = bulk_in.kpi_id
+            value_dict["kpi_id"] = kpi_id
             values_with_kpi.append(KPIValueCreate(**value_dict))
         
         return kpi_value_repo.bulk_create(db, values=values_with_kpi)
