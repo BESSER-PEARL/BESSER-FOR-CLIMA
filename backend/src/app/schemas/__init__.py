@@ -199,13 +199,14 @@ class KPIValueBase(BaseSchema):
 
 
 class KPIValueCreate(KPIValueBase):
-    kpi_id: int = Field(..., gt=0)
+    pass
+    # kpi_id: int = Field(..., gt=0)
 
 
 class KPIValueBulkCreate(BaseSchema):
     """For bulk inserting KPI values."""
-    kpi_id: int = Field(..., gt=0)
     values: List[KPIValueBase] = Field(..., min_items=1, max_items=1000)
+    # kpi_id: int = Field(..., gt=0)
 
 
 class KPIValue(KPIValueBase):

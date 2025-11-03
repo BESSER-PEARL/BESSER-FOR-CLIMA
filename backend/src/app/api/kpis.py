@@ -184,13 +184,14 @@ def update_kpi(
     return kpi_service.update_kpi(db, kpi_id, kpi_in)
 
 
-@router.delete("/{kpi_id}", response_model=KPI, summary="Delete KPI")
+@router.delete("/{kpi_id}", summary="Delete KPI")
 def delete_kpi(
     kpi_id: int = Path(..., description="KPI ID"),
     db: Session = Depends(get_db)
 ):
     """Delete a KPI and all its values."""
-    return kpi_service.delete_kpi(db, kpi_id)
+    kpi_service.delete_kpi(db, kpi_id)
+    return {"message": f"KPI {kpi_id} deleted successfully"}
 
 
 # KPI Values endpoints
