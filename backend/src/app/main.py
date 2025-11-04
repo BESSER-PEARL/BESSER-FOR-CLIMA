@@ -10,7 +10,7 @@ import time
 
 from .core.config import settings
 from .core.database import init_db
-from .api import auth, cities, kpis, dashboards
+from .api import auth, cities, kpis, dashboards, mapdata
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -80,12 +80,16 @@ async def value_error_handler(request: Request, exc: ValueError):
 async def integrity_error_handler(request: Request, exc: IntegrityError):
     """Handle database integrity errors."""
     logger.error(f"Database integrity error: {exc}")
+    
+    # Extract more detailed error information
+    error_detail = str(exc.orig) if hasattr(exc, 'orig') else str(exc)
+    
     return JSONResponse(
         status_code=status.HTTP_409_CONFLICT,
         content={
             "error": "Conflict",
             "message": "Data conflict occurred",
-            "detail": "The operation conflicts with existing data constraints"
+            "detail": error_detail
         }
     )
 
@@ -122,6 +126,7 @@ app.include_router(auth.router)
 app.include_router(cities.router)
 app.include_router(kpis.router)
 app.include_router(dashboards.router)
+app.include_router(mapdata.router)
 
 
 @app.on_event("startup")

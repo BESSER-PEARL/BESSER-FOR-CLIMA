@@ -199,13 +199,14 @@ class KPIValueBase(BaseSchema):
 
 
 class KPIValueCreate(KPIValueBase):
-    kpi_id: int = Field(..., gt=0)
+    pass
+    # kpi_id: int = Field(..., gt=0)
 
 
 class KPIValueBulkCreate(BaseSchema):
     """For bulk inserting KPI values."""
-    kpi_id: int = Field(..., gt=0)
     values: List[KPIValueBase] = Field(..., min_items=1, max_items=1000)
+    # kpi_id: int = Field(..., gt=0)
 
 
 class KPIValue(KPIValueBase):
@@ -416,9 +417,7 @@ class WMS(MapDataBase):
 
 class GeoJsonCreate(MapDataBase):
     data: Dict[str, Any]
-    style: Optional[Dict[str, Any]] = None
     city_id: int = Field(..., gt=0)
-    map_id: Optional[int] = Field(None, gt=0)
 
 
 class GeoJson(MapDataBase):

@@ -1,6 +1,7 @@
 <script setup>
 import { get } from 'plotly.js-dist';
 import { ref, defineProps, watch, computed } from 'vue';
+import apiService from '../services/apiService';
 
 const props = defineProps({
     tableId: {
@@ -31,9 +32,9 @@ const timestamps = ref([])
 
 async function getItems() {
     try {
-
-        const response = await fetch('http://localhost:8000/' + props.city.toLowerCase() + '/kpi/?id=' + props.tableId)
-        const data = await response.json();
+        // Use API service to get KPI values
+        const data = await apiService.getKPIValues(props.tableId);
+        
         //console.log(data)
         // Iterate over the list of strings and log each string
         if (props.columns.length > 0) {

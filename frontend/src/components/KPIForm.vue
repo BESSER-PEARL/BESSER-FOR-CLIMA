@@ -1,5 +1,6 @@
 <script setup>
 import { ref, defineEmits, computed } from 'vue';
+import apiService from '../services/apiService';
 
 const emit = defineEmits(["cancel","addElement", "createVisualisation"])
 
@@ -147,11 +148,9 @@ async function getItem(){
             itemObjects.value = [];
             return;
         }
-        const response = await fetch(`http://localhost:8000/kpis/?city_id=${props.cityId}`);
-        if (!response.ok) {
-            throw new Error(`API request failed: ${response.status}`);
-        }
-        const data = await response.json();
+        
+        // Use API service instead of direct fetch
+        const data = await apiService.getKPIs(props.cityId);
 
         // Sort and add recommendation labels based on chart type
         const sortedKPIs = sortKPIsForChart(data, props.chart);

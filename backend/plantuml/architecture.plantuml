@@ -145,6 +145,40 @@ package "Database Models" {
         type = "map"
     }
     
+    class FreeTextField {
+        text: str [nullable]
+        type = "freetextfield"
+        --
+        NOTE: Independent of KPI
+        Used for text notes only
+    }
+    
+    class Timeline {
+        description: str [nullable]
+        type = "timeline"
+        --
+        NOTE: Independent of KPI
+        References KPIs via JSON string
+    }
+    
+    class TimelineEvent << (T,#FFAAAA) >> {
+        + id: int <<PK>>
+        --
+        title: str
+        description: str [nullable]
+        phase: str
+        start_date: datetime
+        end_date: datetime [nullable]
+        is_ongoing: bool
+        status: str
+        kpi_references: str [nullable] JSON array
+        failure_reason: str [nullable]
+        color: str
+        timeline_id: int <<FK>>
+        created_at: datetime
+        updated_at: datetime
+    }
+    
     ' Polymorphic MapData Base
     class MapData << (T,#FFAAAA) >> {
         + id: int <<PK>>
@@ -201,9 +235,14 @@ Visualization <|-- PieChart
 Visualization <|-- StatChart
 Visualization <|-- Table
 Visualization <|-- Map
+Visualization <|-- FreeTextField
+Visualization <|-- Timeline
 
 ' Table Relationships
 Table "1" -- "0..*" TableColumn : defines
+
+' Timeline Relationships
+Timeline "1" -- "0..*" TimelineEvent : contains
 
 ' Map Relationships
 Map "1" -- "0..*" MapData : displays
@@ -278,6 +317,17 @@ package "API Endpoints (FastAPI)" {
         Type-specific rendering
     }
     
+    class MapDataAPI {
+        +GET /mapdata/?city_id={city_id}
+        +GET /mapdata/{mapdata_id}
+        +POST /mapdata
+        +PUT /mapdata/{mapdata_id}
+        +DELETE /mapdata/{mapdata_id}
+        --
+        WMS and GeoJSON management
+        Geospatial data handling
+    }
+    
     class AuthAPI {
         +POST /auth/login
         +POST /auth/logout
@@ -287,6 +337,14 @@ package "API Endpoints (FastAPI)" {
         Keycloak integration
         JWT token validation
         Role-based access
+    }
+    
+    class HealthAPI {
+        +GET /health
+        +GET /
+        --
+        Health check
+        API information
     }
 }
 
@@ -298,6 +356,8 @@ SectionsAPI ..> DashboardSection : manages
 KPIsAPI ..> KPI : manages
 KPIsAPI ..> KPIValue : retrieves
 VisualizationsAPI ..> Visualization : manages
+MapDataAPI ..> MapData : manages
+AuthAPI ..> City : secures
 
 ' ========================================
 ' ARCHITECTURE LAYERS
@@ -333,6 +393,50 @@ package "Architecture Layers" {
         + Constraints
     }
 }
+
+' ========================================
+' MIDDLEWARE & ERROR HANDLING
+' ========================================
+
+package "Middleware & Error Handling" {
+    
+    class CORSMiddleware {
+        + allow_origins
+        + allow_credentials
+        + allow_methods
+        + allow_headers
+        --
+        Handles cross-origin requests
+    }
+    
+    class ProcessTimeMiddleware {
+        + add_process_time_header()
+        --
+        Adds X-Process-Time header
+    }
+    
+    class ExceptionHandlers {
+        + value_error_handler()
+        + integrity_error_handler()
+        + sqlalchemy_error_handler()
+        + http_exception_handler()
+        --
+        Centralized error handling
+        Consistent error responses
+    }
+    
+    class AuthenticationMiddleware {
+        + KeycloakBearer authentication
+        + JWT validation
+        + Token refresh
+    }
+}
+
+' Middleware to API Layer connection
+CORSMiddleware --> APILayer : intercepts
+ProcessTimeMiddleware --> APILayer : intercepts
+ExceptionHandlers --> APILayer : handles
+AuthenticationMiddleware --> APILayer : validates
 
 APILayer --> ServiceLayer : calls
 ServiceLayer --> RepositoryLayer : uses
@@ -373,13 +477,24 @@ note right of Visualization
     - Shared base attributes
     - Type-specific properties
     
-    **Supported Types:**
-    - LineChart (trends)
-    - BarChart (comparisons)
-    - PieChart (proportions)
-    - StatChart (metrics)
-    - Table (tabular data)
-    - Map (geospatial)
+    **Visualization Types:**
+    - LineChart (KPI-linked: trends)
+    - BarChart (KPI-linked: comparisons)
+    - PieChart (KPI-linked: proportions)
+    - StatChart (KPI-linked: metrics)
+    - Table (KPI-linked: tabular data)
+    - Map (independent: geospatial)
+    - FreeTextField (independent: text notes)
+    - Timeline (independent: solution phases)
+end note
+
+note right of Timeline
+    **Timeline Features**
+    - Solution implementation tracking
+    - Phase management
+    - Event status tracking
+    - KPI reference support
+    - Failure reason documentation
 end note
 
 note left of APILayer
@@ -389,6 +504,15 @@ note left of APILayer
     3. snake_case JSON
     4. Consistent errors
     5. Pydantic validation
+end note
+
+note right of ExceptionHandlers
+    **Error Handling**
+    - ValueError (400)
+    - IntegrityError (409)
+    - SQLAlchemyError (500)
+    - HTTPException (consistent)
+    - Detailed error responses
 end note
 
 note bottom of Database

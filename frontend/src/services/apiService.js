@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Enhanced API service for the Climaborough dashboard
  * Provides a clean interface to the backend API with Keycloak authentication
  */
@@ -8,28 +8,65 @@ class ApiService {
         this.baseUrl = baseUrl;
         this.authToken = null;
         this.keycloak = null; // Will be set by the app
+        this.initializationPromise = null;
+        
+        // TIMESTAMP: This confirms file was reloaded
+        // console.log('🚀 ApiService initialized at:', new Date().toISOString());
+        
+        // Listen for Keycloak token refresh events
+        if (typeof window !== 'undefined') {
+            window.addEventListener('keycloak-token-refreshed', (event) => {
+                console.log('🔄 Token refreshed, API service will use new token');
+            });
+        }
     }
 
     // Set Keycloak instance
     setKeycloak(keycloak) {
         this.keycloak = keycloak;
+        // console.log('🔗 Keycloak connected to API service');
+        // console.log('  - Authenticated:', keycloak?.authenticated);
+        // console.log('  - Token available:', !!keycloak?.token);
     }
 
     // Get current token from Keycloak
     async getToken() {
-        if (this.keycloak && this.keycloak.authenticated) {
+        // console.log('🔍 getToken() called');
+        // console.log('  - Keycloak instance exists:', !!this.keycloak);
+        // console.log('  - Keycloak authenticated:', this.keycloak?.authenticated);
+        // console.log('  - Keycloak token exists:', !!this.keycloak?.token);
+        
+        // IMPORTANT: Check that token exists before using it
+        if (this.keycloak && this.keycloak.authenticated && this.keycloak.token) {
             // Update token if needed
             try {
-                await this.keycloak.updateToken(30); // Refresh if expires in 30 seconds
+                const refreshed = await this.keycloak.updateToken(30); // Refresh if expires in 30 seconds
+                if (refreshed) {
+                    console.log('🔄 Token was refreshed');
+                }
+                // console.log('✅ Using Keycloak token for API request');
+                // console.log('  - Token length:', this.keycloak.token?.length);
+                // console.log('  - Token preview:', this.keycloak.token?.substring(0, 30) + '...');
                 return this.keycloak.token;
             } catch (error) {
-                console.error('Failed to refresh token', error);
-                // Try to re-authenticate
-                this.keycloak.login();
-                return null;
+                console.error('❌ Failed to refresh token:', error);
+                console.warn('⚠️ Token refresh failed, will attempt to use existing token');
+                // Don't redirect to login immediately, try using the existing token
+                return this.keycloak.token;
             }
         }
-        return this.authToken; // Fallback to manually set token
+        
+        if (this.authToken) {
+            console.log('🔑 Using manually set auth token for API request');
+            return this.authToken;
+        }
+        
+        console.error('❌ NO TOKEN AVAILABLE - API calls will fail!');
+        // console.error('  - Keycloak instance:', !!this.keycloak);
+        // console.error('  - Keycloak authenticated:', !!this.keycloak?.authenticated);
+        // console.error('  - Keycloak token:', !!this.keycloak?.token);
+        
+        return null; // Explicitly return null when no token is available
     }
 
     // Set authentication token manually (for testing or non-Keycloak auth)
@@ -44,6 +81,18 @@ class ApiService {
         // Get current token
         const token = await this.getToken();
         
+        // console.log('📡 [REQUEST] Making API request to:', endpoint);
+        // console.log('🔑 [REQUEST] Token available:', !!token);
+        // console.log('🔑 [REQUEST] Token length:', token?.length || 0);
+        // if (!token) {
+        //     console.warn('⚠️ [REQUEST] No token available! Request will fail if authentication is required.');
+        //     console.log('🔍 [REQUEST] Keycloak instance:', !!this.keycloak);
+        //     console.log('🔍 [REQUEST] Keycloak authenticated:', this.keycloak?.authenticated);
+        // } else {
+        //     console.log('✅ [REQUEST] Authorization header WILL BE SENT');
+        //     console.log('✅ [REQUEST] Token preview:', token.substring(0, 50) + '...');
+        // }
+        
         const config = {
             headers: {
                 'Content-Type': 'application/json',
@@ -52,6 +101,8 @@ class ApiService {
             },
             ...options
         };
+        
+        // console.log('📋 [REQUEST] Request headers:', JSON.stringify(config.headers, null, 2));
 
         try {
             const response = await fetch(url, config);
@@ -456,6 +507,54 @@ class ApiService {
     // Get API information
     async getApiInfo() {
         return this.get('/');
+    }
+
+    // MAP DATA API METHODS
+    
+    async getMapDataByCity(cityId) {
+        return this.get(`/mapdata/city/${cityId}`);
+    }
+
+    async getMapDataByCityCode(cityCode) {
+        return this.get(`/mapdata/city/code/${cityCode.toLowerCase()}`);
+    }
+
+    async getMapDataById(mapDataId) {
+        return this.get(`/mapdata/${mapDataId}`);
+    }
+
+    async createWMSLayer(wmsData) {
+        return this.post('/mapdata/wms', wmsData);
+    }
+
+    async createGeoJsonLayer(geojsonData) {
+        return this.post('/mapdata/geojson', geojsonData);
+    }
+
+    async updateWMSLayer(mapDataId, wmsData) {
+        return this.put(`/mapdata/wms/${mapDataId}`, wmsData);
+    }
+
+    async updateGeoJsonLayer(mapDataId, geojsonData) {
+        return this.put(`/mapdata/geojson/${mapDataId}`, geojsonData);
+    }
+
+    async deleteMapData(mapDataId) {
+        return this.delete(`/mapdata/${mapDataId}`);
+    }
+
+    async uploadGeoJsonFile(title, cityId, geojsonData, description = null) {
+        return this.post('/mapdata/geojson/upload-file', {
+            title,
+            city_id: cityId,
+            geojson_data: geojsonData,
+            description
+        });
+    }
+
+    // Legacy map data endpoint (for backward compatibility)
+    async getMapDataLegacy(cityCode) {
+        return this.get(`/${cityCode.toLowerCase()}/mapdata/`);
     }
 }
 

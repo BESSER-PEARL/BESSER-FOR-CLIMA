@@ -6,6 +6,7 @@ import { Icon } from "@iconify/vue";
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { authService } from './services/authService';
+import apiService from './services/apiService';
 
 const router = useRouter();
 const isInitializing = ref(true);
@@ -15,10 +16,26 @@ onMounted(async () => {
   try {
     //console.log('Starting authentication initialization...');
     
-    // Initialize Keycloak with robust error handling
-    const authenticated = await authService.init({
+    // Initialize Keycloak - this returns the Keycloak instance
+    const keycloak = await authService.init({
       onLoad: 'check-sso' // This will fallback to login-required if SSO check fails
     });
+    
+    // IMPORTANT: Connect API service to Keycloak IMMEDIATELY after init
+    // This ensures tokens are available for all subsequent API calls
+    if (keycloak) {
+      apiService.setKeycloak(keycloak);
+      // console.log('✅ API service connected to Keycloak - tokens will be sent automatically');
+      // console.log('🔍 Keycloak authenticated:', keycloak.authenticated);
+      // console.log('🔍 Keycloak token available:', !!keycloak.token);
+      // if (keycloak.token) {
+      //   console.log('🔍 Token preview:', keycloak.token.substring(0, 50) + '...');
+      // }
+    } else {
+      console.warn('⚠️ Keycloak instance not available - tokens will NOT be sent');
+    }
+    
+    const authenticated = keycloak?.authenticated || false;
     
     // Clean up any old localStorage tokens
     authService.cleanupLocalStorage();

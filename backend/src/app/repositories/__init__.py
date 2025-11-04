@@ -262,9 +262,16 @@ class KPIValueRepository(BaseRepository[KPIValue, KPIValueCreate, None]):
             for row in result
         ]
     
-    def bulk_create(self, db: Session, *, values: List[KPIValueCreate]) -> int:
+    def bulk_create(self, db: Session, *, values: List) -> int:
         """Bulk create KPI values."""
-        db_objects = [KPIValue(**value.dict()) for value in values]
+        db_objects = []
+        for value in values:
+            # Handle both Pydantic objects and dictionaries
+            if isinstance(value, dict):
+                db_objects.append(KPIValue(**value))
+            else:
+                db_objects.append(KPIValue(**value.dict()))
+        
         db.add_all(db_objects)
         db.commit()
         return len(db_objects)

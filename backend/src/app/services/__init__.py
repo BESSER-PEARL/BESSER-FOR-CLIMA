@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 
 from ..repositories import (
     city_repo, dashboard_repo, section_repo, kpi_repo, kpi_value_repo, 
-    visualization_repo
+    visualization_repo, map_data_repo
 )
 from ..schemas import (
     CityCreate, CityUpdate, City,
@@ -17,6 +17,7 @@ from ..schemas import (
     KPICreate, KPIUpdate, KPI, KPIQueryParams,
     KPIValueCreate, KPIValue, KPIValueQueryParams, KPIValueBulkCreate,
     VisualizationCreate, VisualizationUpdate, Visualization,
+    WMS, WMSCreate, GeoJson, GeoJsonCreate,
     PaginatedResponse
 )
 
@@ -485,34 +486,38 @@ class KPIValueService:
             end_date=end_date
         )
     
-    def create_kpi_value(self, db: Session, value_in: KPIValueCreate) -> KPIValue:
+    def create_kpi_value(self, db: Session, kpi_id: int, value_in: KPIValueCreate) -> KPIValue:
         """Create new KPI value."""
         # Verify KPI exists
-        kpi = kpi_repo.get(db, value_in.kpi_id)
+        kpi = kpi_repo.get(db, kpi_id)
         if not kpi:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="KPI not found"
             )
         
-        return kpi_value_repo.create(db, obj_in=value_in)
+        # Create value dict with kpi_id
+        value_dict = value_in.dict()
+        value_dict["kpi_id"] = kpi_id
+        
+        return kpi_value_repo.create(db, obj_in=value_dict)
     
-    def bulk_create_kpi_values(self, db: Session, bulk_in: KPIValueBulkCreate) -> int:
+    def bulk_create_kpi_values(self, db: Session, kpi_id: int, bulk_in: KPIValueBulkCreate) -> int:
         """Bulk create KPI values."""
         # Verify KPI exists
-        kpi = kpi_repo.get(db, bulk_in.kpi_id)
+        kpi = kpi_repo.get(db, kpi_id)
         if not kpi:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="KPI not found"
             )
         
-        # Add kpi_id to all values
+        # Add kpi_id to all values - pass as dicts to preserve kpi_id
         values_with_kpi = []
         for value in bulk_in.values:
             value_dict = value.dict()
-            value_dict["kpi_id"] = bulk_in.kpi_id
-            values_with_kpi.append(KPIValueCreate(**value_dict))
+            value_dict["kpi_id"] = kpi_id
+            values_with_kpi.append(value_dict)
         
         return kpi_value_repo.bulk_create(db, values=values_with_kpi)
     
@@ -612,6 +617,182 @@ class VisualizationService:
         return visualization_repo.delete_multiple(db, ids=vis_ids)
 
 
+class MapDataService:
+    """Service for map data operations."""
+    
+    def get_map_data(self, db: Session, map_data_id: int):
+        """Get map data by ID."""
+        map_data = map_data_repo.get(db, map_data_id)
+        if not map_data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Map data not found"
+            )
+        return map_data
+    
+    def get_map_data_by_city(self, db: Session, city_id: int, active_only: bool = True) -> List[Any]:
+        """Get all map layers for a city."""
+        # Verify city exists
+        city = city_repo.get(db, city_id)
+        if not city:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="City not found"
+            )
+        
+        return map_data_repo.get_by_city(db, city_id=city_id, active_only=active_only)
+    
+    def get_map_data_by_city_code(self, db: Session, city_code: str, active_only: bool = True) -> List[Any]:
+        """Get all map layers for a city by code."""
+        # Verify city exists
+        city = city_repo.get_by_code(db, code=city_code.lower())
+        if not city:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"City with code '{city_code}' not found"
+            )
+        
+        return map_data_repo.get_by_city(db, city_id=city.id, active_only=active_only)
+    
+    def create_wms_layer(self, db: Session, wms_in: WMSCreate) -> WMS:
+        """Create a new WMS layer."""
+        # Verify city exists
+        city = city_repo.get(db, wms_in.city_id)
+        if not city:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="City not found"
+            )
+        
+        # Create WMS layer
+        from ..models import WMS as WMSModel
+        from sqlalchemy.exc import IntegrityError
+        
+        try:
+            wms_data = wms_in.dict()
+            wms_data['type'] = 'wms'
+            wms_data['map_id'] = None  # Not used in v2
+            
+            wms = WMSModel(**wms_data)
+            db.add(wms)
+            db.commit()
+            db.refresh(wms)
+            return wms
+        except IntegrityError as e:
+            db.rollback()
+            error_msg = str(e.orig)
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Database constraint violation: {error_msg}"
+            )
+    
+    def create_geojson_layer(self, db: Session, geojson_in: GeoJsonCreate) -> GeoJson:
+        """Create a new GeoJSON layer."""
+        # Verify city exists
+        city = city_repo.get(db, geojson_in.city_id)
+        if not city:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="City not found"
+            )
+        
+        # Validate GeoJSON structure
+        if not isinstance(geojson_in.data, dict):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="GeoJSON data must be a valid JSON object"
+            )
+        
+        if 'type' not in geojson_in.data:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="GeoJSON data must have a 'type' field"
+            )
+        
+        # Create GeoJSON layer
+        from ..models import GeoJson as GeoJsonModel
+        from sqlalchemy.exc import IntegrityError
+        
+        try:
+            geojson_data = geojson_in.dict()
+            geojson_data['type'] = 'geojson'
+            geojson_data['map_id'] = None  # Not used in v2
+            geojson_data['style'] = None   # Use default styling
+            
+            geojson = GeoJsonModel(**geojson_data)
+            db.add(geojson)
+            db.commit()
+            db.refresh(geojson)
+            return geojson
+        except IntegrityError as e:
+            db.rollback()
+            # Extract the specific constraint that failed
+            error_msg = str(e.orig)
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Database constraint violation: {error_msg}"
+            )
+    
+    def update_wms_layer(self, db: Session, map_data_id: int, wms_in: WMSCreate) -> WMS:
+        """Update an existing WMS layer."""
+        map_data = self.get_map_data(db, map_data_id)
+        
+        if map_data.type != 'wms':
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Map data is not a WMS layer"
+            )
+        
+        # Update fields
+        for field, value in wms_in.dict(exclude_unset=True).items():
+            setattr(map_data, field, value)
+        
+        db.commit()
+        db.refresh(map_data)
+        return map_data
+    
+    def update_geojson_layer(self, db: Session, map_data_id: int, geojson_in: GeoJsonCreate) -> GeoJson:
+        """Update an existing GeoJSON layer."""
+        map_data = self.get_map_data(db, map_data_id)
+        
+        if map_data.type != 'geojson':
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Map data is not a GeoJSON layer"
+            )
+        
+        # Validate GeoJSON structure
+        if not isinstance(geojson_in.data, dict):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="GeoJSON data must be a valid JSON object"
+            )
+        
+        # Update fields
+        for field, value in geojson_in.dict(exclude_unset=True).items():
+            setattr(map_data, field, value)
+        
+        db.commit()
+        db.refresh(map_data)
+        return map_data
+    
+    def delete_map_data(self, db: Session, map_data_id: int) -> Dict[str, Any]:
+        """Delete a map layer."""
+        map_data = self.get_map_data(db, map_data_id)
+        
+        title = map_data.title
+        layer_type = map_data.type
+        
+        db.delete(map_data)
+        db.commit()
+        
+        return {
+            "message": f"Map layer '{title}' deleted successfully",
+            "id": map_data_id,
+            "type": layer_type
+        }
+
+
 # Service instances
 city_service = CityService()
 dashboard_service = DashboardService()
@@ -619,3 +800,4 @@ section_service = SectionService()
 kpi_service = KPIService()
 kpi_value_service = KPIValueService()
 visualization_service = VisualizationService()
+map_data_service = MapDataService()
