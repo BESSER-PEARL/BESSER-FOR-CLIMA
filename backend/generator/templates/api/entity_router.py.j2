@@ -1,0 +1,63 @@
+"""
+{{ entity.name }} API routes.
+"""
+from typing import List
+from fastapi import APIRouter, Depends, Query, HTTPException, status
+from sqlalchemy.orm import Session
+
+from ..core.database import get_db
+from ..schemas import (
+    {{ entity.name }}, {{ entity.name }}Create, {{ entity.name }}Update, 
+    PaginatedResponse, ErrorResponse
+)
+from ..services import {{ entity.name.lower() }}_service
+
+router = APIRouter(prefix="/{{ entity.name.lower() }}s", tags=["{{ entity.name }}s"])
+
+
+@router.get("/", response_model=List[{{ entity.name }}], summary="List {{ entity.name.lower() }}s")
+def list_{{ entity.name.lower() }}s(
+    skip: int = Query(0, ge=0, description="Number of records to skip"),
+    limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return"),
+    db: Session = Depends(get_db)
+):
+    """List all {{ entity.name.lower() }}s with pagination."""
+    items, total = {{ entity.name.lower() }}_service.list_{{ entity.name.lower() }}s(db, skip=skip, limit=limit)
+    return items
+
+
+@router.get("/{{'{'}}{{ entity.name.lower() }}_id{{'}'}}", response_model={{ entity.name }}, summary="Get {{ entity.name.lower() }} by ID")
+def get_{{ entity.name.lower() }}(
+    {{ entity.name.lower() }}_id: int,
+    db: Session = Depends(get_db)
+):
+    """Get a specific {{ entity.name.lower() }} by ID."""
+    return {{ entity.name.lower() }}_service.get_{{ entity.name.lower() }}(db, {{ entity.name.lower() }}_id)
+
+
+@router.post("/", response_model={{ entity.name }}, status_code=status.HTTP_201_CREATED, summary="Create {{ entity.name.lower() }}")
+def create_{{ entity.name.lower() }}(
+    {{ entity.name.lower() }}_in: {{ entity.name }}Create,
+    db: Session = Depends(get_db)
+):
+    """Create a new {{ entity.name.lower() }}."""
+    return {{ entity.name.lower() }}_service.create_{{ entity.name.lower() }}(db, {{ entity.name.lower() }}_in)
+
+
+@router.put("/{{'{'}}{{ entity.name.lower() }}_id{{'}'}}", response_model={{ entity.name }}, summary="Update {{ entity.name.lower() }}")
+def update_{{ entity.name.lower() }}(
+    {{ entity.name.lower() }}_id: int,
+    {{ entity.name.lower() }}_in: {{ entity.name }}Update,
+    db: Session = Depends(get_db)
+):
+    """Update an existing {{ entity.name.lower() }}."""
+    return {{ entity.name.lower() }}_service.update_{{ entity.name.lower() }}(db, {{ entity.name.lower() }}_id, {{ entity.name.lower() }}_in)
+
+
+@router.delete("/{{'{'}}{{ entity.name.lower() }}_id{{'}'}}", response_model={{ entity.name }}, summary="Delete {{ entity.name.lower() }}")
+def delete_{{ entity.name.lower() }}(
+    {{ entity.name.lower() }}_id: int,
+    db: Session = Depends(get_db)
+):
+    """Delete a {{ entity.name.lower() }} and all its related data."""
+    return {{ entity.name.lower() }}_service.delete_{{ entity.name.lower() }}(db, {{ entity.name.lower() }}_id)

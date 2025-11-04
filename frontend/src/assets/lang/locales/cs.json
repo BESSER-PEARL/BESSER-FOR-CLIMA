@@ -1,0 +1,64 @@
+{
+  "header": {
+    "home": "Domů",
+    "About": "O nás",
+    "Login": "Přihlášení"
+  },
+  "footer": {
+    "column1": "CLIMABOROUGH je projekt spolufinancovaný Evropskou unií a CINEA s ambicí překlenout propast mezi návrhem a implementací městských inovací, zejména tváří v tvář klimatické změně a jejím následným potřebám pro adaptaci a mitigaci.",
+    "column2": "Financováno Evropskou unií. Vyjádřené názory a stanoviska jsou však pouze autorské a nemusí nutně odrážet stanovisko Evropské unie nebo CINEA. Ani Evropská unie ani udělující autorita za ně nemohou nést odpovědnost.",
+    "tos": "Podmínky použití",
+    "socialMedia": "Sledujte nás"
+  },
+  "homeview": {
+    "hero_title": "Navigujte cestu ke klimatické neutralitě",
+    "hero_subtitle": "Váš přehled pokroku",
+    "hero_button": "Dashboard",
+    "carousel_differdange": "Differdange s přibližně 30 000 obyvateli je třetím největším městem Lucemburska, které se nachází v jižní části země v hraničním trojúhelníku s Belgií a Francií.",
+    "carousel_cascais": "Cascais je pobřežní město s více než 200 000 obyvateli na okraji lisabonské metropolitní oblasti.",
+    "carousel_sofia": "Sofia je hlavním městem Bulharska a 14. největším městem v Evropě s téměř 1,5 milionem obyvatel.",
+    "carousel_maribor": "Město Maribor je druhým největším městem ve Slovinsku s přibližně 100 000 obyvateli (115 000 v městské oblasti).",
+    "carousel_athens": "Obec Athény je hlavním a největším městem Řecka s populací více než 600 000 obyvatel (přibližně 2,7 milionu v městské aglomeraci).",
+    "carousel_grenoble-alpes": "Grenoble-Alpes Métropole se skládá ze 49 obcí a 450 000 obyvatel.",
+    "carousel_ioannina": "Ioannina je hlavním a největším městem Epiru, severozápadního regionu Řecka, s přibližně 112 000 obyvateli v celé obci.",
+    "carousel_torino": "Turín s přibližně 850 000 obyvateli (2,2 milionu v městské oblasti) je jedním z hlavních měst Itálie.",
+    "carousel_issy-les-moulineaux": "Issy-les-Moulineaux je město nacházející se na okraji Paříže.",
+    "carousel_krk": "Město Krk s 6 200 obyvateli v rámci své samosprávy vykonává úkoly místního významu.",
+    "carousel_pilsen": "Plzeň je čtvrtým největším městem České republiky s přibližně 170 000 obyvateli.",
+    "carousel_podgorica": "Podgorica je hlavním městem Černé Hory.",
+    "carousel_prijedor": "Město Prijedor se nachází v severozápadní části Bosny a Hercegoviny.",
+    "carousel_katowice": "Katovice jsou hlavním městem hornoslezské metropolitní oblasti a 11. nejlidnatějším městem v Polsku (přibližně 285 000 obyvatel)."
+  },
+  "projectview": {
+    "title": "Dostupné dashboardy",
+    "hub1": "Climaborough Hub 1 - Od izolované energie a mobility k integrovaným službám",
+    "hub2": "Climaborough Hub 2 - Od odpadu k cirkulární ekonomice",
+    "authentication_required": "Vyžadováno ověření"
+  },
+  "dashboard": {
+    "authentication_required": "Vyžadováno ověření"
+  },
+  "admin": {
+    "authentication_required": "Vyžadováno ověření administrátora"
+  },
+  "denied_header": "Přístup odepřen",
+  "denied_subheader": "Pro přístup k dashboardům Climaborough se musíte přihlásit.",
+  "login": {
+    "title": "Přihlášení",
+    "sign_in": "Přihlásit se pomocí Keycloak",
+    "cancel": "Zrušit",
+    "login": "Přihlaste se pro zobrazení více",
+    "email": "Emailová adresa",
+    "email_message": "Prosím zadejte emailovou adresu!",
+    "password": "Heslo",
+    "submit": "Odeslat"
+  },
+  "auth": {
+    "access_required": "Vyžadován přístup",
+    "please_login": "Pro přístup k této stránce se prosím přihlaste.",
+    "go_home": "Jít na domovskou stránku",
+    "logout_error": "Chyba při odhlášení, zkuste to prosím znovu.",
+    "unauthorized": "Nemáte oprávnění k přístupu k tomuto zdroji.",
+    "forbidden": "Přístup zakázán. Nemáte oprávnění zobrazit tuto stránku."
+  }
+}

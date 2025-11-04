@@ -4,9 +4,6 @@ authors:
 - family-names: "FamilyNames"
   given-names: "GivenNames"
   orcid: "https://orcid.org/0000-0000-0000-0000"
-- family-names: "FamilyNames"
-  given-names: "GivenNames"
-  orcid: "https://orcid.org/0000-0000-0000-0000"
 title: "The title of your paper"
 version: 1.0.0
 doi: 10.1007/s10664-021-10061-x

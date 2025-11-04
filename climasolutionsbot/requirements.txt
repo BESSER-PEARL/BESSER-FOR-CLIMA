@@ -1,1 +1,1 @@
-besser-bot-framework==1.3.0
+besser-agentic-framework[llms, extras, torch]==3.0.1

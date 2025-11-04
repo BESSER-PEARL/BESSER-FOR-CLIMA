@@ -1,0 +1,64 @@
+{
+  "header": {
+    "home": "Strona główna",
+    "About": "O nas",
+    "Login": "Zaloguj się"
+  },
+  "footer": {
+    "column1": "CLIMABOROUGH to projekt współfinansowany przez Unię Europejską i CINEA, mający na celu zniwelowanie różnicy między projektowaniem a wdrażaniem innowacji miejskich, szczególnie w obliczu zmian klimatycznych i wynikających z nich potrzeb adaptacji i łagodzenia skutków.",
+    "column2": "Finansowane przez Unię Europejską. Wyrażone poglądy i opinie należą jednak wyłącznie do autora/autorów i niekoniecznie odzwierciedlają stanowisko Unii Europejskiej lub CINEA. Ani Unia Europejska, ani organ przyznający dotację nie mogą być za nie odpowiedzialne.",
+    "tos": "Warunki użytkowania",
+    "socialMedia": "Śledź nas"
+  },
+  "homeview": {
+    "hero_title": "Nawiguj drogę do neutralności klimatycznej",
+    "hero_subtitle": "Twój panel postępu",
+    "hero_button": "Panel",
+    "carousel_differdange": "Differdange, liczące około 30 000 mieszkańców, jest trzecim co do wielkości miastem w Luksemburgu, położonym w południowej części kraju w trójkącie granicznym z Belgią i Francją.",
+    "carousel_cascais": "Cascais to nadmorskie miasto liczące ponad 200 000 mieszkańców na obrzeżach Regionu Metropolitalnego Lizbony.",
+    "carousel_sofia": "Sofia jest stolicą Bułgarii i 14. największym miastem w Europie z prawie 1,5 milionem mieszkańców.",
+    "carousel_maribor": "Miasto Maribor jest drugim co do wielkości miastem w Słowenii, liczącym około 100 000 mieszkańców (115 000 w obszarze miejskim).",
+    "carousel_athens": "Gmina Ateny jest stolicą i największym miastem Grecji, z populacją ponad 600 000 mieszkańców (około 2,7 miliona w aglomeracji miejskiej).",
+    "carousel_grenoble-alpes": "Metropolia Grenoble-Alpes składa się z 49 gmin i 450 000 mieszkańców.",
+    "carousel_ioannina": "Ioannina jest stolicą i największym miastem Epiru, regionu w północno-zachodniej Grecji, z około 112 000 mieszkańców w całej gminie.",
+    "carousel_torino": "Turyn, liczący około 850 000 mieszkańców (2,2 mln w obszarze miejskim), jest jednym z głównych miast we Włoszech.",
+    "carousel_issy-les-moulineaux": "Issy-les-Moulineaux to miasto położone na obrzeżach Paryża.",
+    "carousel_krk": "Miasto Krk, liczące 6 200 mieszkańców, w ramach swojego samorządu wykonuje zadania o znaczeniu lokalnym.",
+    "carousel_pilsen": "Pilzno jest czwartym co do wielkości miastem w Republice Czeskiej, liczącym około 170 000 mieszkańców.",
+    "carousel_podgorica": "Podgorica jest stolicą Czarnogóry.",
+    "carousel_prijedor": "Miasto Prijedor znajduje się w północno-zachodniej części Bośni i Hercegowiny.",
+    "carousel_katowice": "Katowice są głównym miastem górnośląskiego obszaru metropolitalnego i 11. najludniejszym miastem w Polsce (około 285 000 mieszkańców)."
+  },
+  "projectview": {
+    "title": "Dostępne Panele",
+    "hub1": "Climaborough Hub 1 - Od Izolowanej Energii i Mobilności do Zintegrowanych Usług",
+    "hub2": "Climaborough Hub 2 - Od Odpadów do Gospodarki Obiegu Zamkniętego",
+    "authentication_required": "Wymagane Uwierzytelnienie"
+  },
+  "dashboard": {
+    "authentication_required": "Wymagane Uwierzytelnienie"
+  },
+  "admin": {
+    "authentication_required": "Wymagane Uwierzytelnienie Administratora"
+  },
+  "denied_header": "Odmowa Dostępu",
+  "denied_subheader": "Musisz się zalogować, aby uzyskać dostęp do paneli Climaborough.",
+  "login": {
+    "title": "Zaloguj się",
+    "sign_in": "Zaloguj się przez Keycloak",
+    "cancel": "Anuluj",
+    "login": "Zaloguj się, aby zobaczyć więcej",
+    "email": "Adres Email",
+    "email_message": "Proszę wprowadzić adres email!",
+    "password": "Hasło",
+    "submit": "Wyślij"
+  },
+  "auth": {
+    "access_required": "Wymagany Dostęp",
+    "please_login": "Proszę zalogować się, aby uzyskać dostęp do tej strony.",
+    "go_home": "Wróć do Strony Głównej",
+    "logout_error": "Błąd wylogowania, spróbuj ponownie.",
+    "unauthorized": "Nie masz uprawnień do dostępu do tego zasobu.",
+    "forbidden": "Dostęp zabroniony. Nie masz uprawnień do oglądania tej strony."
+  }
+}

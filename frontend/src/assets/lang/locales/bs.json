@@ -1,0 +1,64 @@
+{
+  "header": {
+    "home": "Početna",
+    "About": "O nama",
+    "Login": "Prijavite se"
+  },
+  "footer": {
+    "column1": "CLIMABOROUGH je projekt koji sufinansiraju Europska unija i CINEA, s ambicijom premostiti jaz između dizajna i implementacije urbanih inovacija, posebno u licu klimatskih promjena i njihovih posljedičnih potreba za prilagodbom i ublažavanjem.",
+    "column2": "Financira Europska unija. Izraženi stavovi i mišljenja su ipak samo autorska i ne odražavaju nužno stavove Europske unije ili CINEA. Ni Europska unija ni organ koji daje grant ne mogu se smatrati odgovornima za njih.",
+    "tos": "Uvjeti korištenja",
+    "socialMedia": "Pratite nas"
+  },
+  "homeview": {
+    "hero_title": "Navigirajte put ka klimatskoj neutralnosti",
+    "hero_subtitle": "Vaša kontrolna tabla za napredak",
+    "hero_button": "Kontrolna tabla",
+    "carousel_differdange": "Differdange, sa oko 30.000 stanovnika, je treći najveći grad u Luksemburgu, smješten u južnom dijelu zemlje u graničnom trouglu sa Belgijom i Francuskom.",
+    "carousel_cascais": "Cascais je primorski grad sa preko 200.000 stanovnika na periferiji lisabonske metropolitanske regije.",
+    "carousel_sofia": "Sofija je glavni grad Bugarske i 14. najveći grad u Evropi sa skoro 1,5 miliona stanovnika.",
+    "carousel_maribor": "Grad Maribor je drugi najveći grad u Sloveniji sa oko 100.000 stanovnika (115.000 u urbanom području).",
+    "carousel_athens": "Opština Atina je glavni i najveći grad Grčke, sa populacijom od preko 600.000 stanovnika (oko 2,7 miliona u urbanoj aglomeraciji).",
+    "carousel_grenoble-alpes": "Grenoble-Alpes Metropola se sastoji od 49 opština i 450.000 stanovnika.",
+    "carousel_ioannina": "Janjina je glavni i najveći grad Epira, sjeverozapadne regije Grčke, sa oko 112.000 stanovnika u cijeloj opštini.",
+    "carousel_torino": "Torino, sa oko 850.000 stanovnika (2,2 miliona u urbanom području), jedan je od glavnih gradova Italije.",
+    "carousel_issy-les-moulineaux": "Issy-les-Moulineaux je grad koji se nalazi na periferiji Pariza.",
+    "carousel_krk": "Grad Krk, sa 6.200 stanovnika, u okviru svoje samouprave obavlja zadatke od lokalnog značaja.",
+    "carousel_pilsen": "Plzen je četvrti najveći grad u Češkoj Republici sa oko 170.000 stanovnika.",
+    "carousel_podgorica": "Podgorica je glavni grad Crne Gore.",
+    "carousel_prijedor": "Grad Prijedor se nalazi u sjeverozapadnom dijelu Bosne i Hercegovine.",
+    "carousel_katowice": "Katowice je glavni grad gornješleske metropolitanske oblasti i 11. najnaseljeniji grad u Poljskoj (oko 285.000 stanovnika)."
+  },
+  "projectview": {
+    "title": "Dostupne kontrolne table",
+    "hub1": "Climaborough Hub 1 - Od izolovane energije i mobilnosti do integrisanih usluga",
+    "hub2": "Climaborough Hub 2 - Od otpada do cirkularnosti",
+    "authentication_required": "Potrebna autentifikacija"
+  },
+  "dashboard": {
+    "authentication_required": "Potrebna autentifikacija"
+  },
+  "admin": {
+    "authentication_required": "Potrebna administratorska autentifikacija"
+  },
+  "denied_header": "Pristup odbijen",
+  "denied_subheader": "Morate se prijaviti ako želite pristupiti kontrolnim tablama Climaborough.",
+  "login": {
+    "title": "Prijava",
+    "sign_in": "Prijavite se pomoću Keycloak",
+    "cancel": "Odustani",
+    "login": "Prijavite se da biste vidjeli više",
+    "email": "Email adresa",
+    "email_message": "Molimo unesite email adresu!",
+    "password": "Lozinka",
+    "submit": "Pošalji"
+  },
+  "auth": {
+    "access_required": "Potreban pristup",
+    "please_login": "Molimo prijavite se za pristup ovoj stranici.",
+    "go_home": "Idi na početnu",
+    "logout_error": "Greška pri odjavi, pokušajte ponovo.",
+    "unauthorized": "Niste ovlašteni za pristup ovom resursu.",
+    "forbidden": "Pristup zabranjen. Nemate dozvolu da vidite ovu stranicu."
+  }
+}

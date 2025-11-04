@@ -5,8 +5,10 @@ sqlalchemy
 uvicorn
 geoalchemy2
 shapely
-PyJWT==2.8.0
+python-jose[cryptography]>=3.3.0
 python-decouple
 python-multipart
-passlib
 besser
+python-keycloak
+python-dotenv==1.0.0
+requests

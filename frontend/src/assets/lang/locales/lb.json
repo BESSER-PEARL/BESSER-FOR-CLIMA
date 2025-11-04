@@ -1,0 +1,64 @@
+{
+  "header": {
+    "home": "Heemecht",
+    "About": "Iwwer eis",
+    "Login": "Aloggen"
+  },
+  "footer": {
+    "column1": "CLIMABOROUGH ass e Projet, ko-finanzéiert vun der Europäescher Union an CINEA, mat der Ambitioun d'Kluft tëschent Design an Ëmsetzung vun urbanen Innovatiounen ze iwwerbréckegen, besonnesch am Gesiicht vum klimatesche Wandel a seng konsekutiv Bedierfnisser fir Adaptatioun a Mitigatioun.",
+    "column2": "Finanzéiert vun der Europäescher Union. Usiichten an Oppiniounen ausgedréckt sinn awer nëmmen déi vum Auteur(en) an reflektéieren net onbedéngt déi vun der Europäescher Union oder CINEA. Weder d'Europäesch Union nach d'bewëllegend Autoritéit kënnen dofir verantwortlech gemaach ginn.",
+    "tos": "Notzungsbedingungen",
+    "socialMedia": "Suivéiert eis"
+  },
+  "homeview": {
+    "hero_title": "Navigéiert de Wee zur Klimaneutralitéit",
+    "hero_subtitle": "Är Dashboard fir de Fortschrëtt",
+    "hero_button": "Dashboard",
+    "carousel_differdange": "Déifferdeng, mat ongeféier 30.000 Awunner, ass déi drëttgréisst Stad vu Lëtzebuerg, geleeën am südlechen Deel vum Land am Dräiecksgrenz mat der Belsch a Frankräich.",
+    "carousel_cascais": "Cascais ass eng Küstestad mat méi wéi 200.000 Awunner um Rand vun der Metropolregioun Lissabon.",
+    "carousel_sofia": "Sofia ass d'Haaptstad vu Bulgarien an déi 14. gréisst Stad an Europa mat bal 1,5 Milliounen Awunner.",
+    "carousel_maribor": "D'Stad Maribor ass déi zweet gréisst Stad a Slowenien mat ongeféier 100.000 Awunner (115.000 am urbane Raum).",
+    "carousel_athens": "D'Gemeng Athen ass d'Haaptstad an déi gréisst Stad vu Griicheland, mat enger Populatioun vu méi wéi 600.000 Awunner (ongeféier 2,7 Milliounen am urbanen Agglomerat).",
+    "carousel_grenoble-alpes": "Grenoble-Alpes Métropole besteet aus 49 Gemengen a 450.000 Awunner.",
+    "carousel_ioannina": "Ioannina ass d'Haaptstad an déi gréisst Stad vum Epirus, enger nordwestlecher Regioun vu Griicheland, mat ongeféier 112.000 Awunner an der ganzer Gemeng.",
+    "carousel_torino": "Turin, mat ongeféier 850.000 Awunner (2,2 Milliounen am urbane Gebitt), ass eng vun de gréisste Stied an Italien.",
+    "carousel_issy-les-moulineaux": "Issy-les-Moulineaux ass eng Stad, déi um Rand vu Paräis läit.",
+    "carousel_krk": "D'Stad Krk, mat 6.200 Awunner, féiert am Kader vun hirer Selbstverwaltung Aufgabe vun lokaler Bedeitung aus.",
+    "carousel_pilsen": "Pilsen ass déi véiertgréisst Stad an der Tschechesch Republik mat ongeféier 170.000 Awunner.",
+    "carousel_podgorica": "Podgorica ass d'Haaptstad vu Montenegro.",
+    "carousel_prijedor": "D'Stad Prijedor läit am nordwestlechen Deel vu Bosnien an der Herzegowina.",
+    "carousel_katowice": "Kattowitz ass d'Haaptstad vun der Oberschlesischer Metropolregioun an déi 11. bevëlkerungsräichst Stad a Polen (ongeféier 285.000 Awunner)."
+  },
+  "projectview": {
+    "title": "Disponibel Dashboards",
+    "hub1": "Climaborough Hub 1 - Vun isoléierter Energie a Mobilitéit zu integréierte Servicer",
+    "hub2": "Climaborough Hub 2 - Vum Offall zur Zirkularitéit",
+    "authentication_required": "Authentifizéierung erfuerderlech"
+  },
+  "dashboard": {
+    "authentication_required": "Authentifizéierung erfuerderlech"
+  },
+  "admin": {
+    "authentication_required": "Admin-Authentifizéierung erfuerderlech"
+  },
+  "denied_header": "Zougrëff refuséiert",
+  "denied_subheader": "Dir musst Iech alogge wann Dir op d'Climaborough Dashboards wëllt zougräifen.",
+  "login": {
+    "title": "Aloggen",
+    "sign_in": "Mat Keycloak aloggen",
+    "cancel": "Ofbriechen",
+    "login": "Loggt Iech a fir méi ze gesinn",
+    "email": "E-Mail Adress",
+    "email_message": "Gitt wgl eng E-Mail Adress an!",
+    "password": "Passwuert",
+    "submit": "Ofschécken"
+  },
+  "auth": {
+    "access_required": "Zougrëff erfuerderlech",
+    "please_login": "Loggt Iech wgl a fir op dës Säit zouzegräifen.",
+    "go_home": "Op d'Haaptsäit goen",
+    "logout_error": "Fehler beim Ausloggen, probéiert et wgl nach emol.",
+    "unauthorized": "Dir sidd net autorisé'iert fir op dës Ressource zouzegräifen.",
+    "forbidden": "Zougrëff verbueden. Dir hutt keng Erlaabnes dës Säit ze gesin."
+  }
+}
