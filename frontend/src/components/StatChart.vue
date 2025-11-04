@@ -55,12 +55,14 @@ const currentValue = computed(() => {
   const data = filteredData.value;
   if (!data.length) return 0;
   
-  const latestValue = data[data.length - 1]?.kpiValue || 0;
+  // API returns 'value' not 'kpiValue'
+  const latestValue = data[data.length - 1]?.value ?? data[data.length - 1]?.kpiValue ?? 0;
   if (latestValue === 0) {
     // Find last non-zero value
     for (let i = data.length - 1; i >= 0; i--) {
-      if (data[i].kpiValue !== 0) {
-        return data[i].kpiValue;
+      const val = data[i].value ?? data[i].kpiValue;
+      if (val !== 0) {
+        return val;
       }
     }
   }
@@ -71,7 +73,8 @@ const currentValue = computed(() => {
 const previousValue = computed(() => {
   const data = filteredData.value;
   if (data.length < 2) return null;
-  return data[data.length - 2]?.kpiValue;
+  // API returns 'value' not 'kpiValue'
+  return data[data.length - 2]?.value ?? data[data.length - 2]?.kpiValue;
 });
 
 // Computed property for the last timestamp
@@ -150,7 +153,8 @@ async function getItems() {
 
 function updateChart() {
   const filteredItems = filteredData.value;
-  values.value = filteredItems.map(item => item.kpiValue);
+  // API returns 'value' not 'kpiValue'
+  values.value = filteredItems.map(item => item.value ?? item.kpiValue);
   value.value = currentValue.value;
   
   var delta = 3;
