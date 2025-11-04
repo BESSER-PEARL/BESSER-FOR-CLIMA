@@ -512,12 +512,12 @@ class KPIValueService:
                 detail="KPI not found"
             )
         
-        # Add kpi_id to all values
+        # Add kpi_id to all values - pass as dicts to preserve kpi_id
         values_with_kpi = []
         for value in bulk_in.values:
             value_dict = value.dict()
             value_dict["kpi_id"] = kpi_id
-            values_with_kpi.append(KPIValueCreate(**value_dict))
+            values_with_kpi.append(value_dict)
         
         return kpi_value_repo.bulk_create(db, values=values_with_kpi)
     
