@@ -3,7 +3,7 @@ import Plotly, { get } from "plotly.js-dist"
 import MonthFilter from './MonthFilter.vue'
 import apiService from '@/services/apiService';
 
-import { ref, onMounted, watch, computed } from "vue";
+import { ref, onMounted, watch, computed, nextTick } from "vue";
 
 const props = defineProps({
   tableId: {
@@ -24,15 +24,22 @@ const props = defineProps({
   },
   id: {
     type: String,
-    required: true
-  },
-  target: {
-    type: Number,
-    required: true
+    required: false,
+    default: () => `chart-${Math.random().toString(36).substr(2, 9)}`
   },
   monthFilter: {
     type: String,
     default: ""
+  },
+  minThreshold: {
+    type: [String, Number],
+    required: false,
+    default: null
+  },
+  maxThreshold: {
+    type: [String, Number],
+    required: false,
+    default: null
   }
 })
 
@@ -42,6 +49,21 @@ const value = ref(0)
 const data = ref({})
 const layout = ref({})
 const localMonthFilter = ref(props.monthFilter || "")
+const isMounted = ref(false)
+
+// Store fetched thresholds if not provided via props
+const minThresholdValue = ref(null);
+const maxThresholdValue = ref(null);
+
+// Get effective threshold values (use props first, fallback to fetched values)
+const effectiveMinThreshold = computed(() => props.minThreshold !== undefined && props.minThreshold !== null ? props.minThreshold : minThresholdValue.value);
+const effectiveMaxThreshold = computed(() => props.maxThreshold !== undefined && props.maxThreshold !== null ? props.maxThreshold : maxThresholdValue.value);
+
+// Check if we have actual thresholds to display
+const hasThresholds = computed(() => {
+  return (effectiveMinThreshold.value !== null && effectiveMinThreshold.value !== 'N/A') || 
+         (effectiveMaxThreshold.value !== null && effectiveMaxThreshold.value !== 'N/A');
+});
 
 // Computed property to filter data based on selected month
 // Computed property - simplified since filtering is now done server-side
@@ -85,30 +107,10 @@ const lastTimestamp = computed(() => {
 });
 const resizeObserver = new ResizeObserver(entries => {
   for (let entry of entries) {
-    // When the element is resized, log a message
-    layout.value = {
-      font: {
-        family: "Metropolis, sans-serif",
-        weight: 'bold'
-      },
-      paper_bgcolor: "white",
-      margin: { t: 40, b: 0, l: 0, r: 0 }, // Added top margin for title
-      width: document.querySelector(`[id='${props.id}mydiv']`).parentElement.clientWidth,
-      height: document.querySelector(`[id='${props.id}mydiv']`).parentElement.clientHeight,
-      autosize: true,
-      title: {
-        text: props.title,
-        x: 0.02, // Slight padding from left
-        y: 0.98, // Position from top
-        xanchor: 'left',
-        yanchor: 'top',
-        font: {
-          size: 20,
-          weight: 'bold',
-        }
-      }
-    };
-    Plotly.newPlot(props.id + "mydiv", data.value, layout.value, { displaylogo: false });
+    // Only update if we have data
+    if (filteredData.value && filteredData.value.length > 0) {
+      updateChart();
+    }
   }
 });
 
@@ -134,6 +136,21 @@ function getRandomInt(min, max) {
 
 async function getItems() {
   try {
+    // Fetch KPI details to get thresholds if not provided
+    if (!props.minThreshold || !props.maxThreshold) {
+      try {
+        const kpiDetails = await apiService.getKPIById(props.tableId);
+        if (kpiDetails && !props.minThreshold) {
+          minThresholdValue.value = kpiDetails.min_threshold || null;
+        }
+        if (kpiDetails && !props.maxThreshold) {
+          maxThresholdValue.value = kpiDetails.max_threshold || null;
+        }
+      } catch (e) {
+        console.warn('Could not fetch KPI details for thresholds:', e);
+      }
+    }
+    
     // Use server-side filtering if month filter is active
     const dataf = localMonthFilter.value
       ? await apiService.getKPIValuesByMonth(props.tableId, localMonthFilter.value)
@@ -147,98 +164,150 @@ async function getItems() {
     updateChart();
   } catch (error) {
     console.error('Error fetching KPI data:', error);
-    window.alert(error)
+    rawData.value = [];
+    updateChart(); // Still call updateChart to show "No data" message
   }
 }
 
 function updateChart() {
   const filteredItems = filteredData.value;
-  // API returns 'value' not 'kpiValue'
-  values.value = filteredItems.map(item => item.value ?? item.kpiValue);
-  value.value = currentValue.value;
   
-  var delta = 3;
-  if(value.value > 50 && value.value < 100) {
-    delta = 13;
-  } else if (value.value > 100 && value.value < 1000) {
-    delta = 23;
-  } else if (value.value > 1000 && value.value < 10000) {
-    delta = 123;
-  } else if (value.value > 10000 && value.value < 100000) {
-    delta = 1230;
-  } else if (value.value > 100000) {
-    delta = 12300;
+  if (!filteredItems || filteredItems.length === 0) {
+    // Don't render chart if no data
+    return;
   }
   
-  const prev = previousValue.value;
-  
-  if (prev !== null && prev >= 0) {
-    data.value = [
-      {
-        type: "indicator",
-        mode: "number+delta",
-        value: value.value,
-        number: { suffix: " " + props.suffix },
-        delta: { position: "right", reference: prev, relative: true, valueformat: ".2%", suffix: " (comparison to previous period) "},
-        domain: { x: [0, 1.0], y: [0, 1] }
-      },
-    ];
-  } else {
-    data.value = [
-      {
-        type: "indicator",
-        mode: "number+delta",
-        value: value.value,
-        number: { suffix: " " + props.suffix },
-        delta: { position: "right", relative: true, valueformat: ".2%" },
-        domain: { x: [0, 1.0], y: [0, 1] }
-      },
-    ];
+  // Only render if component is mounted
+  if (!isMounted.value) {
+    return;
   }
-
-  if (props.target && props.target != 0) {
-    data.value.push({
+  
+  // Use nextTick to ensure DOM is updated
+  nextTick(() => {
+    const element = document.querySelector(`[id='${props.id}mydiv']`);
+    if (!element) {
+      // Element not in DOM yet (might be showing "No data" message)
+      return;
+    }
+    
+    // API returns 'value' not 'kpiValue'
+    values.value = filteredItems.map(item => item.value ?? item.kpiValue);
+    value.value = currentValue.value;
+    
+    const prev = previousValue.value;
+    
+    // Create indicator with real data - show delta only if we have previous value
+    const indicator = {
       type: "indicator",
-      mode: "number",
-      value: props.target,
-      number: {
-        suffix: " " + props.suffix, 
-        prefix: "Target: ", 
+      mode: prev !== null ? "number+delta" : "number",
+      value: value.value,
+      number: { 
+        suffix: " " + props.suffix,
         font: {
-          weight: "normal",
-          size: 30
+          size: 48,
+          weight: 'bold',
+          color: '#1a1a1a'
         }
       },
-      domain: { x: [0, 1], y: [0.20, 0.3] }
-    });
-  }
-  
-  layout.value = {
-    font: {
-      family: "Metropolis, sans-serif",
-      weight: 'bold'
-    },
-    paper_bgcolor: "white",
-    margin: { t: 40, b: 0, l: 0, r: 0 },
-    width: document.querySelector(`[id='${props.id}mydiv']`)?.parentElement?.clientWidth || 400,
-    height: document.querySelector(`[id='${props.id}mydiv']`)?.parentElement?.clientHeight || 300,
-    autosize: true,
-    title: {
-      text: props.title,
-      x: 0.02,
-      y: 0.98,
-      xanchor: 'left',
-      yanchor: 'top',
-      font: {
-        size: 20,
-        weight: 'bold',
+      domain: { x: [0, 1.0], y: [0.45, 1] }
+    };
+    
+    if (prev !== null && prev >= 0) {
+      indicator.delta = { 
+        position: "bottom", 
+        reference: prev, 
+        relative: true, 
+        valueformat: ".2%",
+        font: {
+          size: 20,
+          weight: 'bold'
+        },
+        increasing: { 
+          color: "#2E7D32",
+          symbol: "▲"
+        },
+        decreasing: { 
+          color: "#C62828",
+          symbol: "▼"
+        }
+      };
+    }
+    
+    data.value = [indicator];
+
+    // Add threshold indicators if available with better styling
+    if (hasThresholds.value) {
+      let yPosition = 0.15;
+      
+      if (effectiveMaxThreshold.value !== null && effectiveMaxThreshold.value !== 'N/A') {
+        data.value.push({
+          type: "indicator",
+          mode: "number",
+          value: parseFloat(effectiveMaxThreshold.value),
+          number: {
+            font: {
+              size: 18,
+              weight: 'bold',
+              color: "#FF6B6B"
+            },
+            suffix: " " + props.suffix,
+            prefix: "Max: "
+          },
+          domain: { x: [0, 0.48], y: [yPosition, yPosition + 0.15] }
+        });
+      }
+      
+      if (effectiveMinThreshold.value !== null && effectiveMinThreshold.value !== 'N/A') {
+        data.value.push({
+          type: "indicator",
+          mode: "number",
+          value: parseFloat(effectiveMinThreshold.value),
+          number: {
+            font: {
+              size: 18,
+              weight: 'bold',
+              color: "#4ECDC4"
+            },
+            suffix: " " + props.suffix,
+            prefix: "Min: "
+          },
+          domain: { x: [0.52, 1], y: [yPosition, yPosition + 0.15] }
+        });
       }
     }
-  };
-  
-  if (document.querySelector(`[id='${props.id}mydiv']`)) {
-    Plotly.newPlot(props.id + "mydiv", data.value, layout.value, { displaylogo: false });
-  }
+    
+    layout.value = {
+      font: {
+        family: "Metropolis, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+        weight: 'bold'
+      },
+      paper_bgcolor: "rgba(255, 255, 255, 0.95)",
+      plot_bgcolor: "transparent",
+      margin: { t: 50, b: 10, l: 20, r: 20 },
+      width: element.parentElement?.clientWidth || 400,
+      height: element.parentElement?.clientHeight || 300,
+      autosize: true,
+      title: {
+        text: props.title,
+        x: 0.03,
+        y: 0.97,
+        xanchor: 'left',
+        yanchor: 'top',
+        font: {
+          size: 22,
+          weight: 'bold',
+          color: '#2c3e50',
+          family: "Metropolis, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+        }
+      }
+    };
+    
+    try {
+      Plotly.newPlot(props.id + "mydiv", data.value, layout.value, { displaylogo: false });
+    } catch (error) {
+      console.error('Error rendering Plotly chart:', error);
+    }
+  });
 }
 
 
@@ -261,17 +330,32 @@ watch(() => props.monthFilter, (newFilter) => {
   getItems(); // Re-fetch data from server with new filter
 })
 
+// Watch for rawData changes to trigger chart update when mounted
+watch(rawData, () => {
+  if (isMounted.value && rawData.value && rawData.value.length > 0) {
+    updateChart();
+  }
+})
+
 // No longer need to watch filteredData since we fetch filtered data from server
 // watch(filteredData, () => {
 //   updateChart();
 // })
 
-onMounted(() => {
+onMounted(async () => {
+  isMounted.value = true;
+  
+  // Wait for DOM to be fully updated
+  await nextTick();
+  
   const element = document.querySelector(`[id='${props.id}mydiv']`);
   if (element && element.parentElement) {
     resizeObserver.observe(element.parentElement);
-  } else {
-    console.warn(`StatChart: Could not find element with id '${props.id}mydiv'`);
+    
+    // Trigger initial render if we have data
+    if (rawData.value && rawData.value.length > 0) {
+      updateChart();
+    }
   }
 })
 
@@ -314,7 +398,30 @@ onMounted(() => {
 
 .content {
   display: flex;
-  height: calc(90% - 30px); // Adjust height to account for month filter
+  height: calc(95% - 30px);
+  justify-content: center;
+  align-items: center;
+  background: transparent;
+  position: relative;
+}
+
+.no-data-message {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  font-size: 20px;
+  color: #999;
+  font-weight: 600;
+  gap: 12px;
+  
+  &::before {
+    content: '📊';
+    font-size: 48px;
+    opacity: 0.5;
+  }
 }
 
 #container {
@@ -322,6 +429,7 @@ onMounted(() => {
   flex-direction: column;
   height: 100%;
   overflow: hidden;
+  background: transparent;
 }
 
 #chart {
@@ -333,10 +441,22 @@ onMounted(() => {
   justify-content: flex-end;
   align-items: center;
   flex-shrink: 0;
-  padding: 2px 5px;
-  font-size: 10px;
+  padding: 8px 12px;
+  font-size: 11px;
+  font-weight: 500;
   color: #666;
   height: 5%;
-  min-height: 20px;
+  min-height: 24px;
+  background: transparent;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  
+  svg {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      transform: scale(1.15);
+    }
+  }
 }
 </style>

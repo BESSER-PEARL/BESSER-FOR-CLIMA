@@ -31,50 +31,77 @@ const props = defineProps({
   monthFilter: {
     type: String,
     default: ""
+  },
+  minThreshold: {
+    type: [String, Number],
+    required: false,
+    default: null
+  },
+  maxThreshold: {
+    type: [String, Number],
+    required: false,
+    default: null
   }
 })
 
 const chartType = ref('line'); // Reactive chart type
 
-const chartOptions = computed(() => ({
-  chart: {
-    type: chartType.value, // Use the reactive chartType
-    zoom: {
-      enabled: true
+// Store fetched thresholds if not provided via props
+const minThresholdValue = ref(null);
+const maxThresholdValue = ref(null);
+
+// Get effective threshold values (use props first, fallback to fetched values)
+const effectiveMinThreshold = computed(() => props.minThreshold !== undefined && props.minThreshold !== null ? props.minThreshold : minThresholdValue.value);
+const effectiveMaxThreshold = computed(() => props.maxThreshold !== undefined && props.maxThreshold !== null ? props.maxThreshold : maxThresholdValue.value);
+
+// Check if we have actual thresholds to display
+const hasThresholds = computed(() => {
+  return (effectiveMinThreshold.value !== null && effectiveMinThreshold.value !== 'N/A') || 
+         (effectiveMaxThreshold.value !== null && effectiveMaxThreshold.value !== 'N/A');
+});
+
+const chartOptions = computed(() => {
+  const options = {
+    chart: {
+      type: chartType.value, // Use the reactive chartType
+      zoom: {
+        enabled: true
+      }
+    },
+    dataLabels: {
+      enabled: false
+    },
+    stroke: {
+      curve: chartType.value === 'area' ? 'smooth' : 'straight',
+      width: 2.2
+    },
+    title: {
+      text: props.title,
+      style: {
+        fontSize: '20px',
+        fontWeight: 'bold'
+      },
+      offsetY: -8,
+    },
+    grid: {
+      row: {
+        colors: ['#f3f3f3', 'transparent'],
+        opacity: 0.5
+      },
+    },
+    xaxis: {
+      type: 'datetime',
+      title: { text: props.xtitle }
+    },
+    yaxis: {
+      title: { text: props.ytitle }
     }
-  },
-  dataLabels: {
-    enabled: false
-  },
-  stroke: {
-    curve: chartType.value === 'area' ? 'smooth' : 'straight',
-    width: 2.2
-  },
-  title: {
-    text: props.title,
-    style: {
-      fontSize: '20px',
-      fontWeight: 'bold'
-    },
-    offsetY: -8,
-  },
-  grid: {
-    row: {
-      colors: ['#f3f3f3', 'transparent'],
-      opacity: 0.5
-    },
-  },
-  xaxis: {
-    type: 'datetime',
-    title: { text: props.xtitle }
-  },
-  yaxis: {
-    title: { text: props.ytitle }
-  }
-}));
+  };
+
+  return options;
+});
 
 const values = ref([]);
-const baseline = ref([]);
 const valuemappedtotime = ref([]);
 const timestamps = ref([]);
 const rawData = ref([]);
@@ -86,11 +113,6 @@ const series = ref([
     name: "KPI Values",
     data: [],
     color: props.color,
-  },
-  {
-    name: "Baseline",
-    data: [],
-    color: "#FFB800",
   }
 ]);
 
@@ -127,6 +149,21 @@ async function getItems() {
     
     // console.log('LineChart getItems - localMonthFilter:', localMonthFilter.value);
     
+    // Fetch KPI details to get thresholds if not provided
+    if (!props.minThreshold || !props.maxThreshold) {
+      try {
+        const kpiDetails = await apiService.getKPIById(props.tableId);
+        if (kpiDetails && !props.minThreshold) {
+          minThresholdValue.value = kpiDetails.min_threshold || null;
+        }
+        if (kpiDetails && !props.maxThreshold) {
+          maxThresholdValue.value = kpiDetails.max_threshold || null;
+        }
+      } catch (e) {
+        console.warn('Could not fetch KPI details for thresholds:', e);
+      }
+    }
+    
     // Use server-side filtering if month filter is active
     const data = localMonthFilter.value 
       ? await apiService.getKPIValuesByMonth(props.tableId, localMonthFilter.value)
@@ -146,7 +183,6 @@ function processFilteredData() {
   values.value = [];
   timestamps.value = [];
   valuemappedtotime.value = [];
-  baseline.value = [];
   
   if (!filteredData.value || !Array.isArray(filteredData.value)) {
     return;
@@ -158,22 +194,45 @@ function processFilteredData() {
     values.value.push(val);
     timestamps.value.push(item.timestamp);
     valuemappedtotime.value.push({ x: item.timestamp, y: val });
-    baseline.value.push({ x: item.timestamp, y: Math.max(0, val - 10) });
   });
   
-  // Update series
+  // Update series - only KPI Values
   series.value = [
     {
       name: "KPI Values",
       data: valuemappedtotime.value,
       color: props.color,
-    },
-    {
-      name: "Baseline",
-      data: baseline.value,
-      color: "#FFB800",
     }
   ];
+
+  // Add threshold lines as separate series
+  if (hasThresholds.value) {
+    const timeRange = valuemappedtotime.value.map(point => point.x);
+    
+    if (effectiveMaxThreshold.value !== null && effectiveMaxThreshold.value !== 'N/A') {
+      const maxVal = parseFloat(effectiveMaxThreshold.value);
+      series.value.push({
+        name: `Max Threshold: ${effectiveMaxThreshold.value}`,
+        data: timeRange.map(time => ({ x: time, y: maxVal })),
+        color: '#FF6B6B',
+        type: 'line',
+        strokeWidth: [2],
+        strokeDashArray: 5
+      });
+    }
+    
+    if (effectiveMinThreshold.value !== null && effectiveMinThreshold.value !== 'N/A') {
+      const minVal = parseFloat(effectiveMinThreshold.value);
+      series.value.push({
+        name: `Min Threshold: ${effectiveMinThreshold.value}`,
+        data: timeRange.map(time => ({ x: time, y: minVal })),
+        color: '#4ECDC4',
+        type: 'line',
+        strokeWidth: [2],
+        strokeDashArray: 5
+      });
+    }
+  }
 }
 
 getItems();

@@ -593,6 +593,8 @@ const createVisualization = (tableId, tableName, chart, kpi = {}) => {
         vis.attributes.ytitle = `Values (in ${kpi.unit_text || ''})`;
         vis.attributes.color = "#0177a9";
         vis.attributes.target = kpi.max_threshold || 0;
+        vis.attributes.minThreshold = kpi.min_threshold || null;
+        vis.attributes.maxThreshold = kpi.max_threshold || null;
     } else if (chart === "StatChart") {
         vis.attributes.suffix = kpi.unit_text || '';
         vis.attributes.target = kpi.max_threshold || 0;

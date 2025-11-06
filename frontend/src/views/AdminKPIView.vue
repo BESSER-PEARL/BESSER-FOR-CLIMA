@@ -23,9 +23,9 @@ const isAdmin = computed(() => {
   return hasAdminRole || hasAdminGroup;
 });
 
-// Available cities
+// Available cities - must match the city codes in the database
 const cities = [
-  'Ioannina', 'Maribor', 'Grenoble-Alpes', 'Athens', 'Differdange', 
+  'Ioannina', 'Maribor', 'Grenoble', 'Athens', 'Differdange', 
   'Torino', 'Cascais', 'Sofia'
 ];
 
