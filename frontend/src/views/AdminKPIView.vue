@@ -44,6 +44,11 @@ const kpiValues = ref([]);
 const loadingKpiValues = ref(false);
 const kpiValuesError = ref('');
 
+// KPI Edit Dialog State
+const showKpiEditDialog = ref(false);
+const editingKpi = ref(null);
+const editForm = ref({});
+
 // KPI data grouped by category
 const kpisByCategory = computed(() => {
   const grouped = {};
@@ -132,6 +137,60 @@ const closeKpiValuesDialog = () => {
   selectedKpi.value = null;
   kpiValues.value = [];
   kpiValuesError.value = '';
+};
+
+// Open KPI edit dialog
+const openKpiEditDialog = (kpi) => {
+  editingKpi.value = kpi;
+  editForm.value = {
+    name: kpi.name,
+    description: kpi.description || '',
+    unit_text: kpi.unit_text || '',
+    min_threshold: kpi.min_threshold || '',
+    max_threshold: kpi.max_threshold || '',
+    provider: kpi.provider || '',
+    calculation_frequency: kpi.calculation_frequency || ''
+  };
+  showKpiEditDialog.value = true;
+};
+
+// Close KPI edit dialog
+const closeKpiEditDialog = () => {
+  showKpiEditDialog.value = false;
+  editingKpi.value = null;
+  editForm.value = {};
+};
+
+// Save KPI changes
+const saveKpiChanges = async () => {
+  if (!editingKpi.value) return;
+  
+  try {
+    // Prepare update data with snake_case fields
+    const updateData = {
+      name: editForm.value.name,
+      description: editForm.value.description,
+      unit_text: editForm.value.unit_text,
+      min_threshold: editForm.value.min_threshold ? parseFloat(editForm.value.min_threshold) : null,
+      max_threshold: editForm.value.max_threshold ? parseFloat(editForm.value.max_threshold) : null,
+      provider: editForm.value.provider,
+      calculation_frequency: editForm.value.calculation_frequency
+    };
+    
+    // Call API to update KPI
+    await apiService.updateKPI(editingKpi.value.id, updateData);
+    
+    // Refresh KPIs list
+    await fetchKPIs();
+    
+    // Close dialog and show success
+    closeKpiEditDialog();
+    alert('KPI updated successfully');
+    
+  } catch (err) {
+    error.value = 'Failed to update KPI: ' + err.message;
+    console.error('Error updating KPI:', err);
+  }
 };
 
 // Delete KPI
@@ -306,7 +365,7 @@ onMounted(() => {
                     class="kpi-card"
                     elevation="2"
                   >
-                    <v-card-title>
+                    <v-card-title class="kpi-card-title">
                       <div class="kpi-header">
                         <div class="kpi-title-section">
                           <h4 class="kpi-name">{{ kpi.name }}</h4>
@@ -319,28 +378,37 @@ onMounted(() => {
                             {{ kpi.unit_text || 'No Unit' }}
                           </v-chip>
                         </div>
-                        <div class="kpi-actions">
-                          <v-btn
-                            icon="mdi-chart-line"
-                            size="small"
-                            color="primary"
-                            variant="text"
-                            @click="fetchKpiValues(kpi)"
-                            :loading="loadingKpiValues && selectedKpi?.id === kpi.id"
-                            title="View KPI Values"
-                          ></v-btn>
-                          <v-btn
-                            icon="mdi-delete"
-                            size="small"
-                            color="error"
-                            variant="text"
-                            :loading="deleteLoading"
-                            @click="deleteKPI(kpi.id)"
-                            title="Delete KPI"
-                          ></v-btn>
-                        </div>
                       </div>
                     </v-card-title>
+                    
+                    <div class="kpi-actions-bar">
+                      <v-btn
+                        icon="mdi-pencil"
+                        size="small"
+                        color="info"
+                        variant="text"
+                        @click="openKpiEditDialog(kpi)"
+                        title="Edit KPI"
+                      ></v-btn>
+                      <v-btn
+                        icon="mdi-chart-line"
+                        size="small"
+                        color="primary"
+                        variant="text"
+                        @click="fetchKpiValues(kpi)"
+                        :loading="loadingKpiValues && selectedKpi?.id === kpi.id"
+                        title="View KPI Values"
+                      ></v-btn>
+                      <v-btn
+                        icon="mdi-delete"
+                        size="small"
+                        color="error"
+                        variant="text"
+                        :loading="deleteLoading"
+                        @click="deleteKPI(kpi.id)"
+                        title="Delete KPI"
+                      ></v-btn>
+                    </div>
 
                     <v-card-text>
                       <div class="kpi-details">
@@ -530,6 +598,90 @@ onMounted(() => {
       </v-card>
     </v-dialog>
 
+    <!-- KPI Edit Dialog -->
+    <v-dialog v-model="showKpiEditDialog" max-width="600px">
+      <v-card>
+        <v-card-title class="text-h5">
+          <div class="dialog-title">
+            <v-icon left>mdi-pencil</v-icon>
+            Edit KPI
+          </div>
+        </v-card-title>
+        
+        <v-divider></v-divider>
+
+        <v-card-text class="pa-6">
+          <v-form v-if="editingKpi" @submit.prevent="saveKpiChanges">
+            <v-text-field
+              v-model="editForm.name"
+              label="KPI Name"
+              variant="outlined"
+              class="mb-4"
+              required
+            ></v-text-field>
+
+            <v-textarea
+              v-model="editForm.description"
+              label="Description"
+              variant="outlined"
+              class="mb-4"
+              rows="3"
+            ></v-textarea>
+
+            <v-text-field
+              v-model="editForm.unit_text"
+              label="Unit"
+              variant="outlined"
+              class="mb-4"
+            ></v-text-field>
+
+            <v-text-field
+              v-model="editForm.provider"
+              label="Provider"
+              variant="outlined"
+              class="mb-4"
+            ></v-text-field>
+
+            <v-text-field
+              v-model="editForm.calculation_frequency"
+              label="Calculation Frequency"
+              variant="outlined"
+              class="mb-4"
+            ></v-text-field>
+
+            <div class="threshold-row">
+              <v-text-field
+                v-model="editForm.min_threshold"
+                label="Min Threshold"
+                type="number"
+                variant="outlined"
+                class="mr-2"
+              ></v-text-field>
+
+              <v-text-field
+                v-model="editForm.max_threshold"
+                label="Max Threshold"
+                type="number"
+                variant="outlined"
+              ></v-text-field>
+            </div>
+          </v-form>
+        </v-card-text>
+
+        <v-divider></v-divider>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="grey" @click="closeKpiEditDialog">
+            Cancel
+          </v-btn>
+          <v-btn color="primary" @click="saveKpiChanges">
+            Save Changes
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
   </AuthRequired>
 </template>
 
@@ -647,30 +799,41 @@ onMounted(() => {
   }
 }
 
+.kpi-card-title {
+  padding-bottom: 0 !important;
+}
+
 .kpi-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  width: 100%;
   
   .kpi-title-section {
     flex-grow: 1;
+    min-width: 0;
     
     .kpi-name {
       color: #0177a9;
       font-size: 1.2rem;
       margin-bottom: 8px;
       font-weight: 600;
+      word-break: break-word;
+      white-space: normal;
     }
     
     .status-chip {
       font-weight: 500;
     }
   }
-  
-  .kpi-actions {
-    display: flex;
-    gap: 5px;
-  }
+}
+
+.kpi-actions-bar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+  padding: 8px 16px;
+  border-top: 1px solid #f0f0f0;
 }
 
 .kpi-details {
@@ -841,5 +1004,10 @@ onMounted(() => {
     color: #999;
     font-size: 1rem;
   }
+}
+
+.threshold-row {
+  display: flex;
+  gap: 12px;
 }
 </style>
