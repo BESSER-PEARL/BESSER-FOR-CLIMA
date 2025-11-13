@@ -9,18 +9,21 @@
       @update:model-value="handleDateChange"
       :max-date="new Date()"
       teleport-center
+      format="dd/MM/yyyy"
+      preview-format="dd/MM/yyyy"
+      hide-offset-dates
+      auto-apply
       :text-input="textInputOptions"
     >
-      <template #dp-input="{ value, onInput, onEnter, onBlur }">
+      <template #dp-input="{ value }">
         <v-btn
           variant="outlined"
           color="primary"
           prepend-icon="mdi-calendar-range"
           class="filter-btn"
-          @click="onEnter"
         >
           <span class="filter-text">
-            {{ value || 'Select date' }}
+            {{ formatDisplayDate(date) || 'Select date' }}
           </span>
           <v-icon class="ml-2">mdi-chevron-down</v-icon>
         </v-btn>
@@ -51,9 +54,24 @@ const textInputOptions = ref({
   format: 'dd/MM/yyyy'
 });
 
+const formatDisplayDate = (dateArray) => {
+  if (!dateArray || !Array.isArray(dateArray)) return '';
+  
+  const formatSingle = (d) => {
+    if (!d) return '';
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+  
+  return `${formatSingle(dateArray[0])} - ${formatSingle(dateArray[1])}`;
+};
+
 onMounted(() => {
   const endDate = new Date();
-  const startDate = new Date(new Date().setDate(endDate.getDate() - 7));
+  const startDate = new Date();
+  startDate.setDate(endDate.getDate() - 7);
   date.value = [startDate, endDate];
   handleDateChange(date.value);
 });
@@ -75,11 +93,21 @@ const presetDates = ref([
   { label: 'Today', value: [new Date(), new Date()] },
   {
     label: 'Last 7 Days',
-    value: [new Date(new Date().setDate(new Date().getDate() - 7)), new Date()],
+    value: (() => {
+      const end = new Date();
+      const start = new Date();
+      start.setDate(end.getDate() - 7);
+      return [start, end];
+    })(),
   },
   {
     label: 'Last 30 Days',
-    value: [new Date(new Date().setDate(new Date().getDate() - 30)), new Date()],
+    value: (() => {
+      const end = new Date();
+      const start = new Date();
+      start.setDate(end.getDate() - 30);
+      return [start, end];
+    })(),
   },
   {
     label: 'This Month',
