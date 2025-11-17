@@ -50,6 +50,10 @@ const chartType = ref('line'); // Reactive chart type
 const minThresholdValue = ref(null);
 const maxThresholdValue = ref(null);
 
+// Track if data has categories
+const hasCategories = ref(false);
+const categoryColors = ref({});
+
 // Get effective threshold values (use props first, fallback to fetched values)
 const effectiveMinThreshold = computed(() => props.minThreshold !== undefined && props.minThreshold !== null ? props.minThreshold : minThresholdValue.value);
 const effectiveMaxThreshold = computed(() => props.maxThreshold !== undefined && props.maxThreshold !== null ? props.maxThreshold : maxThresholdValue.value);
@@ -60,20 +64,26 @@ const hasThresholds = computed(() => {
          (effectiveMaxThreshold.value !== null && effectiveMaxThreshold.value !== 'N/A');
 });
 
+// Determine if current chart type supports stacking
+const supportsStacking = computed(() => {
+  return hasCategories.value && (chartType.value === 'bar' || chartType.value === 'area');
+});
+
 const chartOptions = computed(() => {
   const options = {
     chart: {
       type: chartType.value, // Use the reactive chartType
       zoom: {
         enabled: true
-      }
+      },
+      stacked: supportsStacking.value, // Enable stacking for bar and area charts with categories
     },
     dataLabels: {
       enabled: false
     },
     stroke: {
       curve: chartType.value === 'area' ? 'smooth' : 'straight',
-      width: 2.2
+      width: chartType.value === 'area' ? 2 : (supportsStacking.value ? 0 : 2.2)
     },
     title: {
       text: props.title,
@@ -95,6 +105,19 @@ const chartOptions = computed(() => {
     },
     yaxis: {
       title: { text: props.ytitle }
+    },
+    fill: {
+      opacity: chartType.value === 'area' && supportsStacking.value ? 0.8 : 1
+    },
+    legend: {
+      position: 'top',
+      horizontalAlign: 'left'
+    },
+    plotOptions: {
+      bar: {
+        horizontal: false,
+        columnWidth: '70%',
+      }
     }
   };
 
@@ -115,6 +138,20 @@ const series = ref([
     color: props.color,
   }
 ]);
+
+// Color palette for categories
+const categoryColorPalette = [
+  '#086494', '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', 
+  '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2', '#F8B739'
+];
+
+// Helper function to generate color for a category
+function getCategoryColor(category, index) {
+  if (!categoryColors.value[category]) {
+    categoryColors.value[category] = categoryColorPalette[index % categoryColorPalette.length];
+  }
+  return categoryColors.value[category];
+}
 
 // Computed property - simplified since filtering is now done server-side
 const filteredData = computed(() => {
@@ -188,15 +225,34 @@ function processFilteredData() {
     return;
   }
   
+  // Check if data has categories
+  hasCategories.value = filteredData.value.some(item => item.category_label);
+  
+  if (hasCategories.value && (chartType.value === 'bar' || chartType.value === 'area')) {
+    // Process data with categories for stacked charts
+    processStackedData();
+  } else if (hasCategories.value && chartType.value === 'line') {
+    // Process data with categories for line chart (multiple lines)
+    processMultiLineData();
+  } else {
+    // Process data without categories (standard single series)
+    processSingleSeriesData();
+  }
+  
+  // Add threshold lines if applicable (only for non-stacked charts)
+  if (hasThresholds.value && !supportsStacking.value) {
+    addThresholdLines();
+  }
+}
+
+function processSingleSeriesData() {
   filteredData.value.forEach(item => {
-    // API returns 'value' field, not 'kpiValue'
     const val = item.value ?? item.kpiValue ?? 0;
     values.value.push(val);
     timestamps.value.push(item.timestamp);
     valuemappedtotime.value.push({ x: item.timestamp, y: val });
   });
   
-  // Update series - only KPI Values
   series.value = [
     {
       name: "KPI Values",
@@ -204,40 +260,110 @@ function processFilteredData() {
       color: props.color,
     }
   ];
+}
 
-  // Add threshold lines as separate series
-  if (hasThresholds.value) {
-    const timeRange = valuemappedtotime.value.map(point => point.x);
+function processMultiLineData() {
+  // Group data by category
+  const categoryData = {};
+  
+  filteredData.value.forEach(item => {
+    const val = item.value ?? item.kpiValue ?? 0;
+    const category = item.category_label || 'Uncategorized';
     
-    if (effectiveMaxThreshold.value !== null && effectiveMaxThreshold.value !== 'N/A') {
-      const maxVal = parseFloat(effectiveMaxThreshold.value);
-      series.value.push({
-        name: `Max Threshold: ${effectiveMaxThreshold.value}`,
-        data: timeRange.map(time => ({ x: time, y: maxVal })),
-        color: '#FF6B6B',
-        type: 'line',
-        strokeWidth: [2],
-        strokeDashArray: 5
-      });
+    if (!categoryData[category]) {
+      categoryData[category] = [];
     }
     
-    if (effectiveMinThreshold.value !== null && effectiveMinThreshold.value !== 'N/A') {
-      const minVal = parseFloat(effectiveMinThreshold.value);
-      series.value.push({
-        name: `Min Threshold: ${effectiveMinThreshold.value}`,
-        data: timeRange.map(time => ({ x: time, y: minVal })),
-        color: '#4ECDC4',
-        type: 'line',
-        strokeWidth: [2],
-        strokeDashArray: 5
-      });
+    categoryData[category].push({ x: item.timestamp, y: val });
+    timestamps.value.push(item.timestamp);
+  });
+  
+  // Create series for each category
+  series.value = Object.keys(categoryData).map((category, index) => ({
+    name: category,
+    data: categoryData[category],
+    color: getCategoryColor(category, index)
+  }));
+}
+
+function processStackedData() {
+  // Group data by timestamp and category for stacking
+  const timeSeriesMap = {};
+  const categories = new Set();
+  
+  filteredData.value.forEach(item => {
+    const val = item.value ?? item.kpiValue ?? 0;
+    const timestamp = item.timestamp;
+    const category = item.category_label || 'Uncategorized';
+    
+    categories.add(category);
+    
+    if (!timeSeriesMap[timestamp]) {
+      timeSeriesMap[timestamp] = {};
     }
+    
+    // Aggregate values for same timestamp and category
+    if (!timeSeriesMap[timestamp][category]) {
+      timeSeriesMap[timestamp][category] = 0;
+    }
+    timeSeriesMap[timestamp][category] += val;
+  });
+  
+  // Convert to series format
+  const categoriesArray = Array.from(categories);
+  series.value = categoriesArray.map((category, index) => {
+    const data = Object.keys(timeSeriesMap).map(timestamp => ({
+      x: timestamp,
+      y: timeSeriesMap[timestamp][category] || 0
+    }));
+    
+    return {
+      name: category,
+      data: data,
+      color: getCategoryColor(category, index)
+    };
+  });
+  
+  // Update timestamps for display
+  timestamps.value = Object.keys(timeSeriesMap);
+}
+
+function addThresholdLines() {
+  const timeRange = valuemappedtotime.value.map(point => point.x);
+  
+  if (effectiveMaxThreshold.value !== null && effectiveMaxThreshold.value !== 'N/A') {
+    const maxVal = parseFloat(effectiveMaxThreshold.value);
+    series.value.push({
+      name: `Max Threshold: ${effectiveMaxThreshold.value}`,
+      data: timeRange.map(time => ({ x: time, y: maxVal })),
+      color: '#FF6B6B',
+      type: 'line',
+      strokeWidth: [2],
+      strokeDashArray: 5
+    });
+  }
+  
+  if (effectiveMinThreshold.value !== null && effectiveMinThreshold.value !== 'N/A') {
+    const minVal = parseFloat(effectiveMinThreshold.value);
+    series.value.push({
+      name: `Min Threshold: ${effectiveMinThreshold.value}`,
+      data: timeRange.map(time => ({ x: time, y: minVal })),
+      color: '#4ECDC4',
+      type: 'line',
+      strokeWidth: [2],
+      strokeDashArray: 5
+    });
   }
 }
 
 getItems();
 
 watch(() => [props.title, props.xtitle, props.ytitle, props.color], () => {
+  processFilteredData();
+});
+
+// Watch for chartType changes to re-process data (for switching between stacked/unstacked)
+watch(chartType, () => {
   processFilteredData();
 });
 
@@ -261,9 +387,9 @@ watch(() => props.monthFilter, (newFilter) => {
     </div>
     <div class="bottom-controls">
       <select v-model="chartType" class="chart-select">
-        <option value="line">Line Chart</option>
-        <option value="bar">Bar Chart</option>
-        <option value="area">Area Chart</option>
+        <option value="line">Lines</option>
+        <option value="bar">Bars</option>
+        <option value="area">Areas</option>
       </select>
       <div class="update">
         Last Update: {{ lastTimestamp }}

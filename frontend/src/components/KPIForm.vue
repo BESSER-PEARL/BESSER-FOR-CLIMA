@@ -60,7 +60,7 @@ const chartIcon = computed(() => {
 // Get chart type display name
 const chartDisplayName = computed(() => {
     const names = {
-        'linechart': 'Line Chart',
+        'linechart': 'Time Series Chart',
         'barchart': 'Bar Chart',
         'piechart': 'Pie Chart',
         'statchart': 'Stat Widget',
@@ -72,15 +72,17 @@ const chartDisplayName = computed(() => {
 
 // Function to sort KPIs based on chart type using has_category_label
 const sortKPIsForChart = (kpis, chartType) => {
-    const isBarOrPieChart = chartType.toLowerCase() === 'barchart' || chartType.toLowerCase() === 'piechart';
+    const chartTypeLower = chartType.toLowerCase();
+    // LineChart, BarChart, and PieChart all support categories now
+    const supportsCategoriesWell = ['linechart', 'barchart', 'piechart'].includes(chartTypeLower);
 
     return kpis.sort((a, b) => {
-        if (isBarOrPieChart) {
-            // For Bar/Pie charts, prioritize KPIs with has_category_label
+        if (supportsCategoriesWell) {
+            // For charts that support categories, prioritize KPIs with has_category_label
             if (a.has_category_label && !b.has_category_label) return -1;
             if (!a.has_category_label && b.has_category_label) return 1;
         } else {
-            // For other charts, prioritize KPIs without has_category_label
+            // For other charts (stat, table, map), prioritize KPIs without has_category_label
             if (!a.has_category_label && b.has_category_label) return -1;
             if (a.has_category_label && !b.has_category_label) return 1;
         }
@@ -91,22 +93,28 @@ const sortKPIsForChart = (kpis, chartType) => {
 
 // Function to add recommendation labels using has_category_label
 const addRecommendationLabels = (kpis, chartType) => {
-    const isBarOrPieChart = chartType.toLowerCase() === 'barchart' || chartType.toLowerCase() === 'piechart';
+    const chartTypeLower = chartType.toLowerCase();
+    // LineChart, BarChart, and PieChart all support categories now
+    const supportsCategoriesWell = ['linechart', 'barchart', 'piechart'].includes(chartTypeLower);
 
     return kpis.map(kpi => {
         const hasCategoryLabel = kpi.has_category_label;
         let isRecommended = false;
         let warningMessage = '';
 
-        if (isBarOrPieChart) {
-            isRecommended = hasCategoryLabel;
-            if (!hasCategoryLabel) {
-                warningMessage = 'No category labels - may not display optimally';
+        if (supportsCategoriesWell) {
+            // All KPIs work, but those with categories get enhanced visualizations
+            isRecommended = true; // All KPIs are compatible
+            if (hasCategoryLabel) {
+                warningMessage = 'Supports stacked/multi-line visualization';
+            } else {
+                warningMessage = 'Standard single-series visualization';
             }
         } else {
+            // For stat, table, map - prefer single values
             isRecommended = !hasCategoryLabel;
             if (hasCategoryLabel) {
-                warningMessage = 'Better suited for Bar/Pie charts';
+                warningMessage = 'Better suited for Time Series/Bar/Pie charts';
             }
         }
 
@@ -210,8 +218,14 @@ const createVisualisation = () => {
         variant="tonal"
       >
         <div class="alert-content">
-          <strong>{{ recommendationStats.recommended }}</strong> of {{ recommendationStats.total }} KPIs 
-          are recommended for {{ chartDisplayName }}
+          <div v-if="chart.toLowerCase() === 'linechart'">
+            <strong>Time Series Chart</strong> supports all KPIs • 
+            KPIs with categories will display as stacked bars/areas or multiple lines
+          </div>
+          <div v-else>
+            <strong>{{ recommendationStats.recommended }}</strong> of {{ recommendationStats.total }} KPIs 
+            are recommended for {{ chartDisplayName }}
+          </div>
         </div>
       </v-alert>
 
@@ -250,15 +264,23 @@ const createVisualisation = () => {
             @click="table = item"
             :active="table?.id === item.id"
             class="kpi-list-item"
-            :class="{ 'recommended': item.isRecommended, 'selected': table?.id === item.id }"
+            :class="{ 
+              'multi-series': chart.toLowerCase() === 'linechart' && item.has_category_label,
+              'recommended': chart.toLowerCase() !== 'linechart' && item.isRecommended, 
+              'selected': table?.id === item.id 
+            }"
           >
             <template v-slot:prepend>
               <v-avatar
-                :color="item.isRecommended ? 'success' : 'warning'"
+                :color="chart.toLowerCase() === 'linechart' 
+                  ? (item.has_category_label ? 'success' : 'primary')
+                  : (item.isRecommended ? 'success' : 'warning')"
                 size="40"
               >
                 <v-icon 
-                  :icon="item.isRecommended ? 'mdi-check-circle' : 'mdi-alert-circle'"
+                  :icon="chart.toLowerCase() === 'linechart'
+                    ? (item.has_category_label ? 'mdi-chart-multiple' : 'mdi-chart-line')
+                    : (item.isRecommended ? 'mdi-check-circle' : 'mdi-alert-circle')"
                   color="white"
                 ></v-icon>
               </v-avatar>
@@ -279,6 +301,15 @@ const createVisualisation = () => {
 
             <template v-slot:append>
               <v-chip
+                v-if="chart.toLowerCase() === 'linechart'"
+                :color="item.has_category_label ? 'success' : 'primary'"
+                size="small"
+                variant="flat"
+              >
+                {{ item.has_category_label ? 'Multi-Series' : 'Single-Series' }}
+              </v-chip>
+              <v-chip
+                v-else
                 :color="item.isRecommended ? 'success' : 'warning'"
                 size="small"
                 variant="flat"
@@ -453,6 +484,11 @@ const createVisualisation = () => {
 
         &.recommended {
           background-color: rgba(76, 175, 80, 0.02);
+        }
+
+        &.multi-series {
+          background-color: rgba(76, 175, 80, 0.05);
+          border-left: 3px solid #4caf50;
         }
 
         &.selected {

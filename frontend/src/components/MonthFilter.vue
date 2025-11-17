@@ -69,11 +69,8 @@ const formatDisplayDate = (dateArray) => {
 };
 
 onMounted(() => {
-  const endDate = new Date();
-  const startDate = new Date();
-  startDate.setDate(endDate.getDate() - 7);
-  date.value = [startDate, endDate];
-  handleDateChange(date.value);
+  // Don't set a default filter on mount
+  // User must explicitly select a date range
 });
 
 const handleDateChange = (newDate) => {
