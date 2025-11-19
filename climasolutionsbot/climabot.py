@@ -43,16 +43,16 @@ gpt = LLMOpenAI(
     num_previous_messages=10
 )
 
-# Configure the intent classifier
-ic_config = LLMIntentClassifierConfiguration(
-    llm_name='gpt-4o-mini',
-    parameters={},
-    use_intent_descriptions=True,
-    use_training_sentences=False,
-    use_entity_descriptions=True,
-    use_entity_synonyms=False
-)
-agent.set_default_ic_config(ic_config)
+# # Configure the intent classifier
+# ic_config = LLMIntentClassifierConfiguration(
+#     llm_name='gpt-4o-mini',
+#     parameters={},
+#     use_intent_descriptions=True,
+#     use_training_sentences=False,
+#     use_entity_descriptions=True,
+#     use_entity_synonyms=False
+# )
+# agent.set_default_ic_config(ic_config)
 
 
 bot_intent = agent.new_intent('bot_intent', [

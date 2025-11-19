@@ -202,6 +202,7 @@ class LineChart(Visualization):
     x_title: Mapped[str] = mapped_column(String(100), nullable=False)
     y_title: Mapped[str] = mapped_column(String(100), nullable=False)
     color: Mapped[str] = mapped_column(String(50), default="#3498db")
+    preferred_chart_type: Mapped[Optional[str]] = mapped_column(String(20), default="line")
     
     __mapper_args__ = {"polymorphic_identity": "linechart"}
 

@@ -2,6 +2,8 @@
 import Plotly, { get } from "plotly.js-dist"
 import MonthFilter from './MonthFilter.vue'
 import apiService from '@/services/apiService';
+import KPIInfoDialog from './KPIInfoDialog.vue';
+import { Icon } from '@iconify/vue';
 
 import { ref, onMounted, watch, computed, nextTick } from "vue";
 
@@ -115,7 +117,9 @@ const resizeObserver = new ResizeObserver(entries => {
 });
 
 
-const alert = ref(false)
+const alert = ref(false);
+const showKPIInfo = ref(false);
+
 const toggleAlert = () => {
   alert.value = !alert.value
 }
@@ -378,11 +382,12 @@ onMounted(async () => {
     </div>
     <div class="update">
       Last Update: {{ lastTimestamp }}
-      <Icon v-if="alert" icon="mdi:bell" width="20" height="20" @click="toggleAlert"
-        style="margin-left: 5px;color: red" />
-      <Icon v-else icon="mdi:bell-outline" width="20" height="20" @click="toggleAlert"
-        style="margin-left: 5px;color: black" />
+      <Icon icon="mdi:information" width="20" height="20" @click="showKPIInfo = true"
+        style="margin-left: 5px; color: #086494; cursor: pointer;" title="View KPI Information" />
     </div>
+
+    <!-- KPI Info Dialog -->
+    <KPIInfoDialog v-model="showKPIInfo" :kpi-id="tableId" />
   </div>
 </template>
 
@@ -449,6 +454,7 @@ onMounted(async () => {
   min-height: 24px;
   background: transparent;
   border-top: 1px solid rgba(0, 0, 0, 0.06);
+  gap: 8px;
   
   svg {
     cursor: pointer;
@@ -458,5 +464,33 @@ onMounted(async () => {
       transform: scale(1.15);
     }
   }
+}
+
+.info-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #086494;
+  transition: all 0.2s ease;
+  font-size: 24px;
+
+  &:hover {
+    transform: scale(1.15);
+    color: #064a6f;
+  }
+
+  svg {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+.update-text {
+  font-size: 11px;
+  color: #666;
 }
 </style>

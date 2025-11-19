@@ -29,7 +29,7 @@ const sendMessage = () => {
       {
         "answer": "Your natural language response",
         "visualization": {
-          "type": "LineChart|PieChart|BarChart|StatChart",
+          "type": "TimeChart|PieChart|BarChart|StatChart",
           "kpi_id": "The KPI ID (e.g. temp001, money001, energy001)",
           "title": "A descriptive title for the visualization",
           "unitText": "The unit from the KPI (e.g. Celsius, Euros, Percentage)",
@@ -145,8 +145,8 @@ const onMessageReceived = (message) => {
 };
 
 onMounted(() => {
-  websocketService = new WebSocketService('wss://climaborough-bot.iworker1.private.list.lu');
-  // websocketService = new WebSocketService('ws://localhost:8765');
+  // websocketService = new WebSocketService('wss://climaborough-bot.iworker1.private.list.lu');
+  websocketService = new WebSocketService('ws://localhost:8765');
   websocketService.setOnMessageCallback(onMessageReceived);
   
   // Wait for websocket connection and KPIs to be loaded

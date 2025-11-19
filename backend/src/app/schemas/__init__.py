@@ -243,6 +243,8 @@ class VisualizationUpdate(BaseSchema):
     y_position: Optional[int] = Field(None, ge=0)
     section_id: Optional[int] = Field(None, gt=0)
     kpi_id: Optional[int] = Field(None, gt=0)
+    preferred_chart_type: Optional[str] = Field(None, pattern=r'^(line|bar|area)$')
+    color: Optional[str] = Field(None, pattern=r'^#[0-9A-Fa-f]{6}$')
 
 
 class Visualization(VisualizationBase):
@@ -260,12 +262,14 @@ class LineChartCreate(VisualizationCreate):
     x_title: str = Field(..., min_length=1, max_length=100)
     y_title: str = Field(..., min_length=1, max_length=100)
     color: str = Field("#3498db", pattern=r'^#[0-9A-Fa-f]{6}$')
+    preferred_chart_type: Optional[str] = Field("line", pattern=r'^(line|bar|area)$')
 
 
 class LineChart(Visualization):
     x_title: str
     y_title: str
     color: str
+    preferred_chart_type: Optional[str]
 
 
 class BarChartCreate(VisualizationCreate):

@@ -413,7 +413,8 @@ class ApiService {
     // Helper method to handle different chart types in the old format
     mapVisualizationType(newType) {
         const typeMap = {
-            'linechart': 'LineChart',
+            'linechart': 'TimeChart',
+            'timechart': 'TimeChart',
             'barchart': 'BarChart', 
             'piechart': 'PieChart',
             'statchart': 'StatChart',
@@ -422,12 +423,13 @@ class ApiService {
             'freetextfield': 'FreeTextField',
             'timeline': 'Timeline'
         };
-        return typeMap[newType] || 'LineChart';
+        return typeMap[newType] || 'TimeChart';
     }
 
     // Helper method to convert chart types to API format
     mapChartTypeToApi(chartType) {
         const typeMap = {
+            'TimeChart': 'linechart',
             'LineChart': 'linechart',
             'BarChart': 'barchart',
             'PieChart': 'piechart', 

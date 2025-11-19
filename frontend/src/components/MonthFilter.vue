@@ -75,8 +75,16 @@ onMounted(() => {
 
 const handleDateChange = (newDate) => {
   if (newDate && newDate.length === 2) {
-    const startStr = newDate[0].toISOString().split('T')[0];
-    const endStr = newDate[1].toISOString().split('T')[0];
+    // Set start date to 00:00:00 (beginning of day)
+    const startDate = new Date(newDate[0]);
+    startDate.setHours(0, 0, 0, 0);
+    
+    // Set end date to 23:59:59 (end of day)
+    const endDate = new Date(newDate[1]);
+    endDate.setHours(23, 59, 59, 999);
+    
+    const startStr = startDate.toISOString().split('T')[0];
+    const endStr = endDate.toISOString().split('T')[0];
     const filterValue = `${startStr}|${endStr}`;
     emit('update:modelValue', filterValue);
     emit('monthChange', filterValue);
@@ -87,13 +95,24 @@ const handleDateChange = (newDate) => {
 };
 
 const presetDates = ref([
-  { label: 'Today', value: [new Date(), new Date()] },
+  { 
+    label: 'Today', 
+    value: (() => {
+      const start = new Date();
+      start.setHours(0, 0, 0, 0);
+      const end = new Date();
+      end.setHours(23, 59, 59, 999);
+      return [start, end];
+    })()
+  },
   {
     label: 'Last 7 Days',
     value: (() => {
       const end = new Date();
+      end.setHours(23, 59, 59, 999);
       const start = new Date();
       start.setDate(end.getDate() - 7);
+      start.setHours(0, 0, 0, 0);
       return [start, end];
     })(),
   },
@@ -101,21 +120,32 @@ const presetDates = ref([
     label: 'Last 30 Days',
     value: (() => {
       const end = new Date();
+      end.setHours(23, 59, 59, 999);
       const start = new Date();
       start.setDate(end.getDate() - 30);
+      start.setHours(0, 0, 0, 0);
       return [start, end];
     })(),
   },
   {
     label: 'This Month',
-    value: [new Date(new Date().getFullYear(), new Date().getMonth(), 1), new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)],
+    value: (() => {
+      const start = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0);
+      end.setHours(23, 59, 59, 999);
+      return [start, end];
+    })(),
   },
   {
     label: 'Last Month',
-    value: [
-      new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1),
-      new Date(new Date().getFullYear(), new Date().getMonth(), 0),
-    ],
+    value: (() => {
+      const start = new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(new Date().getFullYear(), new Date().getMonth(), 0);
+      end.setHours(23, 59, 59, 999);
+      return [start, end];
+    })(),
   },
 ]);
 </script>

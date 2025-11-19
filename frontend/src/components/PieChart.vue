@@ -1,6 +1,8 @@
 <script setup>
 import { ref, watch, computed } from "vue";
 import apiService from '@/services/apiService';
+import KPIInfoDialog from './KPIInfoDialog.vue';
+import { Icon } from '@iconify/vue';
 
 const props = defineProps({
   tableId: {
@@ -397,6 +399,8 @@ watch(() => props.monthFilter, (newFilter) => {
 // })
 
 const alert = ref(false)
+const showKPIInfo = ref(false);
+
 const toggleAlert = () => {
   alert.value = !alert.value
 }
@@ -412,11 +416,12 @@ const toggleAlert = () => {
     </div>
     <div class="update">
       Last Update: {{ lastTimestamp }}
-      <Icon v-if="alert" icon="mdi:bell" width="20" height="20" @click="toggleAlert"
-        style="margin-left: 5px;color: red" />
-      <Icon v-else icon="mdi:bell-outline" width="20" height="20" @click="toggleAlert"
-        style="margin-left: 5px;color: black" />
+      <Icon icon="mdi:information" width="20" height="20" @click="showKPIInfo = true"
+        style="margin-left: 5px; color: #086494; cursor: pointer;" title="View KPI Information" />
     </div>
+
+    <!-- KPI Info Dialog -->
+    <KPIInfoDialog v-model="showKPIInfo" :kpi-id="tableId" />
   </div>
 
 </template>
@@ -444,6 +449,41 @@ const toggleAlert = () => {
   color: #666;
   height: 5%;
   min-height: 20px;
+  gap: 8px;
+}
+
+.update-text {
+  margin-right: auto;
+}
+
+.info-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 1.5px solid #086494;
+  border-radius: 4px;
+  background-color: white;
+  color: #086494;
+  cursor: pointer;
+  transition: all 0.3s;
+  outline: none;
+  padding: 0;
+
+  &:hover {
+    border-color: #064d6a;
+    background-color: #f8f9fa;
+    transform: scale(1.05);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  svg {
+    font-size: 16px;
+  }
 }
 
 .no-data-message {

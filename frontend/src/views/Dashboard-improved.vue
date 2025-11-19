@@ -13,7 +13,7 @@ import BarChartForm from '../components/forms/BarChartForm.vue'
 import StatChartForm from '../components/forms/StatChartForm.vue'
 import TableForm from '../components/forms/TableForm.vue'
 
-import LineChart from '../components/LineChart.vue'
+import TimeChart from '../components/TimeChart.vue'
 import PieChart from '../components/PieChart.vue'
 import BarChart from '../components/BarChart.vue'
 import StatChart from '../components/StatChart.vue'
@@ -35,7 +35,8 @@ import apiService from '../services/apiService';
 
 // Component mapping for dynamic components
 const componentMap = {
-    'LineChart': LineChart,
+    'TimeChart': TimeChart,
+    'LineChart': TimeChart,  // Legacy support
     'PieChart': PieChart,
     'BarChart': BarChart,
     'StatChart': StatChart,
@@ -331,6 +332,7 @@ const loadVisualizations = async () => {
                     vis.attributes.xtitle = item.x_title || 'Date';
                     vis.attributes.ytitle = item.y_title || 'Values';
                     vis.attributes.color = item.color || '#0177a9';
+                    vis.attributes.preferredChartType = item.preferred_chart_type || 'line';
                 } else if (item.type === 'statchart') {
                     vis.attributes.suffix = item.unit || '';
                 } else if (item.type === 'freetextfield') {
@@ -442,10 +444,11 @@ const saveDashboard = async () => {
                     };
 
                     // Add chart-specific properties
-                    if (item.chart === "LineChart") {
+                    if (item.chart === "LineChart" || item.chart === "TimeChart") {
                         visData.x_title = item.attributes.xtitle || 'Date';
                         visData.y_title = item.attributes.ytitle || 'Values';
                         visData.color = item.attributes.color || '#0177a9';
+                        visData.preferred_chart_type = item.attributes.preferredChartType || 'line';
                     } else if (item.chart === "StatChart") {
                         visData.unit = item.attributes.suffix || '';
                     } else if (item.chart === "FreeTextField") {
@@ -588,13 +591,14 @@ const createVisualization = (tableId, tableName, chart, kpi = {}) => {
     };
 
     // Add chart-specific attributes
-    if (chart === "LineChart") {
+    if (chart === "LineChart" || chart === "TimeChart") {
         vis.attributes.xtitle = "Date";
         vis.attributes.ytitle = `Values (in ${kpi.unit_text || ''})`;
         vis.attributes.color = "#0177a9";
         vis.attributes.target = kpi.max_threshold || 0;
         vis.attributes.minThreshold = kpi.min_threshold || null;
         vis.attributes.maxThreshold = kpi.max_threshold || null;
+        vis.attributes.preferredChartType = 'line'; // Default to line chart
     } else if (chart === "StatChart") {
         vis.attributes.suffix = kpi.unit_text || '';
         vis.attributes.target = kpi.max_threshold || 0;
@@ -660,12 +664,35 @@ const deleteVisualization = (item) => {
     selectedSection.layout = selectedSection.layout.filter((vis) => vis.id !== item.id);
 };
 
+// Handle chart type preference updates from TimeChart
+const handleChartTypeUpdate = async (item, newChartType) => {
+    const index = selectedSection.layout.findIndex(vis => vis.id === item.id);
+    if (index !== -1) {
+        selectedSection.layout[index].attributes.preferredChartType = newChartType;
+        
+        // Save directly to API without full dashboard save
+        if (item.id && !editMode.value) {
+            try {
+                await setupApiService();
+                await apiService.updateVisualization(item.id, {
+                    preferred_chart_type: newChartType
+                });
+                console.log(`Chart type updated to ${newChartType} for visualization ${item.id}`);
+            } catch (error) {
+                console.error('Error updating chart type:', error);
+            }
+        }
+        // In edit mode, it will be saved when user clicks save dashboard
+    }
+};
+
 // Visualization Edit Forms
 const editVisualization = async (item) => {
     currentItem.value = item;
     
     switch (item.chart) {
         case "LineChart":
+        case "TimeChart":
             lineChartBool.value = true;
             break;
         case "PieChart":
@@ -1892,6 +1919,7 @@ watch(error, (newError) => {
                                                 } : item.attributes"
                                                 :month-filter="globalMonthFilter"
                                                 @edit="editVisualization(item)"
+                                                @update:preferredChartType="(newType) => handleChartTypeUpdate(item, newType)"
                                             />
                                         </div>
                                     </div>
@@ -2057,6 +2085,7 @@ watch(error, (newError) => {
                                                 isEditMode: false
                                             } : item.attributes"
                                             :month-filter="globalMonthFilter"
+                                            @update:preferredChartType="(newType) => handleChartTypeUpdate(item, newType)"
                                         />
                                     </div>
                                 </GridItem>

@@ -65,8 +65,8 @@ const onMessageReceived = (message) => {
 
 onMounted(() => {
   // Remove authentication check since AuthRequired handles it
-  websocketService = new WebSocketService('wss://climaborough-bot.iworker1.private.list.lu');
-  // websocketService = new WebSocketService('ws://localhost:8765');
+  // websocketService = new WebSocketService('wss://climaborough-bot.iworker1.private.list.lu');
+  websocketService = new WebSocketService('ws://localhost:8765');
   websocketService.setOnMessageCallback(onMessageReceived);
   
   // Set a small delay to ensure the websocket connection is established
